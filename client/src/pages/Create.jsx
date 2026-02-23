@@ -1,10 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import CanvasBoard from "../components/CanvasBoard";
 import FlowerPicker from "../components/FlowerPicker";
 import NoteCard from "../components/NoteCard";
 import { bouquetSuggestions, noteSuggestions } from "../data/bouquetSuggestions";
 import { generateNoteWithGrok } from "../lib/grok";
+import { applySeo, seoKeywords } from "../lib/seo";
 
 const FREE_FLOWER_LIMIT = 2;
 const FREE_WORD_LIMIT = 20;
@@ -35,6 +36,30 @@ export default function Create() {
   const canRequestAiNote = useMemo(() => situationText.trim().length > 0 && !isGeneratingNote, [situationText, isGeneratingNote]);
   const visibleBouquetSuggestions = showAllBouquetSuggestions ? bouquetSuggestions : bouquetSuggestions.slice(0, 3);
   const visibleNoteSuggestions = showAllNoteSuggestions ? noteSuggestions : noteSuggestions.slice(0, 3);
+
+  useEffect(() => {
+    applySeo({
+      title: "Build a Custom Bouquet Online",
+      description:
+        "Use our bouquet builder to create a virtual flower arrangement, write your own message, and generate thoughtful notes with AI.",
+      keywords: seoKeywords.create,
+      path: "/create",
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "Petals and Words Bouquet Builder",
+        applicationCategory: "LifestyleApplication",
+        operatingSystem: "Web",
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "INR",
+        },
+        url: `${window.location.origin}/create`,
+        description: "Create a digital bouquet and add a personalized note.",
+      },
+    });
+  }, []);
 
   const handleCanvasStateChange = useCallback((nextStems) => {
     if (!Array.isArray(nextStems)) return;

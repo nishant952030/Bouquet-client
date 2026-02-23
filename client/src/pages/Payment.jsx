@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { doc, setDoc } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "../lib/firebase";
+import { loadRazorpayScript } from "../lib/razorpay";
+import { applySeo, seoKeywords } from "../lib/seo";
 
 const PLAN_ORDER = ["free", "small", "medium", "large"];
 
@@ -14,38 +16,34 @@ const PLANS = [
     flowerLimit: 2,
     wordLimit: 20,
     features: ["Watermark preview", "Best for trying the builder"],
-    cta: "Use Free Preview",
   },
   {
     id: "small",
     name: "Small",
-    priceLabel: "₹29",
+    priceLabel: "Rs 29",
     priceValue: 29,
     flowerLimit: 5,
     wordLimit: 60,
     features: ["No watermark", "Shareable link", "HD image export"],
-    cta: "Unlock Small",
     recommended: true,
   },
   {
     id: "medium",
     name: "Medium",
-    priceLabel: "₹59",
+    priceLabel: "Rs 59",
     priceValue: 59,
     flowerLimit: 10,
     wordLimit: 150,
     features: ["No watermark", "Shareable link", "More flowers and words"],
-    cta: "Unlock Medium",
   },
   {
     id: "large",
     name: "Large",
-    priceLabel: "₹99",
+    priceLabel: "Rs 99",
     priceValue: 99,
     flowerLimit: Infinity,
     wordLimit: Infinity,
     features: ["No watermark", "Unlimited bouquet", "Premium styles / animation"],
-    cta: "Unlock Large",
   },
 ];
 
@@ -78,10 +76,52 @@ export default function Payment() {
   const [senderName, setSenderName] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [hasPaidSuccessfully, setHasPaidSuccessfully] = useState(false);
+  const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
   const selectedPlan = PLANS.find((plan) => plan.id === selectedPlanId) ?? PLANS[1];
   const requiredPlan = PLANS.find((plan) => plan.id === requiredPlanId) ?? PLANS[0];
   const canKeepEverything = PLAN_ORDER.indexOf(selectedPlanId) >= PLAN_ORDER.indexOf(requiredPlanId);
+
+  useEffect(() => {
+    applySeo({
+      title: "Bouquet Plans and Checkout",
+      description:
+        "Select a bouquet plan to keep all flowers and note words, then generate a share link after checkout.",
+      keywords: seoKeywords.payment,
+      path: "/payment",
+      robots: "noindex,nofollow",
+    });
+  }, []);
+
+  const createShareLink = async (paymentMeta = null) => {
+    const id = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
+    const payload = {
+      stems,
+      note,
+      plan: selectedPlanId,
+      senderName: senderName.trim(),
+      payment: paymentMeta,
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      if (isFirebaseConfigured && db) {
+        await setDoc(doc(db, "bouquets", id), payload);
+      }
+      localStorage.setItem(`bouquet_share_${id}`, JSON.stringify(payload));
+    } catch (error) {
+      console.error("Unable to save bouquet share data", error);
+      alert("Unable to save share data.");
+      return false;
+    }
+
+    const url = `${window.location.origin}/view/${id}`;
+    setShareId(id);
+    setShareUrl(url);
+    setCheckoutMessage("Payment successful. Your bouquet is now ready to share.");
+    setHasPaidSuccessfully(true);
+    return true;
+  };
 
   const completeCheckout = async () => {
     if (!canKeepEverything || isProcessingPayment) return;
@@ -96,33 +136,65 @@ export default function Payment() {
       return;
     }
 
-    const id = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
-    const payload = {
-      stems,
-      note,
-      plan: selectedPlanId,
-      senderName: senderName.trim(),
-      createdAt: new Date().toISOString(),
-    };
-
-    try {
-      if (isFirebaseConfigured && db) {
-        await setDoc(doc(db, "bouquets", id), payload);
-      }
-      localStorage.setItem(`bouquet_share_${id}`, JSON.stringify(payload));
-    } catch (error) {
-      console.error("Unable to save bouquet share data", error);
-      alert("Unable to save share data.");
+    if (!razorpayKeyId) {
+      setCheckoutMessage("Razorpay is not configured. Add VITE_RAZORPAY_KEY_ID in client/.env.");
       setIsProcessingPayment(false);
       return;
     }
 
-    const url = `${window.location.origin}/view/${id}`;
-    setShareId(id);
-    setShareUrl(url);
-    setCheckoutMessage("Payment successful. Your bouquet is now ready to share.");
-    setHasPaidSuccessfully(true);
-    setIsProcessingPayment(false);
+    const razorpayReady = await loadRazorpayScript();
+    if (!razorpayReady || !window.Razorpay) {
+      setCheckoutMessage("Unable to load payment gateway. Please try again.");
+      setIsProcessingPayment(false);
+      return;
+    }
+
+    const options = {
+      key: razorpayKeyId,
+      amount: Math.round(selectedPlan.priceValue * 100),
+      currency: "INR",
+      name: "Petals and Words",
+      description: `${selectedPlan.name} plan`,
+      prefill: {
+        name: senderName.trim(),
+      },
+      notes: {
+        flowerCount: String(flowerCount),
+        wordCount: String(wordCount),
+        selectedPlanId,
+      },
+      theme: {
+        color: "#f43f5e",
+      },
+      handler: async (response) => {
+        const success = await createShareLink({
+          provider: "razorpay",
+          razorpay_payment_id: response?.razorpay_payment_id || "",
+        });
+        if (!success) {
+          setCheckoutMessage("Payment was captured, but saving your share link failed. Please contact support.");
+        }
+        setIsProcessingPayment(false);
+      },
+      modal: {
+        ondismiss: () => {
+          setIsProcessingPayment(false);
+        },
+      },
+    };
+
+    try {
+      const razorpay = new window.Razorpay(options);
+      razorpay.on("payment.failed", () => {
+        setCheckoutMessage("Payment failed. Please try again.");
+        setIsProcessingPayment(false);
+      });
+      razorpay.open();
+    } catch (error) {
+      console.error("Unable to open Razorpay checkout", error);
+      setCheckoutMessage("Unable to start payment right now. Please try again.");
+      setIsProcessingPayment(false);
+    }
   };
 
   const copyShareLink = async () => {
@@ -203,7 +275,7 @@ export default function Payment() {
                 </p>
                 <ul className="mt-3 space-y-1 text-xs text-stone-700">
                   {plan.features.map((feature) => (
-                    <li key={feature}>• {feature}</li>
+                    <li key={feature}>* {feature}</li>
                   ))}
                 </ul>
                 {isTooSmall && <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-amber-700">Won't keep everything</p>}
@@ -240,9 +312,7 @@ export default function Payment() {
             ].join(" ")}
             onClick={completeCheckout}
           >
-            {isProcessingPayment && (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" />
-            )}
+            {isProcessingPayment && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" />}
             {isProcessingPayment ? "Processing..." : selectedPlan.priceValue > 0 ? `Pay ${selectedPlan.priceLabel}` : "Continue Free"}
           </button>
         )}

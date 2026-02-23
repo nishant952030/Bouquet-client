@@ -1,0 +1,109 @@
+const SITE_NAME = "Petals and Words";
+
+function upsertMeta(selector, attrs) {
+  let element = document.head.querySelector(selector);
+  if (!element) {
+    element = document.createElement("meta");
+    document.head.appendChild(element);
+  }
+  Object.entries(attrs).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      element.setAttribute(key, value);
+    }
+  });
+}
+
+function upsertLink(selector, attrs) {
+  let element = document.head.querySelector(selector);
+  if (!element) {
+    element = document.createElement("link");
+    document.head.appendChild(element);
+  }
+  Object.entries(attrs).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      element.setAttribute(key, value);
+    }
+  });
+}
+
+function upsertScript(selector, json) {
+  let element = document.head.querySelector(selector);
+  if (!element) {
+    element = document.createElement("script");
+    element.type = "application/ld+json";
+    element.setAttribute("data-seo-ld", "page");
+    document.head.appendChild(element);
+  }
+  element.textContent = JSON.stringify(json);
+}
+
+export function applySeo({
+  title,
+  description,
+  keywords = [],
+  path = "/",
+  image = "/logo-transparent.png",
+  robots = "index,follow",
+  jsonLd,
+}) {
+  const baseUrl = window.location.origin;
+  const canonical = `${baseUrl}${path}`;
+  const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
+  const keywordText = Array.isArray(keywords) ? keywords.join(", ") : "";
+
+  document.title = fullTitle;
+
+  upsertMeta('meta[name="description"]', { name: "description", content: description });
+  upsertMeta('meta[name="keywords"]', { name: "keywords", content: keywordText });
+  upsertMeta('meta[name="robots"]', { name: "robots", content: robots });
+
+  upsertMeta('meta[property="og:type"]', { property: "og:type", content: "website" });
+  upsertMeta('meta[property="og:site_name"]', { property: "og:site_name", content: SITE_NAME });
+  upsertMeta('meta[property="og:title"]', { property: "og:title", content: fullTitle });
+  upsertMeta('meta[property="og:description"]', { property: "og:description", content: description });
+  upsertMeta('meta[property="og:url"]', { property: "og:url", content: canonical });
+  upsertMeta('meta[property="og:image"]', { property: "og:image", content: `${baseUrl}${image}` });
+
+  upsertMeta('meta[name="twitter:card"]', { name: "twitter:card", content: "summary_large_image" });
+  upsertMeta('meta[name="twitter:title"]', { name: "twitter:title", content: fullTitle });
+  upsertMeta('meta[name="twitter:description"]', { name: "twitter:description", content: description });
+  upsertMeta('meta[name="twitter:image"]', { name: "twitter:image", content: `${baseUrl}${image}` });
+
+  upsertLink('link[rel="canonical"]', { rel: "canonical", href: canonical });
+
+  if (jsonLd) {
+    upsertScript('script[data-seo-ld="page"]', jsonLd);
+  }
+}
+
+export const seoKeywords = {
+  home: [
+    "online bouquet maker",
+    "virtual bouquet creator",
+    "digital flower bouquet",
+    "bouquet with message",
+    "send flowers with note",
+    "romantic flower message",
+    "apology flower note",
+    "birthday bouquet message",
+  ],
+  create: [
+    "build bouquet online",
+    "custom bouquet generator",
+    "flower arrangement app",
+    "write bouquet note",
+    "AI love note generator",
+    "online flower card maker",
+  ],
+  payment: [
+    "bouquet pricing plans",
+    "buy digital bouquet",
+    "share bouquet link",
+    "flower message link",
+  ],
+  view: [
+    "view digital bouquet",
+    "online flower message",
+    "shared bouquet link",
+  ],
+};

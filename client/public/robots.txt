@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Keep private and transactional routes out of search results.
+Disallow: /payment
+Disallow: /view/
+
+Sitemap: https://www.petalsandwords.com/sitemap.xml

@@ -43,3 +43,11 @@ The note generator also supports Groq and will use it automatically when `VITE_G
 - `VITE_GROQ_API_KEY`
 - `VITE_GROQ_MODEL` (default: `llama-3.3-70b-versatile`)
 - `VITE_GROQ_API_URL` (default: `https://api.groq.com/openai/v1/chat/completions`)
+
+## Razorpay Setup
+
+Add this variable in `client/.env` (and Vercel project env):
+
+- `VITE_RAZORPAY_KEY_ID`
+
+Paid plans open Razorpay checkout and only create share links after successful payment.

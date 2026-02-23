@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { doc, getDoc, getDocFromServer } from "firebase/firestore";
 import RecipientBouquetCanvas from "../components/RecipientBouquetCanvas";
 import { db, isFirebaseConfigured } from "../lib/firebase";
+import { applySeo, seoKeywords } from "../lib/seo";
 
 function getSharedBouquetFromLocalStorage(id) {
   try {
@@ -18,6 +19,16 @@ export default function ViewBouquet() {
   const { id } = useParams();
   const [shared, setShared] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    applySeo({
+      title: "Shared Virtual Bouquet",
+      description: "Open and read a shared digital flower bouquet with a personal note.",
+      keywords: seoKeywords.view,
+      path: id ? `/view/${id}` : "/view",
+      robots: "noindex,nofollow",
+    });
+  }, [id]);
 
   useEffect(() => {
     let cancelled = false;

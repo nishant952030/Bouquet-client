@@ -3,7 +3,6 @@ import Home from "./pages/Home.jsx";
 import Create from "./pages/Create.jsx";
 import Payment from "./pages/Payment.jsx";
 import ViewBouquet from "./pages/ViewBouquet.jsx";
-
 export default function App() {
   return (
     <BrowserRouter>

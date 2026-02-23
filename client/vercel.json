@@ -1,4 +1,17 @@
 {
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "petalsandwords.com"
+        }
+      ],
+      "destination": "https://www.petalsandwords.com/$1",
+      "permanent": true
+    }
+  ],
   "routes": [
     {
       "handle": "filesystem"
