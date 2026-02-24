@@ -18,3 +18,29 @@ body {
 #root {
   min-height: 100vh;
 }
+
+.note-paper {
+  background:
+    radial-gradient(130% 120% at 20% 0%, rgba(255, 255, 255, 0.85), rgba(255, 247, 234, 0.75) 45%, rgba(246, 225, 194, 0.65) 100%),
+    linear-gradient(175deg, rgba(255, 255, 255, 0.35), rgba(244, 220, 186, 0.35));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -18px 30px rgba(230, 190, 140, 0.08);
+}
+
+.note-paper-textarea {
+  background-color: #fff8ed;
+  background-image:
+    radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.6) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 80% 70%, rgba(232, 196, 148, 0.28) 0 1px, transparent 1.5px),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(189, 133, 69, 0.08) 0,
+      rgba(189, 133, 69, 0.08) 1px,
+      transparent 1px,
+      transparent 2.05em
+    );
+  box-shadow:
+    inset 0 1px 2px rgba(120, 87, 53, 0.08),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.7);
+}
