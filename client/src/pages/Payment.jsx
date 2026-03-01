@@ -20,6 +20,7 @@ const PLANS = [
   {
     id: "small",
     name: "Small",
+    originalPriceLabel: "Rs 49",
     priceLabel: "Rs 29",
     priceValue: 29,
     flowerLimit: 5,
@@ -30,6 +31,7 @@ const PLANS = [
   {
     id: "medium",
     name: "Medium",
+    originalPriceLabel: "Rs 89",
     priceLabel: "Rs 59",
     priceValue: 59,
     flowerLimit: 10,
@@ -39,6 +41,7 @@ const PLANS = [
   {
     id: "large",
     name: "Large",
+    originalPriceLabel: "Rs 149",
     priceLabel: "Rs 99",
     priceValue: 99,
     flowerLimit: Infinity,
@@ -71,7 +74,6 @@ export default function Payment() {
   const requiredPlanId = useMemo(() => getRequiredPlan(flowerCount, wordCount), [flowerCount, wordCount]);
   const [selectedPlanId, setSelectedPlanId] = useState(requiredPlanId === "free" ? "small" : requiredPlanId);
   const [shareUrl, setShareUrl] = useState("");
-  const [shareId, setShareId] = useState("");
   const [checkoutMessage, setCheckoutMessage] = useState("");
   const [senderName, setSenderName] = useState("");
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -116,7 +118,6 @@ export default function Payment() {
     }
 
     const url = `${window.location.origin}/view/${id}`;
-    setShareId(id);
     setShareUrl(url);
     setCheckoutMessage("Payment successful. Your bouquet is now ready to share.");
     setHasPaidSuccessfully(true);
@@ -130,7 +131,6 @@ export default function Payment() {
 
     if (selectedPlanId === "free") {
       setShareUrl("");
-      setShareId("");
       setCheckoutMessage("You are on Free preview with watermark. Upgrade anytime to unlock sharing.");
       setIsProcessingPayment(false);
       return;
@@ -208,6 +208,28 @@ export default function Payment() {
     }
   };
 
+  const shareBouquetLink = async () => {
+    if (!shareUrl) return;
+    const sharePayload = {
+      title: "Petals and Words Bouquet",
+      text: `${senderName.trim() || "Someone special"} sent you a bouquet`,
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(sharePayload);
+        return;
+      }
+    } catch (error) {
+      // User cancellation should not show fallback alerts.
+      if (error?.name === "AbortError") return;
+    }
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${sharePayload.text} ${shareUrl}`)}`;
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+  };
+
   if (!hasBouquetData) {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center px-4 py-8">
@@ -263,7 +285,10 @@ export default function Payment() {
                     <p className="text-xl text-stone-900" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
                       {plan.name}
                     </p>
-                    <p className="text-sm font-semibold text-rose-700">{plan.priceLabel}</p>
+                    <div className="flex items-center gap-2">
+                      {plan.originalPriceLabel && <p className="text-xs text-stone-400 line-through">{plan.originalPriceLabel}</p>}
+                      <p className="text-sm font-semibold text-rose-700">{plan.priceLabel}</p>
+                    </div>
                   </div>
                   {plan.recommended && (
                     <span className="rounded-full bg-rose-500 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">Popular</span>
@@ -330,21 +355,27 @@ export default function Payment() {
         {shareUrl && (
           <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
             <p className="text-sm font-semibold text-emerald-800">Share this link with your person:</p>
-            <p className="mt-2 break-all text-sm text-emerald-900">{shareUrl}</p>
+            <button
+              type="button"
+              onClick={shareBouquetLink}
+              className="mt-2 break-all text-left text-sm text-emerald-900 underline decoration-emerald-300 underline-offset-2"
+            >
+              {shareUrl}
+            </button>
             <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={shareBouquetLink}
+                className="rounded-full bg-emerald-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-white"
+              >
+                Share Now
+              </button>
               <button
                 type="button"
                 onClick={copyShareLink}
                 className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-white"
               >
                 Copy Link
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate(`/view/${shareId}`)}
-                className="rounded-full border border-emerald-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-emerald-800"
-              >
-                Open Recipient View
               </button>
             </div>
           </div>

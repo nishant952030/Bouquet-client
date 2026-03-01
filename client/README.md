@@ -51,3 +51,21 @@ Add this variable in `client/.env` (and Vercel project env):
 - `VITE_RAZORPAY_KEY_ID`
 
 Paid plans open Razorpay checkout and only create share links after successful payment.
+
+## Razorpay Webhook Setup
+
+This project includes a Vercel serverless webhook endpoint:
+
+- `POST /api/razorpay/webhook`
+
+Add this server env variable (do not prefix with `VITE_`):
+
+- `RAZORPAY_WEBHOOK_SECRET`
+
+Razorpay dashboard configuration:
+
+1. Go to Webhooks and create a webhook for `https://www.petalsandwords.com/api/razorpay/webhook`
+2. Set the same secret value you use in `RAZORPAY_WEBHOOK_SECRET`
+3. Select events you need (at minimum `payment.captured`, optionally `payment.failed`)
+
+The endpoint verifies `x-razorpay-signature` before accepting events.
