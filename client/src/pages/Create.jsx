@@ -39,9 +39,9 @@ export default function Create() {
 
   useEffect(() => {
     applySeo({
-      title: "Build a Custom Bouquet Online",
+      title: "Online Bouquet Creator and Virtual Bouquet Maker",
       description:
-        "Use our bouquet builder to create a virtual flower arrangement, write your own message, and generate thoughtful notes with AI.",
+        "Use this online bouquet creator to build a virtual flower bouquet, write your own message, and share instantly.",
       keywords: seoKeywords.create,
       path: "/create",
       jsonLd: {
@@ -112,8 +112,11 @@ export default function Create() {
           />
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-600 sm:text-xs">Petals and Words</p>
           <h1 className="text-3xl text-stone-900 sm:text-[2rem] md:text-4xl" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-            Compose your bouquet
+            Compose your bouquet online
           </h1>
+          <p className="mt-2 max-w-2xl text-sm text-stone-600">
+            This page works as your digital bouquet maker and online flower bouquet maker with custom notes.
+          </p>
         </div>
         <Link
           to="/"

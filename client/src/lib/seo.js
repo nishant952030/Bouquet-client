@@ -78,7 +78,16 @@ export function applySeo({
 
 export const seoKeywords = {
   home: [
+    "virtual bouquet maker",
+    "digital bouquet maker",
     "online bouquet maker",
+    "best virtual bouquet maker online free",
+    "online flower bouquet maker",
+    "online bouquet creator",
+    "bouquet maker online",
+    "virtual flower bouquet maker online free",
+    "virtual flower maker",
+    "bouquet maker",
     "virtual bouquet creator",
     "digital flower bouquet",
     "bouquet with message",
@@ -88,6 +97,10 @@ export const seoKeywords = {
     "birthday bouquet message",
   ],
   create: [
+    "online bouquet creator",
+    "bouquet maker online",
+    "virtual bouquet maker",
+    "online flower bouquet maker",
     "build bouquet online",
     "custom bouquet generator",
     "flower arrangement app",

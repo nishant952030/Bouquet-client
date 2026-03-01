@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import SoftButton from "../components/SoftButton";
 import { useNavigate } from "react-router-dom";
 import { applySeo, seoKeywords } from "../lib/seo";
@@ -8,22 +9,42 @@ export default function Home() {
 
   useEffect(() => {
     applySeo({
-      title: "Online Bouquet Maker and Virtual Flower Notes",
+      title: "Virtual Bouquet Maker | Digital and Online Bouquet Maker",
       description:
-        "Create a virtual bouquet online, add a personal flower note, and share it in minutes. Petals and Words helps you send a romantic, birthday, or apology bouquet message.",
+        "Petals and Words is a virtual bouquet maker and digital bouquet maker. Create an online flower bouquet, add a personal note, and share it in minutes.",
       keywords: seoKeywords.home,
       path: "/",
       jsonLd: {
         "@context": "https://schema.org",
-        "@type": "WebSite",
-        name: "Petals and Words",
-        url: window.location.origin,
-        description: "Online bouquet maker for creating and sharing digital flowers with personal notes.",
-        potentialAction: {
-          "@type": "SearchAction",
-          target: `${window.location.origin}/create`,
-          "query-input": "required name=bouquet",
-        },
+        "@graph": [
+          {
+            "@type": "WebSite",
+            name: "Petals and Words",
+            url: window.location.origin,
+            description: "Virtual bouquet maker for creating and sharing digital flowers with personal notes.",
+          },
+          {
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Is this a free virtual bouquet maker?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Yes. You can create a bouquet in free preview and upgrade only when you want more flowers or longer notes.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Can I use it as an online flower bouquet maker with sharing?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "Yes. Build your bouquet, complete checkout, and share the generated link through WhatsApp or other apps.",
+                },
+              },
+            ],
+          },
+        ],
       },
     });
   }, []);
@@ -62,6 +83,36 @@ export default function Home() {
             Petals and Words is a digital flower bouquet creator for people searching terms like bouquet with message, romantic flower note, birthday flower message, and apology note with flowers.
             Pick your flowers, write your note, and share a clean link instantly.
           </p>
+        </section>
+
+        <section className="w-full max-w-3xl rounded-3xl border border-amber-100/80 bg-white/70 p-5 shadow-lg backdrop-blur sm:p-6">
+          <h2 className="text-2xl text-stone-900" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
+            Why people use this bouquet maker online
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-stone-700 sm:text-base">
+            If you are searching for a virtual bouquet maker, digital bouquet maker, or online bouquet creator, this tool is built for that exact use.
+            You can design quickly, write a message, and share in one flow.
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-stone-700 sm:text-base">
+            Looking for the best virtual bouquet maker online free or a virtual flower bouquet maker online free? Start with free preview, then upgrade only if you need extra flowers and words.
+          </p>
+        </section>
+
+        <section className="w-full max-w-3xl rounded-3xl border border-stone-100 bg-white/70 p-5 shadow-lg backdrop-blur sm:p-6">
+          <h2 className="text-2xl text-stone-900" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
+            Popular bouquet maker pages
+          </h2>
+          <div className="mt-3 flex flex-wrap gap-2 text-sm">
+            <Link to="/virtual-bouquet-maker" className="rounded-full border border-rose-200 bg-white px-4 py-2 text-rose-700 hover:border-rose-300">
+              Virtual Bouquet Maker
+            </Link>
+            <Link to="/digital-bouquet-maker" className="rounded-full border border-rose-200 bg-white px-4 py-2 text-rose-700 hover:border-rose-300">
+              Digital Bouquet Maker
+            </Link>
+            <Link to="/online-bouquet-maker" className="rounded-full border border-rose-200 bg-white px-4 py-2 text-rose-700 hover:border-rose-300">
+              Online Bouquet Maker
+            </Link>
+          </div>
         </section>
       </div>
     </main>
