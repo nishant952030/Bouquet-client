@@ -9,9 +9,9 @@ export default function Home() {
 
   useEffect(() => {
     applySeo({
-      title: "Virtual Bouquet Maker | Digital and Online Bouquet Maker",
+      title: "Online Bouquet Maker | Send Digital Bouquet with Note",
       description:
-        "Petals and Words is a virtual bouquet maker and digital bouquet maker. Create an online flower bouquet, add a personal note, and share it in minutes.",
+        "Create and send a digital bouquet with a personal note in minutes. Choose your bouquet style, add your message, and share instantly.",
       keywords: seoKeywords.home,
       path: "/",
       jsonLd: {
@@ -21,17 +21,31 @@ export default function Home() {
             "@type": "WebSite",
             name: "Petals and Words",
             url: window.location.origin,
-            description: "Virtual bouquet maker for creating and sharing digital flowers with personal notes.",
+            description: "Online bouquet maker for creating and sharing digital flowers with personal notes.",
+          },
+          {
+            "@type": "SoftwareApplication",
+            name: "Petals and Words Bouquet Maker",
+            applicationCategory: "LifestyleApplication",
+            operatingSystem: "Web",
+            offers: {
+              "@type": "AggregateOffer",
+              priceCurrency: "INR",
+              lowPrice: "29",
+              highPrice: "59",
+              offerCount: "2",
+            },
+            url: `${window.location.origin}/create`,
           },
           {
             "@type": "FAQPage",
             mainEntity: [
               {
                 "@type": "Question",
-                name: "Is this a free virtual bouquet maker?",
+                name: "What is the starting price?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Yes. You can create a bouquet in free preview and upgrade only when you want more flowers or longer notes.",
+                  text: "Paid bouquet plans start from Rs 29, with an Unlimited option at Rs 59.",
                 },
               },
               {

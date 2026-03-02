@@ -102,6 +102,15 @@ export default function KeywordLanding() {
           </article>
         </div>
 
+        <article className="mt-4 rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4">
+          <h2 className="text-2xl text-stone-900" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
+            Transparent pricing
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-stone-700">
+            Plans start from Rs 29 with an Unlimited option at Rs 59. Checkout supports secure UPI/cards via Razorpay.
+          </p>
+        </article>
+
         <div className="mt-8 flex flex-wrap gap-3 text-sm">
           <Link to="/" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
             Home

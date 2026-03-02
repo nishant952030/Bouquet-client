@@ -1,14 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { track } from "@vercel/analytics";
 import CanvasBoard from "../components/CanvasBoard";
 import FlowerPicker from "../components/FlowerPicker";
 import NoteCard from "../components/NoteCard";
 import { bouquetSuggestions, noteSuggestions } from "../data/bouquetSuggestions";
+import { trackEvent } from "../lib/analytics";
 import { generateNoteWithGrok } from "../lib/grok";
 import { applySeo, seoKeywords } from "../lib/seo";
-
-const FREE_FLOWER_LIMIT = 2;
-const FREE_WORD_LIMIT = 20;
 
 function countWords(text) {
   const normalized = text.trim();
@@ -27,10 +26,10 @@ export default function Create() {
   const [generationError, setGenerationError] = useState("");
   const [showAllBouquetSuggestions, setShowAllBouquetSuggestions] = useState(false);
   const [showAllNoteSuggestions, setShowAllNoteSuggestions] = useState(false);
+  const hasTrackedContentRef = useRef(false);
 
   const flowerCount = stems.length;
   const wordCount = countWords(note);
-  const exceedsFreeTier = flowerCount > FREE_FLOWER_LIMIT || wordCount > FREE_WORD_LIMIT;
   const hasBouquetContent = flowerCount > 0 || note.trim().length > 0;
 
   const canRequestAiNote = useMemo(() => situationText.trim().length > 0 && !isGeneratingNote, [situationText, isGeneratingNote]);
@@ -39,9 +38,9 @@ export default function Create() {
 
   useEffect(() => {
     applySeo({
-      title: "Online Bouquet Creator and Virtual Bouquet Maker",
+      title: "Create Digital Bouquet Online | Add Flowers and Note",
       description:
-        "Use this online bouquet creator to build a virtual flower bouquet, write your own message, and share instantly.",
+        "Create a digital bouquet online, add your personal note, and continue to secure checkout to share your bouquet link instantly.",
       keywords: seoKeywords.create,
       path: "/create",
       jsonLd: {
@@ -51,15 +50,29 @@ export default function Create() {
         applicationCategory: "LifestyleApplication",
         operatingSystem: "Web",
         offers: {
-          "@type": "Offer",
-          price: "0",
+          "@type": "AggregateOffer",
+          lowPrice: "29",
+          highPrice: "59",
+          offerCount: "2",
           priceCurrency: "INR",
         },
         url: `${window.location.origin}/create`,
         description: "Create a digital bouquet and add a personalized note.",
       },
     });
+
+    track("create_start", { source: "create_page" });
+    trackEvent("create_start", { source: "create_page" });
   }, []);
+
+  useEffect(() => {
+    if (hasTrackedContentRef.current || !hasBouquetContent) return;
+
+    hasTrackedContentRef.current = true;
+    const payload = { flowerCount, wordCount };
+    track("create_content_added", payload);
+    trackEvent("create_content_added", payload);
+  }, [flowerCount, hasBouquetContent, wordCount]);
 
   const handleCanvasStateChange = useCallback((nextStems) => {
     if (!Array.isArray(nextStems)) return;
@@ -92,6 +105,14 @@ export default function Create() {
 
   const goToPayment = () => {
     if (!hasBouquetContent) return;
+
+    const payload = {
+      flowerCount,
+      wordCount,
+    };
+    track("payment_page_open", payload);
+    trackEvent("payment_page_open", payload);
+
     navigate("/payment", {
       state: {
         flowerCount,
@@ -102,25 +123,18 @@ export default function Create() {
   };
 
   return (
-    <main className="mx-auto min-h-screen w-full max-w-6xl px-3 py-5 sm:px-4 md:px-6 md:py-10">
-      <header className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+    <main className="mx-auto min-h-screen w-full max-w-6xl px-3 py-5 pb-24 sm:px-4 md:px-6 md:py-10">
+      <header className="mb-5 flex items-center justify-between gap-3 sm:mb-6">
+        <div className="min-w-0">
           <img
             src="/logo-transparent.png"
             alt="Petals and Words logo"
             className="mb-2 w-[170px] sm:w-[210px]"
           />
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-600 sm:text-xs">Petals and Words</p>
-          <h1 className="text-3xl text-stone-900 sm:text-[2rem] md:text-4xl" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-            Compose your bouquet online
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-stone-600">
-            This page works as your digital bouquet maker and online flower bouquet maker with custom notes.
-          </p>
         </div>
         <Link
           to="/"
-          className="w-fit rounded-full border border-rose-200 bg-white/70 px-4 py-2 text-sm font-medium text-rose-700 transition hover:border-rose-300 hover:bg-white"
+          className="shrink-0 rounded-full border border-rose-200 bg-white/70 px-4 py-2 text-sm font-medium text-rose-700 transition hover:border-rose-300 hover:bg-white"
         >
           Home
         </Link>
@@ -144,21 +158,12 @@ export default function Create() {
               </div>
             </div>
 
-            <div className="mt-3 rounded-2xl border border-rose-200/70 bg-rose-50/70 p-3 text-sm text-rose-900">
-              {!exceedsFreeTier && (
-                <p>
-                  Free preview includes up to {FREE_FLOWER_LIMIT} flowers and about {FREE_WORD_LIMIT} words.
-                </p>
-              )}
-              {exceedsFreeTier && <p>This bouquet is getting beautiful. Unlock to keep everything exactly as you made it.</p>}
-            </div>
-
             <button
               type="button"
               onClick={goToPayment}
               disabled={!hasBouquetContent}
               className={[
-                "mt-4 w-full rounded-2xl px-5 py-3 text-sm font-semibold uppercase tracking-[0.15em] transition",
+                "mt-4 hidden w-full rounded-2xl px-5 py-3 text-sm font-semibold uppercase tracking-[0.15em] transition sm:block",
                 hasBouquetContent ? "bg-rose-500 text-white shadow-lg shadow-rose-200 hover:bg-rose-600" : "cursor-not-allowed bg-stone-200 text-stone-500",
               ].join(" ")}
             >
@@ -258,6 +263,20 @@ export default function Create() {
           </div>
         </div>
       </section>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-rose-100 bg-white/95 px-4 py-3 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur sm:hidden">
+        <button
+          type="button"
+          onClick={goToPayment}
+          disabled={!hasBouquetContent}
+          className={[
+            "w-full rounded-2xl px-5 py-3 text-sm font-semibold uppercase tracking-[0.15em] transition",
+            hasBouquetContent ? "bg-rose-500 text-white" : "cursor-not-allowed bg-stone-200 text-stone-500",
+          ].join(" ")}
+        >
+          Continue To Checkout
+        </button>
+      </div>
     </main>
   );
 }
