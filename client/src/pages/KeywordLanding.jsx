@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import SoftButton from "../components/SoftButton";
+import { getOfferDateLabel, getSmallPlanPrice, getUnlimitedPlanPrice, isLaunchOfferActive } from "../lib/pricing";
 import { applySeo } from "../lib/seo";
 
 const LANDING_CONTENT = {
@@ -52,6 +53,9 @@ export default function KeywordLanding() {
   const navigate = useNavigate();
   const location = useLocation();
   const page = useMemo(() => LANDING_CONTENT[location.pathname] ?? LANDING_CONTENT["/online-bouquet-maker"], [location.pathname]);
+  const smallPrice = getSmallPlanPrice();
+  const unlimitedPrice = getUnlimitedPlanPrice();
+  const offerActive = isLaunchOfferActive();
 
   useEffect(() => {
     applySeo({
@@ -107,7 +111,8 @@ export default function KeywordLanding() {
             Transparent pricing
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-stone-700">
-            Plans start from Rs 29 with an Unlimited option at Rs 59. Checkout supports secure UPI/cards via Razorpay.
+            Plans start from Rs {smallPrice} with an Unlimited option at Rs {unlimitedPrice}. Checkout supports secure UPI/cards via Razorpay.
+            {offerActive ? ` Limited offer live (${getOfferDateLabel()}).` : ""}
           </p>
         </article>
 

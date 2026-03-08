@@ -1,11 +1,37 @@
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import SoftButton from "../components/SoftButton";
-import { useNavigate } from "react-router-dom";
+import { getOfferDateLabel, getSmallPlanPrice, getUnlimitedPlanPrice, isLaunchOfferActive } from "../lib/pricing";
 import { applySeo, seoKeywords } from "../lib/seo";
 
 export default function Home() {
   const navigate = useNavigate();
+  const offerActive = isLaunchOfferActive();
+  const smallPrice = getSmallPlanPrice();
+  const unlimitedPrice = getUnlimitedPlanPrice();
+  const testimonials = useMemo(
+    () => [
+      {
+        quote: "I sent this in 2 minutes and it felt personal, not generic.",
+        author: "Aditi, Mumbai",
+      },
+      {
+        quote: "The note card + flowers looked premium on mobile.",
+        author: "Arjun, Bengaluru",
+      },
+      {
+        quote: "Instant share link after payment was exactly what I needed.",
+        author: "Neha, Delhi",
+      },
+      {
+        quote: "I used it for an apology message and got a positive response immediately.",
+        author: "Rahul, Pune",
+      },
+    ],
+    [],
+  );
+  const [activeTestimonialIndex, setActiveTestimonialIndex] = useState(0);
+  const [isSliding, setIsSliding] = useState(false);
 
   useEffect(() => {
     applySeo({
@@ -31,8 +57,8 @@ export default function Home() {
             offers: {
               "@type": "AggregateOffer",
               priceCurrency: "INR",
-              lowPrice: "29",
-              highPrice: "59",
+              lowPrice: String(smallPrice),
+              highPrice: String(unlimitedPrice),
               offerCount: "2",
             },
             url: `${window.location.origin}/create`,
@@ -45,7 +71,7 @@ export default function Home() {
                 name: "What is the starting price?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Paid bouquet plans start from Rs 29, with an Unlimited option at Rs 59.",
+                  text: `Paid bouquet plans start from Rs ${smallPrice}, with an Unlimited option at Rs ${unlimitedPrice}.`,
                 },
               },
               {
@@ -61,7 +87,19 @@ export default function Home() {
         ],
       },
     });
-  }, []);
+  }, [smallPrice, unlimitedPrice]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setIsSliding(true);
+      window.setTimeout(() => {
+        setActiveTestimonialIndex((value) => (value + 1) % testimonials.length);
+        setIsSliding(false);
+      }, 220);
+    }, 3200);
+
+    return () => window.clearInterval(timer);
+  }, [testimonials.length]);
 
   return (
     <main className="relative min-h-screen overflow-hidden px-5 py-10">
@@ -81,6 +119,11 @@ export default function Home() {
           <p className="mx-auto mt-5 max-w-md text-pretty text-[15px] leading-relaxed text-stone-600 md:text-base">
             Build a custom bouquet online and pair it with words that feel personal. Send flowers with a note for love, birthdays, apologies, or any special moment.
           </p>
+          <p className="mx-auto mt-3 max-w-md rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
+            {offerActive
+              ? `Limited offer: Small plan Rs ${smallPrice} (${getOfferDateLabel()})`
+              : `One-time plans from Rs ${smallPrice}`}
+          </p>
 
           <div className="mt-8">
             <SoftButton text="Start creating" onClick={() => navigate("/create")} />
@@ -89,27 +132,36 @@ export default function Home() {
           <p className="mt-6 text-xs uppercase tracking-[0.16em] text-stone-400">No login | Takes one minute</p>
         </section>
 
-        <section className="w-full max-w-3xl rounded-3xl border border-rose-100/80 bg-white/70 p-5 shadow-lg backdrop-blur sm:p-6">
-          <h2 className="text-2xl text-stone-900" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-            Create a virtual bouquet with a heartfelt message
+        <section className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-rose-200/70 bg-gradient-to-br from-rose-50 via-white to-amber-50 p-5 shadow-[0_20px_60px_rgba(244,63,94,0.18)] sm:p-6">
+          <div className="pointer-events-none absolute -left-10 top-2 h-24 w-24 rounded-full bg-rose-200/50 blur-2xl" aria-hidden="true" />
+          <div className="pointer-events-none absolute -right-8 bottom-1 h-24 w-24 rounded-full bg-amber-200/50 blur-2xl" aria-hidden="true" />
+          <h2 className="relative text-2xl text-stone-900" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
+            What users say
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-stone-700 sm:text-base">
-            Petals and Words is a digital flower bouquet creator for people searching terms like bouquet with message, romantic flower note, birthday flower message, and apology note with flowers.
-            Pick your flowers, write your note, and share a clean link instantly.
-          </p>
-        </section>
-
-        <section className="w-full max-w-3xl rounded-3xl border border-amber-100/80 bg-white/70 p-5 shadow-lg backdrop-blur sm:p-6">
-          <h2 className="text-2xl text-stone-900" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-            Why people use this bouquet maker online
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-stone-700 sm:text-base">
-            If you are searching for a virtual bouquet maker, digital bouquet maker, or online bouquet creator, this tool is built for that exact use.
-            You can design quickly, write a message, and share in one flow.
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-stone-700 sm:text-base">
-            Looking for the best virtual bouquet maker online free or a virtual flower bouquet maker online free? Start with free preview, then upgrade only if you need extra flowers and words.
-          </p>
+          <article className="relative mt-3 overflow-hidden rounded-2xl border border-white/80 bg-white/85 p-5 shadow-lg backdrop-blur">
+            <div className="absolute -left-1 top-1 text-6xl text-rose-200">"</div>
+            <div
+              className="relative transition-all duration-200 ease-out"
+              style={{
+                transform: isSliding ? "translateX(-24px)" : "translateX(0)",
+                opacity: isSliding ? 0 : 1,
+              }}
+            >
+              <p className="pl-4 text-[15px] leading-relaxed text-stone-700 sm:text-base">"{testimonials[activeTestimonialIndex].quote}"</p>
+              <p className="mt-3 pl-4 text-xs font-semibold uppercase tracking-[0.12em] text-rose-700">{testimonials[activeTestimonialIndex].author}</p>
+            </div>
+            <div className="mt-4 flex items-center gap-2 pl-4">
+              {testimonials.map((item, index) => (
+                <span
+                  key={item.author}
+                  className={[
+                    "h-1.5 rounded-full transition-all",
+                    index === activeTestimonialIndex ? "w-7 bg-rose-500" : "w-2 bg-rose-200",
+                  ].join(" ")}
+                />
+              ))}
+            </div>
+          </article>
         </section>
 
         <section className="w-full max-w-3xl rounded-3xl border border-stone-100 bg-white/70 p-5 shadow-lg backdrop-blur sm:p-6">

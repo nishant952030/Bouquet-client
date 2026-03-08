@@ -49,8 +49,15 @@ The note generator also supports Groq and will use it automatically when `VITE_G
 Add this variable in `client/.env` (and Vercel project env):
 
 - `VITE_RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
 
 Paid plans open Razorpay checkout and only create share links after successful payment.
+
+The project now creates orders and verifies signatures through serverless routes:
+
+- `POST /api/razorpay/create-order`
+- `POST /api/razorpay/verify`
 
 ## Razorpay Webhook Setup
 
@@ -69,3 +76,30 @@ Razorpay dashboard configuration:
 3. Select events you need (at minimum `payment.captured`, optionally `payment.failed`)
 
 The endpoint verifies `x-razorpay-signature` before accepting events.
+
+## Global Checkout Setup (Stripe)
+
+Use Stripe for non-INR countries. It has no monthly fee on standard plans (pay per successful transaction).
+
+Server env variables:
+
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET` (for optional webhook validation)
+
+Serverless endpoints included:
+
+- `POST /api/stripe/create-checkout-session`
+- `GET /api/stripe/verify-session`
+- `POST /api/stripe/webhook`
+
+Payment flow behavior:
+
+1. `/api/geo` detects country via Vercel headers.
+2. India users go through Razorpay in INR.
+3. Non-India users go through Stripe checkout in USD.
+4. Returning Stripe users are verified via `session_id` before bouquet link generation.
+
+## Recommended Platform Mix
+
+- India: Razorpay (best UPI conversion)
+- Global: Stripe Checkout (best card conversion, no fixed monthly fee)
