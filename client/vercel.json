@@ -12,5 +12,31 @@
       "destination": "https://www.petalsandwords.com/$1",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/create",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/payment",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/view/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/virtual-bouquet-maker",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/digital-bouquet-maker",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/online-bouquet-maker",
+      "destination": "/index.html"
+    }
   ]
 }
