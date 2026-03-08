@@ -31,9 +31,13 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
   const wrapperRef = useRef(null);
   const fabricCanvas = useRef(null);
   const watermarkObjects = useRef([]);
+  const activationTimerRef = useRef(null);
+  const touchStartRef = useRef({ x: 0, y: 0 });
   const [canvasSize, setCanvasSize] = useState({ width: 300, height: Math.round(300 * CANVAS_RATIO) });
   const [canRemoveSelected, setCanRemoveSelected] = useState(false);
   const [canRaiseSelected, setCanRaiseSelected] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [isCanvasActive, setIsCanvasActive] = useState(true);
 
   const serializeStems = (canvas) =>
     canvas
@@ -88,6 +92,12 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
     );
 
   useEffect(() => {
+    const coarsePointer = typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)")?.matches || "ontouchstart" in window);
+    setIsTouchDevice(Boolean(coarsePointer));
+    setIsCanvasActive(!coarsePointer);
+  }, []);
+
+  useEffect(() => {
     const updateCanvasSize = () => {
       if (!wrapperRef.current) return;
       const available = wrapperRef.current.clientWidth - 8;
@@ -99,6 +109,8 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
     window.addEventListener("resize", updateCanvasSize);
     return () => window.removeEventListener("resize", updateCanvasSize);
   }, []);
+
+  useEffect(() => () => clearTimeout(activationTimerRef.current), []);
 
   useEffect(() => {
     const canvas = new Canvas("bouquet-canvas", {
@@ -265,11 +277,75 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
     persistAndEmit(canvas);
   };
 
+  const deactivateCanvasTouchMode = () => {
+    setIsCanvasActive(false);
+    const canvas = fabricCanvas.current;
+    if (!canvas) return;
+    canvas.discardActiveObject();
+    canvas.renderAll();
+    updateRemoveState(canvas);
+  };
+
+  const handleOverlayTouchStart = (event) => {
+    const touch = event.touches?.[0];
+    if (!touch) return;
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    clearTimeout(activationTimerRef.current);
+    activationTimerRef.current = setTimeout(() => {
+      setIsCanvasActive(true);
+    }, 160);
+  };
+
+  const handleOverlayTouchMove = (event) => {
+    const touch = event.touches?.[0];
+    if (!touch) return;
+    const dx = Math.abs(touch.clientX - touchStartRef.current.x);
+    const dy = Math.abs(touch.clientY - touchStartRef.current.y);
+    if (dx > 8 || dy > 8) {
+      clearTimeout(activationTimerRef.current);
+    }
+  };
+
+  const clearOverlayActivationTimer = () => {
+    clearTimeout(activationTimerRef.current);
+  };
+
   return (
     <div ref={wrapperRef} className="w-full">
       {/* Canvas wrapper — warm card */}
-      <div className="relative overflow-hidden rounded-2xl border border-rose-100 bg-[#fff8f2] shadow-lg shadow-rose-100/50">
-        <canvas id="bouquet-canvas" ref={canvasRef} className="mx-auto block rounded-2xl" />
+      <div
+        className="relative overflow-hidden rounded-2xl border border-rose-100 bg-[#fff8f2] shadow-lg shadow-rose-100/50"
+        style={{ touchAction: isTouchDevice && !isCanvasActive ? "pan-y" : "none" }}
+      >
+        <canvas
+          id="bouquet-canvas"
+          ref={canvasRef}
+          className={["mx-auto block rounded-2xl", isTouchDevice && !isCanvasActive ? "pointer-events-none" : ""].join(" ")}
+        />
+        {isTouchDevice && !isCanvasActive && (
+          <button
+            type="button"
+            onClick={() => setIsCanvasActive(true)}
+            onTouchStart={handleOverlayTouchStart}
+            onTouchMove={handleOverlayTouchMove}
+            onTouchEnd={clearOverlayActivationTimer}
+            onTouchCancel={clearOverlayActivationTimer}
+            className="absolute inset-0 z-20 flex items-center justify-center bg-white/20 px-4 text-center backdrop-blur-[0.5px]"
+          >
+            <span className="rounded-full border border-rose-200 bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-rose-700">
+              Hold or tap to edit bouquet
+            </span>
+          </button>
+        )}
+        {isTouchDevice && isCanvasActive && (
+          <button
+            type="button"
+            onClick={deactivateCanvasTouchMode}
+            className="absolute right-2 top-2 z-20 rounded-full border border-rose-200 bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-rose-700"
+          >
+            Done
+          </button>
+        )}
       </div>
 
       {/* Controls row — touch-friendly, 48px tall minimum */}
