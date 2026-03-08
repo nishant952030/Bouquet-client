@@ -272,3 +272,10 @@ export const noteSuggestions = [
   "Sending this because you came to mind, and that's reason enough.",
   "For the person who never asks for anything — here's something just for you.",
 ];
+export const womensDayNoteSuggestions = [
+  "Happy Women's Day. Your strength, kindness, and grace inspire me every single day.",
+  "To the woman who makes life brighter just by being in it - Happy Women's Day.",
+  "You lead with courage and love. Today I celebrate you and all that you are.",
+  "For every silent sacrifice and every bold step - thank you, and Happy Women's Day.",
+  "You are power with compassion, and beauty with purpose. Happy Women's Day.",
+];
