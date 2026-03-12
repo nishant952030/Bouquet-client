@@ -7,16 +7,16 @@ import NoteCard from "../components/NoteCard";
 import { bouquetSuggestions, noteSuggestions } from "../data/bouquetSuggestions";
 import { trackEvent } from "../lib/analytics";
 import { generateNoteWithGrok } from "../lib/grok";
-import { getOfferDateLabel, getSmallPlanPrice, getUnlimitedPlanPrice, isLaunchOfferActive } from "../lib/pricing";
+import { formatUsdFromCents, getSmallPlanUsdCents, getUnlimitedPlanUsdCents, isLaunchOfferActive } from "../lib/pricing";
 import { applySeo, seoKeywords } from "../lib/seo";
 import { loadCheckoutDraft, saveCheckoutDraft } from "../lib/checkoutStorage";
 
-/* ─────────────────────────────────────────────────────
+/* 
    WOMEN'S DAY EXPIRY LOGIC
    isWomensDay() returns true while it is still March 8
    (local device time). At midnight the flag flips to false
    and ALL Women's Day UI disappears automatically.
-───────────────────────────────────────────────────── */
+ */
 function isWomensDay() {
   const now = new Date();
   return now.getMonth() === 2 && now.getDate() === 8; // month 0-indexed
@@ -28,7 +28,7 @@ function msUntilMidnight() {
   return midnight.getTime() - now.getTime();
 }
 
-/* ─── SVG Doodles ─────────────────────────────────── */
+/*  SVG Doodles  */
 function DoodleFlower({ className = "", style = {} }) {
   return (
     <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -138,7 +138,7 @@ function DoodleBow({ className = "", style = {} }) {
   );
 }
 
-/* ─── Countdown ───────────────────────────────────── */
+/*  Countdown  */
 function MidnightCountdown() {
   const [ms, setMs] = useState(msUntilMidnight());
   useEffect(() => {
@@ -162,23 +162,23 @@ function MidnightCountdown() {
   );
 }
 
-/* ─── WD data ─────────────────────────────────────── */
+/*  WD data  */
 const WD_NOTE_SUGGESTIONS = [
-  "Happy Women's Day to the strongest woman I know. Thank you for everything you do, silently and selflessly. 🌸",
-  "To the woman who taught me what love really looks like — wishing you a day as beautiful as you are.",
-  "You carry so much. Today, let someone carry the flowers for you. Happy Women's Day! 💐",
-  "Dear friend, the world is brighter because you're in it. Happy March 8th! 🌺",
-  "Mom, every day I'm grateful you're mine. Today the whole world celebrates women like you. ✨",
-  "To my sister — fierce, funny, and my forever person. Happy Women's Day! 🎀",
+  "Happy Women's Day to the strongest woman I know. Thank you for everything you do, silently and selflessly. ",
+  "To the woman who taught me what love really looks like  wishing you a day as beautiful as you are.",
+  "You carry so much. Today, let someone carry the flowers for you. Happy Women's Day! ",
+  "Dear friend, the world is brighter because you're in it. Happy March 8th! ",
+  "Mom, every day I'm grateful you're mine. Today the whole world celebrates women like you. ",
+  "To my sister  fierce, funny, and my forever person. Happy Women's Day! ",
 ];
 const WD_OCCASIONS = [
-  { emoji: "💕", label: "For Mom", desc: "Warm & full of love" },
-  { emoji: "🌸", label: "For Best Friend", desc: "Playful & personal" },
-  { emoji: "🌺", label: "For Her", desc: "Romantic & tender" },
-  { emoji: "🎀", label: "For Sister", desc: "Bold & heartfelt" },
+  { emoji: "", label: "For Mom", desc: "Warm & full of love" },
+  { emoji: "", label: "For Best Friend", desc: "Playful & personal" },
+  { emoji: "", label: "For Her", desc: "Romantic & tender" },
+  { emoji: "", label: "For Sister", desc: "Bold & heartfelt" },
 ];
 
-/* ─── CSS ─────────────────────────────────────────── */
+/*  CSS  */
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap');
 
@@ -248,19 +248,13 @@ const CSS = `
 
 function countWords(t) { const n = t.trim(); return n ? n.split(/\s+/).length : 0; }
 
-/* ════════════════════════════════════════════════════
+/* 
    MAIN
-════════════════════════════════════════════════════ */
+ */
 export default function Create() {
   const navigate = useNavigate();
 
-  /* Women's Day live flag — flips off automatically at midnight */
-  const [wdActive, setWdActive] = useState(isWomensDay());
-  useEffect(() => {
-    if (!wdActive) return;
-    const t = setTimeout(() => setWdActive(false), msUntilMidnight());
-    return () => clearTimeout(t);
-  }, [wdActive]);
+  const wdActive = false;
 
   /* core state */
   const [selectedFlower, setSelectedFlower] = useState(null);
@@ -279,8 +273,10 @@ export default function Create() {
   const wordCount = countWords(note);
   const hasBouquetContent = flowerCount > 0 || note.trim().length > 0;
   const offerActive = isLaunchOfferActive();
-  const smallPrice = getSmallPlanPrice();
-  const unlimitedPrice = getUnlimitedPlanPrice();
+  const smallPriceCents = getSmallPlanUsdCents();
+  const unlimitedPriceCents = getUnlimitedPlanUsdCents();
+  const smallPrice = formatUsdFromCents(smallPriceCents);
+  const unlimitedPrice = formatUsdFromCents(unlimitedPriceCents);
   const progress = Math.min(100, (flowerCount > 0 ? 40 : 0) + Math.min(60, wordCount * 4));
 
   const canAiNote = useMemo(() => situationText.trim().length > 0 && !isGeneratingNote, [situationText, isGeneratingNote]);
@@ -289,9 +285,7 @@ export default function Create() {
 
   useEffect(() => {
     applySeo({
-      title: wdActive
-        ? "Women's Day Bouquet Maker | Send Digital Flowers for March 8"
-        : "Create Digital Bouquet Online | Add Flowers and Note",
+      title: "Create Digital Bouquet Online | Add Flowers and Note",
       description: "Create a digital bouquet online, add your personal note, and continue to secure checkout to share your bouquet link instantly.",
       keywords: seoKeywords.create,
       path: "/create",
@@ -301,13 +295,13 @@ export default function Create() {
         name: "Petals and Words Bouquet Builder",
         applicationCategory: "LifestyleApplication",
         operatingSystem: "Web",
-        offers: { "@type": "AggregateOffer", lowPrice: String(smallPrice), highPrice: String(unlimitedPrice), offerCount: "2", priceCurrency: "INR" },
+        offers: { "@type": "AggregateOffer", lowPrice: (smallPriceCents / 100).toFixed(2), highPrice: (unlimitedPriceCents / 100).toFixed(2), offerCount: "2", priceCurrency: "USD" },
         url: `${window.location.origin}/create`,
       },
     });
     track("create_start", { source: "create_page" });
     trackEvent("create_start", { source: "create_page" });
-  }, [smallPrice, unlimitedPrice, wdActive]);
+  }, [smallPriceCents, unlimitedPriceCents]);
 
   useEffect(() => {
     if (hasTracked.current || !hasBouquetContent) return;
@@ -354,12 +348,12 @@ export default function Create() {
     navigate("/payment", { state: { flowerCount, stems, note } });
   };
 
-  /* ════════════ RENDER ════════════ */
+  /*  RENDER  */
   return (
     <main className="cr-root pb-32" style={{ position: "relative", overflowX: "hidden" }}>
       <style>{CSS}</style>
 
-      {/* floating bg doodles — WD only */}
+      {/* floating bg doodles  WD only */}
       {wdActive && (
         <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
           <DoodleFlower className="absolute -top-2 left-1 h-14 w-14 fp2 opacity-[.12]" />
@@ -372,7 +366,7 @@ export default function Create() {
         </div>
       )}
 
-      {/* ── STICKY HEADER ── */}
+      {/*  STICKY HEADER  */}
       <header className="sticky top-0 z-30 border-b border-rose-100/60 backdrop-blur"
         style={{ background: "rgba(253,246,240,.97)" }}>
 
@@ -383,15 +377,15 @@ export default function Create() {
             <div className="flex ticker-inner whitespace-nowrap select-none">
               {[0, 1].map((gi) => (
                 <span key={gi} className="flex shrink-0 items-center gap-8 px-6 text-[11px] font-medium text-rose-100/90">
-                  {["🌸 Happy Women's Day · March 8",
-                    "💐 Send a bouquet she'll treasure",
-                    "✨ Today-only special offer",
-                    "🎀 For Mom · Sister · Best Friend · Her",
-                    "🌺 Celebrate every woman in your life",
-                    "💕 She deserves more than a text",
+                  {[" Happy Women's Day  March 8",
+                    " Send a bouquet she'll treasure",
+                    " Today-only special offer",
+                    " For Mom  Sister  Best Friend  Her",
+                    " Celebrate every woman in your life",
+                    " She deserves more than a text",
                   ].map((txt, i) => (
                     <span key={i} className="flex items-center gap-8">
-                      {txt}<span className="text-rose-400/60">✦</span>
+                      {txt}<span className="text-rose-400/60"></span>
                     </span>
                   ))}
                 </span>
@@ -405,7 +399,7 @@ export default function Create() {
             <img src="/logo-transparent.png" alt="Petals and Words" className="h-8 w-auto" />
             {wdActive && (
               <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700">
-                🌸 Women's Day
+                 Women's Day
               </span>
             )}
           </div>
@@ -415,7 +409,7 @@ export default function Create() {
               <div className="prog-track w-16"><div className="prog-fill" style={{ width: `${progress}%` }} /></div>
             </div>
             <Link to="/" className="rounded-full border border-rose-200 bg-white px-3 py-1.5 text-[12px] font-medium text-rose-700 transition hover:bg-rose-50">
-              ← Home
+               Home
             </Link>
           </div>
         </div>
@@ -423,7 +417,7 @@ export default function Create() {
 
       <div className="mx-auto max-w-2xl px-4 pt-4">
 
-        {/* ── WD banner with countdown ── */}
+        {/*  WD banner with countdown  */}
         {wdActive && (
           <div className="fs1 mb-4">
             <div className="relative overflow-hidden rounded-2xl px-4 py-4"
@@ -434,10 +428,10 @@ export default function Create() {
               <DoodleSparkle className="absolute bottom-2 left-16 h-4 w-4 opacity-30 fp3" />
               <div className="relative flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-200">March 8 · Women's Day</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-200">March 8  Women's Day</p>
                   <p className="mt-0.5 text-[1.2rem] font-light leading-tight text-white"
                     style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                    Happy Women's Day 🌸
+                    Happy Women's Day 
                   </p>
                   <p className="mt-0.5 text-[11px] text-rose-100/80">This offer disappears at midnight</p>
                 </div>
@@ -450,7 +444,7 @@ export default function Create() {
           </div>
         )}
 
-        {/* ── Page heading ── */}
+        {/*  Page heading  */}
         <div className="fs2 mb-4 text-center">
           {wdActive ? (
             <>
@@ -465,7 +459,7 @@ export default function Create() {
                 <em className="wd-headline">she'll treasure forever</em>
               </h1>
               <p className="mx-auto mt-2 max-w-xs text-[13px] leading-relaxed text-stone-500">
-                Pick flowers · write her words · share in 60 seconds
+                Pick flowers  write her words  share in 60 seconds
               </p>
               <DoodleCurly className="mx-auto mt-3 w-24 opacity-45" />
             </>
@@ -476,7 +470,7 @@ export default function Create() {
                 style={{ fontFamily: '"Cormorant Garamond",serif' }}>
                 Create something <em>beautiful</em>
               </h1>
-              <p className="mt-1.5 text-[13px] text-stone-500">Add flowers · write a note · share instantly</p>
+              <p className="mt-1.5 text-[13px] text-stone-500">Add flowers  write a note  share instantly</p>
             </>
           )}
           <div className="mx-auto mt-3 max-w-xs">
@@ -484,7 +478,7 @@ export default function Create() {
           </div>
         </div>
 
-        {/* ── WD occasion quick-pick chips ── */}
+        {/*  WD occasion quick-pick chips  */}
         {wdActive && (
           <div className="fs3 mb-4 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
             {WD_OCCASIONS.map((item) => (
@@ -501,7 +495,7 @@ export default function Create() {
           </div>
         )}
 
-        {/* ── Canvas card ── */}
+        {/*  Canvas card  */}
         <section className="fs3 mb-4 rounded-2xl border border-rose-100 bg-white p-4 shadow-md"
           style={{ position: "relative" }}>
           {wdActive && (
@@ -514,7 +508,7 @@ export default function Create() {
           )}
           <div className="mb-3 flex items-center justify-between gap-2 pt-2">
             <div className="flex items-center gap-2">
-              <span className="text-lg">{wdActive ? "🌸" : "🎨"}</span>
+              <span className="text-lg">{wdActive ? "" : ""}</span>
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-500">
                   {wdActive ? "Her bouquet" : "Your canvas"}
@@ -527,10 +521,10 @@ export default function Create() {
             </div>
             <div className="flex gap-1.5">
               <span className="rounded-full border border-rose-100 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700">
-                🌸 {flowerCount}
+                 {flowerCount}
               </span>
               <span className="rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
-                ✍ {wordCount}w
+                 {wordCount}w
               </span>
             </div>
           </div>
@@ -539,13 +533,13 @@ export default function Create() {
           </div>
         </section>
 
-        {/* ── Tab bar ── */}
+        {/*  Tab bar  */}
         <div className="fs4 mb-4">
           <div className="flex gap-1.5 rounded-2xl border border-stone-100 bg-white p-1.5 shadow-sm">
             {[
-              { id: "flowers", label: wdActive ? "🌸 Flowers" : "🌸 Flowers", sub: wdActive ? "Her bouquet" : "Build bouquet" },
-              { id: "note", label: wdActive ? "✍️ Her Note" : "✍️ Note", sub: "Write message" },
-              { id: "ai", label: "✨ AI Write", sub: "Auto-generate" },
+              { id: "flowers", label: wdActive ? "Flowers" : "Flowers", sub: wdActive ? "Her bouquet" : "Build bouquet" },
+              { id: "note", label: wdActive ? "Her Note" : "Note", sub: "Write message" },
+              { id: "ai", label: "AI Write", sub: "Auto-generate" },
             ].map((tab) => (
               <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
                 className={["flex-1 rounded-xl px-2 py-2.5 text-center transition-all duration-150 text-[13px] font-semibold",
@@ -559,7 +553,7 @@ export default function Create() {
           </div>
         </div>
 
-        {/* ══ FLOWERS TAB ══ */}
+        {/*  FLOWERS TAB  */}
         {activeTab === "flowers" && (
           <div className="fs5 space-y-4">
             <FlowerPicker onPick={setSelectedFlower} selectedFlower={selectedFlower} />
@@ -592,7 +586,7 @@ export default function Create() {
           </div>
         )}
 
-        {/* ══ NOTE TAB ══ */}
+        {/*  NOTE TAB  */}
         {activeTab === "note" && (
           <div className="fs5 space-y-4">
             <NoteCard text={note} setText={setNote} />
@@ -604,7 +598,7 @@ export default function Create() {
                   <DoodleHeart className="h-5 w-6 shrink-0 opacity-70" />
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-500">Women's Day messages</p>
-                    <p className="text-[12px] text-stone-400">Tap to use · edit freely</p>
+                    <p className="text-[12px] text-stone-400">Tap to use | edit freely</p>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -649,12 +643,12 @@ export default function Create() {
           </div>
         )}
 
-        {/* ══ AI TAB ══ */}
+        {/*  AI TAB  */}
         {activeTab === "ai" && (
           <div className="fs5">
             <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-md">
               <div className="mb-3 flex items-center gap-2">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 text-lg text-white shadow-md">✨</div>
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 text-lg text-white shadow-md"></div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-sky-600">AI Note Writer</p>
                   <p className="text-[15px] font-light text-stone-800 leading-tight"
@@ -665,7 +659,7 @@ export default function Create() {
               </div>
               <p className="mb-3 text-[13px] leading-relaxed text-stone-500">
                 {wdActive
-                  ? "Tell us who she is to you — AI will craft a heartfelt Women's Day message in your voice."
+                  ? "Tell us who she is to you  AI will craft a heartfelt Women's Day message in your voice."
                   : "Describe your situation and AI will write a personal note for your bouquet."}
               </p>
               <textarea rows={4} value={situationText} onChange={(e) => setSituationText(e.target.value)}
@@ -682,21 +676,21 @@ export default function Create() {
                 ].join(" ")}>
                 {isGeneratingNote
                   ? <><svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Writing...</>
-                  : <>✨ {wdActive ? "Write Women's Day Note" : "Generate Note"}</>}
+                  : <> {wdActive ? "Write Women's Day Note" : "Generate Note"}</>}
               </button>
               {generationError && (
                 <p className="mt-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-[12px] text-rose-700">{generationError}</p>
               )}
               {note && (
                 <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-emerald-700">Note ready ✓</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-emerald-700">Note ready </p>
                   <p className="mt-1 text-[14px] italic leading-relaxed text-emerald-900"
                     style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                    "{note.slice(0, 80)}{note.length > 80 ? "…" : ""}"
+                    "{note.slice(0, 80)}{note.length > 80 ? "" : ""}"
                   </p>
                   <button type="button" onClick={() => setActiveTab("note")}
                     className="mt-1 text-[11px] font-semibold text-emerald-700 underline underline-offset-2">
-                    View &amp; edit →
+                    View &amp; edit 
                   </button>
                 </div>
               )}
@@ -704,7 +698,7 @@ export default function Create() {
           </div>
         )}
 
-        {/* ── WD countdown strip ── */}
+        {/*  WD countdown strip  */}
         {wdActive && (
           <div className="fs6 mt-4">
             <div className="relative overflow-hidden rounded-2xl px-4 py-4"
@@ -714,7 +708,7 @@ export default function Create() {
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200">Offer disappears at midnight</p>
                   <p className="mt-0.5 text-[13px] text-white">
-                    {offerActive ? `Women's Day price: ₹${smallPrice}` : `Plans from ₹${smallPrice} · One-time`}
+                    {offerActive ? `Special price: ${smallPrice}` : `Plans from ${smallPrice} | One-time`}
                   </p>
                 </div>
                 <MidnightCountdown />
@@ -725,13 +719,13 @@ export default function Create() {
 
       </div>{/* /max-w-2xl */}
 
-      {/* ── FIXED BOTTOM CTA ── */}
+      {/*  FIXED BOTTOM CTA  */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-rose-100/60 backdrop-blur px-4 pb-5 pt-3 shadow-[0_-8px_30px_rgba(0,0,0,0.07)]"
         style={{ background: "rgba(253,246,240,.97)" }}>
         <div className="mx-auto max-w-2xl">
           {wdActive && hasBouquetContent && (
             <p className="mb-2 text-center text-[11px] font-medium text-rose-600">
-              🌸 She'll receive this on Women's Day — make it count
+               She'll receive this on Women's Day  make it count
             </p>
           )}
           <button type="button" onClick={goToPayment} disabled={!hasBouquetContent}
@@ -744,7 +738,7 @@ export default function Create() {
             ].join(" ")}>
             {hasBouquetContent ? (
               <>
-                {wdActive ? "🌸 Send her bouquet" : "Continue to checkout"}
+                {wdActive ? " Send her bouquet" : "Continue to checkout"}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                   strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14M12 5l7 7-7 7" />
@@ -755,10 +749,10 @@ export default function Create() {
             )}
           </button>
           <div className="mt-2 flex items-center justify-center gap-3 text-[11px] text-stone-400">
-            <span>🔒 Secure</span><span>·</span>
-            <span>⚡ Instant link</span><span>·</span>
-            <span>₹{smallPrice} one-time</span>
-            {wdActive && <><span>·</span><span className="font-medium text-rose-500">🌸 WD Special</span></>}
+            <span>Secure</span><span>|</span>
+            <span>Instant link</span><span>|</span>
+            <span>{smallPrice} one-time</span>
+            {wdActive && <><span>|</span><span className="font-medium text-rose-500">WD Special</span></>}
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import process from "node:process";
 
-async function createRazorpayOrder({ amountPaise, currency, receipt, notes }) {
+async function createRazorpayOrder({ amountMinor, currency, receipt, notes }) {
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
@@ -16,7 +16,7 @@ async function createRazorpayOrder({ amountPaise, currency, receipt, notes }) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      amount: amountPaise,
+      amount: amountMinor,
       currency,
       receipt,
       notes,
@@ -37,15 +37,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { amountPaise, currency = "INR", receipt, notes } = req.body || {};
-  if (!amountPaise || Number(amountPaise) < 100) {
+  const { amountPaise, receipt, notes } = req.body || {};
+  if (!amountPaise || Number(amountPaise) < 1) {
     return res.status(400).json({ error: "Invalid amount" });
   }
 
   try {
     const order = await createRazorpayOrder({
-      amountPaise: Math.round(Number(amountPaise)),
-      currency,
+      amountMinor: Math.round(Number(amountPaise)),
+      currency: "USD",
       receipt: receipt || `pw_${Date.now()}`,
       notes: notes || {},
     });

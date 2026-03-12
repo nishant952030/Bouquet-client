@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SoftButton from "../components/SoftButton";
-import { getOfferDateLabel, getSmallPlanPrice, getUnlimitedPlanPrice, isLaunchOfferActive } from "../lib/pricing";
+import { formatUsdFromCents, getOfferDateLabel, getSmallPlanUsdCents, getUnlimitedPlanUsdCents, isLaunchOfferActive } from "../lib/pricing";
 import { applySeo, seoKeywords } from "../lib/seo";
 
-/* ─── Women's Day SVG Doodles ───────────────────────── */
+/*  SVG Doodles  */
 function DoodleFlower({ className = "", style = {} }) {
   return (
     <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
@@ -107,7 +107,7 @@ function DoodleBow({ className = "", style = {} }) {
   );
 }
 
-/* ─── styles ─────────────────────────────────────────── */
+/*  styles  */
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap');
 
@@ -156,14 +156,16 @@ const styles = `
 export default function Home() {
   const navigate = useNavigate();
   const offerActive = isLaunchOfferActive();
-  const smallPrice = getSmallPlanPrice();
-  const unlimitedPrice = getUnlimitedPlanPrice();
+  const smallPriceCents = getSmallPlanUsdCents();
+  const unlimitedPriceCents = getUnlimitedPlanUsdCents();
+  const smallPrice = formatUsdFromCents(smallPriceCents);
+  const unlimitedPrice = formatUsdFromCents(unlimitedPriceCents);
 
   const testimonials = useMemo(() => [
     { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi", city: "Mumbai" },
-    { quote: "The flowers looked so premium on mobile. She cried happy tears 🥺", author: "Priya", city: "Hyderabad" },
+    { quote: "The flowers looked so premium on mobile. She cried happy tears ", author: "Priya", city: "Hyderabad" },
     { quote: "Instant share link after payment was exactly what I needed.", author: "Neha", city: "Delhi" },
-    { quote: "I sent it to my mom for Women's Day and she called me immediately.", author: "Shruti", city: "Pune" },
+    { quote: "I sent it to my mom and she called me immediately.", author: "Shruti", city: "Pune" },
   ], []);
 
   const [activeIdx, setActiveIdx] = useState(0);
@@ -179,12 +181,12 @@ export default function Home() {
         "@context": "https://schema.org",
         "@graph": [
           { "@type": "WebSite", name: "Petals and Words", url: window.location.origin, description: "Online bouquet maker for creating and sharing digital flowers with personal notes." },
-          { "@type": "SoftwareApplication", name: "Petals and Words Bouquet Maker", applicationCategory: "LifestyleApplication", operatingSystem: "Web", offers: { "@type": "AggregateOffer", priceCurrency: "INR", lowPrice: String(smallPrice), highPrice: String(unlimitedPrice), offerCount: "2" }, url: `${window.location.origin}/create` },
-          { "@type": "FAQPage", mainEntity: [{ "@type": "Question", name: "What is the starting price?", acceptedAnswer: { "@type": "Answer", text: `Paid bouquet plans start from Rs ${smallPrice}, with an Unlimited option at Rs ${unlimitedPrice}.` } }, { "@type": "Question", name: "Can I use it as an online flower bouquet maker with sharing?", acceptedAnswer: { "@type": "Answer", text: "Yes. Build your bouquet, complete checkout, and share the generated link through WhatsApp or other apps." } }] },
+          { "@type": "SoftwareApplication", name: "Petals and Words Bouquet Maker", applicationCategory: "LifestyleApplication", operatingSystem: "Web", offers: { "@type": "AggregateOffer", priceCurrency: "USD", lowPrice: (smallPriceCents / 100).toFixed(2), highPrice: (unlimitedPriceCents / 100).toFixed(2), offerCount: "2" }, url: `${window.location.origin}/create` },
+          { "@type": "FAQPage", mainEntity: [{ "@type": "Question", name: "What is the starting price?", acceptedAnswer: { "@type": "Answer", text: `Paid bouquet plans start from ${smallPrice}, with an Unlimited option at ${unlimitedPrice}.` } }, { "@type": "Question", name: "Can I use it as an online flower bouquet maker with sharing?", acceptedAnswer: { "@type": "Answer", text: "Yes. Build your bouquet, complete checkout, and share the generated link through WhatsApp or other apps." } }] },
         ],
       },
     });
-  }, [smallPrice, unlimitedPrice]);
+  }, [smallPrice, smallPriceCents, unlimitedPrice, unlimitedPriceCents]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -202,14 +204,14 @@ export default function Home() {
       style={{ background: "linear-gradient(160deg, #fdf6f0 0%, #fceef0 50%, #fdf8f0 100%)" }}>
       <style>{styles}</style>
 
-      {/* ── Ambient background blobs ── */}
+      {/*  Ambient background blobs  */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
         <div className="absolute -left-24 top-0 h-80 w-80 rounded-full bg-rose-200/30 blur-3xl" />
         <div className="absolute -right-24 top-1/4 h-72 w-72 rounded-full bg-pink-200/25 blur-3xl" />
         <div className="absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-amber-200/30 blur-3xl" />
       </div>
 
-      {/* ── Scattered background doodles ── */}
+      {/*  Scattered background doodles  */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         <DoodleFlower className="absolute -top-2 -left-4 w-20 h-20 opacity-20 p1" />
         <DoodleFlower className="absolute top-8 right-4 w-14 h-14 opacity-15 p2" />
@@ -225,23 +227,22 @@ export default function Home() {
 
       <div className="relative mx-auto flex w-full max-w-lg flex-col items-center gap-5 px-4 pb-16 pt-5">
 
-        {/* ── Women's Day Banner ── */}
+        {/*  Highlight Banner  */}
         <div className="d1 w-full">
           <div className="relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl px-4 py-3"
             style={{ background: "linear-gradient(135deg, #3a3028 0%, #8e3e3a 60%, #c0605a 100%)" }}>
             <DoodleWreathLeft className="absolute left-0 top-0 h-full w-10 opacity-40" />
             <DoodleWreathRight className="absolute right-0 top-0 h-full w-10 opacity-40" />
             <div className="relative flex flex-col items-center text-center">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-rose-200">March 8th · 2025</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-rose-200">Send Love Today</p>
               <p className="mt-0.5 text-[18px] font-semibold leading-tight text-white" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-                Happy Women's Day 🌸
-              </p>
-              <p className="mt-0.5 text-[11px] text-rose-100/90">Celebrate every woman who makes your world brighter</p>
+                Share a Beautiful Bouquet</p>
+              <p className="mt-0.5 text-[11px] text-rose-100/90">Make someone feel special with flowers and words</p>
             </div>
           </div>
         </div>
 
-        {/* ── Hero card ── */}
+        {/*  Hero card  */}
         <section className="d2 relative w-full overflow-hidden rounded-[2rem] border border-rose-100 bg-white/85 px-6 py-8 text-center shadow-2xl shadow-rose-200/30 backdrop-blur sm:px-10 sm:py-10">
 
           {/* Corner doodles */}
@@ -257,26 +258,26 @@ export default function Home() {
           <img src="/logo-transparent.png" alt="Petals and Words logo"
             className="mx-auto mb-3 w-full max-w-[240px] sm:max-w-[280px]" />
 
-          {/* WD label */}
+          {/* Section label */}
           <div className="mb-2 flex items-center justify-center gap-2">
             <DoodleStar className="w-5 h-5 opacity-70" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-rose-600">Women's Day Special</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-rose-600">Made for Meaningful Moments</p>
             <DoodleStar className="w-5 h-5 opacity-70" />
           </div>
 
           <h1 className="text-balance text-[2.1rem] font-light leading-tight text-stone-900 sm:text-5xl"
             style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-            Send her flowers{" "}
+            Send flowers{" "}
             <em className="wds-ribbon">she'll never forget</em>
           </h1>
 
           <p className="mx-auto mt-4 max-w-sm text-pretty text-[14px] leading-relaxed text-stone-500 sm:text-[15px]">
-            A digital bouquet with your words, delivered in seconds — for your mom, your sister, your best friend. Every woman who deserves to feel truly celebrated today.
+            A digital bouquet with your words, delivered in seconds - for family, friends, or anyone you care about.
           </p>
 
           {/* Occasion chips */}
           <div className="mt-4 flex flex-wrap justify-center gap-2">
-            {["For Mom 💕", "For Best Friend 🌸", "For Her 🌺", "For Sister ✨"].map((label) => (
+            {["For Mom", "For Best Friend", "For Partner", "For Family"].map((label) => (
               <span key={label}
                 className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[12px] font-medium text-rose-700">
                 {label}
@@ -288,8 +289,8 @@ export default function Home() {
           <div className="mx-auto mt-4 w-fit">
             <div className="badge-pulse rounded-xl border border-rose-200 bg-gradient-to-r from-rose-50 to-amber-50 px-4 py-2 text-[12px] font-semibold text-stone-700">
               {offerActive
-                ? `🎀 Women's Day offer: from ₹${smallPrice} · ${getOfferDateLabel()}`
-                : `🌸 One-time plans from ₹${smallPrice} · No subscription`}
+                ? `Limited-time offer: from ${smallPrice} | ${getOfferDateLabel()}`
+                : `One-time plans from ${smallPrice} | No subscription`}
             </div>
           </div>
 
@@ -299,18 +300,18 @@ export default function Home() {
               onClick={() => navigate("/create")}
               className="inline-flex min-h-[52px] w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[#3a3028] px-8 text-[14px] font-semibold uppercase tracking-[0.1em] text-[#faf6f0] shadow-lg shadow-stone-900/20 transition-all hover:-translate-y-0.5 hover:bg-[#8e3e3a] active:scale-[.98]"
             >
-              Create her bouquet
+              Create bouquet
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </button>
           </div>
 
-          <p className="mt-3 text-[11px] uppercase tracking-[0.18em] text-stone-400">No login · Ready in 60 seconds · Instant share</p>
+          <p className="mt-3 text-[11px] uppercase tracking-[0.18em] text-stone-400">No login | Ready in 60 seconds | Instant share</p>
           <DoodleCurlyLine className="mx-auto mt-4 w-28 opacity-40" style={{ transform: "rotate(180deg)" }} />
         </section>
 
-        {/* ── How it works ── */}
+        {/*  How it works  */}
         <section className="d3 w-full rounded-2xl border border-rose-100 bg-white/80 p-5 shadow-md backdrop-blur">
           <div className="mb-4 flex items-center gap-2">
             <DoodleHeart className="w-6 h-5 opacity-70 shrink-0" />
@@ -318,9 +319,9 @@ export default function Home() {
           </div>
           <div className="space-y-3">
             {[
-              { n: "1", emoji: "🌸", title: "Pick flowers for her", desc: "Choose stems and arrange them into a bouquet she'll love." },
-              { n: "2", emoji: "✍️", title: "Write from the heart", desc: "Add a personal note — or let AI write one for you." },
-              { n: "3", emoji: "⚡", title: "Pay & share instantly", desc: "One-time payment. Get a link. Send over WhatsApp in seconds." },
+              { n: "1", emoji: "", title: "Pick your flowers", desc: "Choose stems and arrange them into a bouquet they'll love." },
+              { n: "2", emoji: "", title: "Write from the heart", desc: "Add a personal note or let AI write one for you." },
+              { n: "3", emoji: "", title: "Pay and share instantly", desc: "One-time payment. Get a link. Send over WhatsApp in seconds." },
             ].map((s) => (
               <div key={s.n} className="flex items-start gap-3 rounded-xl border border-rose-50 bg-[#faf6f0] px-3 py-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#3a3028] text-[12px] font-bold text-white">
@@ -335,18 +336,18 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Testimonials ── */}
+        {/*  Testimonials  */}
         <section className="d4 relative w-full overflow-hidden rounded-2xl border border-rose-100 bg-white/80 p-5 shadow-md backdrop-blur">
           <DoodleFlower className="absolute -top-2 -right-2 w-14 h-14 opacity-20 p1" />
           <div className="mb-3 flex items-center gap-2">
             <DoodleStar className="w-5 h-5 opacity-60 shrink-0" />
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-rose-600">What women say</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-rose-600">What people say</p>
           </div>
           <div
             className="overflow-hidden rounded-xl border border-rose-50 bg-[#faf6f0] p-4 transition-all duration-200 ease-out"
             style={{ transform: isSliding ? "translateX(-20px)" : "translateX(0)", opacity: isSliding ? 0 : 1 }}
           >
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-amber-500">★★★★★</p>
+            <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-amber-500">5 out of 5</p>
             <p className="text-[15px] italic leading-relaxed text-stone-700"
               style={{ fontFamily: '"Cormorant Garamond", serif' }}>
               "{testimonials[activeIdx].quote}"
@@ -368,7 +369,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── Women's Day dark message card ── */}
+        {/*  Dark message card  */}
         <section className="d4 relative w-full overflow-hidden rounded-2xl px-5 py-7 text-center"
           style={{ background: "linear-gradient(135deg, #3a3028 0%, #5c3a34 60%, #8e3e3a 100%)" }}>
           <DoodleWreathLeft className="absolute left-0 top-0 h-full w-12 opacity-30" />
@@ -376,35 +377,35 @@ export default function Home() {
           <DoodleSparkle className="absolute top-3 right-12 w-6 h-6 opacity-40 p2" />
           <DoodleSparkle className="absolute bottom-4 left-14 w-5 h-5 opacity-30 p3" />
           <div className="relative">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-300">March 8 · Women's Day</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-300">Thoughtful Gifts Made Easy</p>
             <p className="mt-2 text-[1.65rem] font-light leading-snug text-white"
               style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-              <em>She deserves more than a text.</em>
+              <em>They deserve more than a text.</em>
             </p>
             <p className="mx-auto mt-2 max-w-xs text-[13px] leading-relaxed text-rose-100/90">
-              Make the woman in your life feel truly seen today. A bouquet and your words — a gift she'll screenshot and save.
+              Make someone in your life feel truly seen today. A bouquet and your words - a gift they'll screenshot and save.
             </p>
             <button
               onClick={() => navigate("/create")}
               className="mt-5 inline-flex min-h-[48px] items-center gap-2 rounded-full border border-white/25 bg-white/10 px-7 text-[13px] font-semibold uppercase tracking-[0.1em] text-white backdrop-blur transition-all hover:bg-white/20 active:scale-[.98]"
             >
-              Make her bouquet now 🌸
+              Make a bouquet now
             </button>
           </div>
         </section>
 
-        {/* ── SEO pages ── */}
+        {/*  SEO pages  */}
         <section className="d5 w-full rounded-2xl border border-stone-100 bg-white/70 p-4 shadow-sm backdrop-blur">
           <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-400">Explore more</p>
           <div className="flex flex-wrap gap-2">
             <Link to="/virtual-bouquet-maker" className="rounded-full border border-rose-200 bg-white px-4 py-2 text-[13px] font-medium text-rose-700 transition hover:bg-rose-50 hover:border-rose-300">
-              🌺 Virtual Bouquet Maker
+               Virtual Bouquet Maker
             </Link>
             <Link to="/digital-bouquet-maker" className="rounded-full border border-rose-200 bg-white px-4 py-2 text-[13px] font-medium text-rose-700 transition hover:bg-rose-50 hover:border-rose-300">
-              💐 Digital Bouquet Maker
+               Digital Bouquet Maker
             </Link>
             <Link to="/online-bouquet-maker" className="rounded-full border border-rose-200 bg-white px-4 py-2 text-[13px] font-medium text-rose-700 transition hover:bg-rose-50 hover:border-rose-300">
-              🌸 Online Bouquet Maker
+               Online Bouquet Maker
             </Link>
           </div>
         </section>

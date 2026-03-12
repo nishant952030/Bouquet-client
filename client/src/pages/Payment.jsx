@@ -5,19 +5,19 @@ import { doc, setDoc } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "../lib/firebase";
 import { trackEvent } from "../lib/analytics";
 import {
+  formatUsdFromCents,
   getOfferDateLabel,
-  getSmallPlanOriginalPrice,
-  getSmallPlanPrice,
-  getUnlimitedPlanPrice,
+  getSmallPlanUsdCents,
+  getUnlimitedPlanUsdCents,
   isLaunchOfferActive,
 } from "../lib/pricing";
 import { loadRazorpayScript } from "../lib/razorpay";
 import { applySeo, seoKeywords } from "../lib/seo";
 import { clearCheckoutDraft, loadCheckoutDraft, saveCheckoutDraft } from "../lib/checkoutStorage";
 
-/* ─── Women's Day expiry ──────────────────────────────
+/*  Women's Day expiry 
    All WD UI disappears automatically at midnight March 8.
-───────────────────────────────────────────────────── */
+ */
 function isWomensDay() {
   const n = new Date();
   return n.getMonth() === 2 && n.getDate() === 8;
@@ -28,10 +28,10 @@ function msUntilMidnight() {
   return m.getTime() - n.getTime();
 }
 
-/* ─── constants ────────────────────────────────────── */
+/*  constants  */
 const PENDING_KEY = "pw_pending_global_checkout";
 
-/* ─── helpers ──────────────────────────────────────── */
+/*  helpers  */
 function countWords(text) {
   const n = String(text || "").trim();
   return n ? n.split(/\s+/).length : 0;
@@ -59,7 +59,7 @@ async function readApi(res) {
   try { const t = await res.text(); return t ? { error: t } : null; } catch { return null; }
 }
 
-/* ─── SVG Doodles ─────────────────────────────────── */
+/*  SVG Doodles  */
 function DoodleFlower({ className = "", style = {} }) {
   return (
     <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style} aria-hidden="true">
@@ -129,7 +129,7 @@ function DoodleWreathRight({ className = "", style = {} }) {
   );
 }
 
-/* ─── Countdown ───────────────────────────────────── */
+/*  Countdown  */
 function MidnightCountdown({ dark = false }) {
   const [ms, setMs] = useState(msUntilMidnight());
   useEffect(() => {
@@ -155,7 +155,7 @@ function MidnightCountdown({ dark = false }) {
   );
 }
 
-/* ─── CSS ─────────────────────────────────────────── */
+/*  CSS  */
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap');
 
@@ -317,15 +317,15 @@ const CSS = `
   }
 `;
 
-/* ─── Sub-components ──────────────────────────────── */
+/*  Sub-components  */
 function TrustBar() {
   return (
     <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 py-2">
       {[
-        { icon: "🔒", label: "256-bit SSL" },
-        { icon: "⚡", label: "Instant link" },
-        { icon: "💳", label: "UPI · Cards · Wallets" },
-        { icon: "✅", label: "10,000+ bouquets sent" },
+        { icon: "", label: "256-bit SSL" },
+        { icon: "", label: "Instant link" },
+        { icon: "", label: "UPI  Cards  Wallets" },
+        { icon: "", label: "10,000+ bouquets sent" },
       ].map((item) => (
         <div key={item.label} className="trust-pill">
           <div className="trust-pill-icon">{item.icon}</div>
@@ -338,17 +338,17 @@ function TrustBar() {
 
 function SocialProofTicker({ wdActive }) {
   const general = [
-    "Arjun from Bengaluru just sent a bouquet 🌸",
-    "Neha from Delhi sent one 2 min ago 💐",
-    "Rahul from Pune just paid · link shared 🌺",
-    "Aditi from Mumbai loved her bouquet ✨",
+    "Arjun from Bengaluru just sent a bouquet ",
+    "Neha from Delhi sent one 2 min ago ",
+    "Rahul from Pune just paid  link shared ",
+    "Aditi from Mumbai loved her bouquet ",
   ];
   const wd = [
-    "Priya from Hyderabad sent her mom a bouquet 🌸",
-    "Meera from Chennai just paid · Women's Day 💐",
-    "Anjali from Delhi sent it 3 min ago 🌺",
-    "Kavya from Bengaluru's mom called immediately ✨",
-    "Shruti from Pune — her best friend loved it 💕",
+    "Priya from Hyderabad sent her mom a bouquet ",
+    "Meera from Chennai just paid  Women's Day ",
+    "Anjali from Delhi sent it 3 min ago ",
+    "Kavya from Bengaluru's mom called immediately ",
+    "Shruti from Pune  her best friend loved it ",
   ];
   const proofs = wdActive ? wd : general;
   const [idx, setIdx] = useState(0);
@@ -380,7 +380,7 @@ function BouquetPreview({ flowerCount, wordCount, note, wdActive }) {
       </p>
       <div className="flex items-center gap-3">
         <div className="flex flex-col items-center justify-center rounded-xl border border-rose-100 bg-[#faf6f0] px-3 py-2.5 min-w-[60px]">
-          <span className="text-2xl leading-none">🌸</span>
+          <span className="text-2xl leading-none"></span>
           <span className="mt-1 text-[11px] font-semibold text-stone-700">{flowerCount} stems</span>
         </div>
         <div className="flex-1 min-w-0">
@@ -388,13 +388,13 @@ function BouquetPreview({ flowerCount, wordCount, note, wdActive }) {
             <>
               <p className="text-[15px] italic leading-relaxed text-stone-700 line-clamp-2"
                 style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                "{preview}{note.trim().length > 65 ? "…" : ""}"
+                "{preview}{note.trim().length > 65 ? "" : ""}"
               </p>
               <p className="mt-1 text-[11px] text-stone-400">{wordCount} words in your note</p>
             </>
           ) : (
             <p className="text-[13px] italic text-stone-400" style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-              {wdActive ? "No note yet — she'll still love the flowers 🌸" : "No note added · bouquet only"}
+              {wdActive ? "No note yet  she'll still love the flowers " : "No note added  bouquet only"}
             </p>
           )}
         </div>
@@ -403,21 +403,15 @@ function BouquetPreview({ flowerCount, wordCount, note, wdActive }) {
   );
 }
 
-/* ════════════════════════════════════════════════════
+/* 
    MAIN COMPONENT
-════════════════════════════════════════════════════ */
+ */
 export default function Payment() {
   const location = useLocation();
   const navigate = useNavigate();
   const offerActive = isLaunchOfferActive();
 
-  /* WD live flag */
-  const [wdActive, setWdActive] = useState(isWomensDay());
-  useEffect(() => {
-    if (!wdActive) return;
-    const t = setTimeout(() => setWdActive(false), msUntilMidnight());
-    return () => clearTimeout(t);
-  }, [wdActive]);
+  const wdActive = false;
 
   const pendingCheckout = useMemo(() => getPending(), []);
   const checkoutDraft = useMemo(() => loadCheckoutDraft(), []);
@@ -452,38 +446,38 @@ export default function Payment() {
     {
       id: "small",
       label: "Small",
-      sublabel: "Up to 5 flowers · 60 words",
-      emoji: "🌷",
-      inrValue: getSmallPlanPrice(),
-      inrOriginalValue: getSmallPlanOriginalPrice(),
+      sublabel: "Up to 5 flowers  60 words",
+      emoji: "",
+      amountCents: getSmallPlanUsdCents(),
+      originalCents: null,
       badge: null,
     },
     {
       id: "medium",
       label: "Unlimited",
       sublabel: "Unlimited flowers & words",
-      emoji: "💐",
-      inrValue: getUnlimitedPlanPrice(),
-      inrOriginalValue: null,
+      emoji: "",
+      amountCents: getUnlimitedPlanUsdCents(),
+      originalCents: null,
       badge: "Most popular",
     },
   ]), []);
 
   const selectedPlan = plans.find(p => p.id === selectedPlanId) ?? plans[0];
   const canKeepEverything = selectedPlanId === "medium" || requiredPlanId === "small";
-  const displayPlanAmount = `₹${selectedPlan.inrValue}`;
-  const selectedPlanAmountMinor = Math.round(selectedPlan.inrValue * 100);
+  const displayPlanAmount = formatUsdFromCents(selectedPlan.amountCents);
+  const selectedPlanAmountMinor = selectedPlan.amountCents;
 
   /* effects */
   useEffect(() => {
     applySeo({
-      title: wdActive ? "Women's Day Checkout · Petals and Words" : "Checkout · Petals and Words",
+      title: "Checkout  Petals and Words",
       description: "Complete bouquet checkout and get your share link instantly.",
       keywords: seoKeywords.payment,
       path: "/payment",
       robots: "noindex,nofollow",
     });
-  }, [wdActive]);
+  }, []);
 
   useEffect(() => {
     trackEv("checkout_page_view", { flowerCount, wordCount, requiredPlanId, paymentProvider });
@@ -537,7 +531,7 @@ export default function Payment() {
     if (!ready || !window.Razorpay) { setCheckoutMsg("Unable to load payment gateway."); return; }
     const orderRes = await fetch("/api/razorpay/create-order", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amountPaise: selectedPlanAmountMinor, currency: "INR", notes: { selectedPlanId, flowers: String(flowerCount), words: String(wordCount) } }),
+      body: JSON.stringify({ amountPaise: selectedPlanAmountMinor, currency: "USD", notes: { selectedPlanId, flowers: String(flowerCount), words: String(wordCount) } }),
     });
     const orderData = await readApi(orderRes);
     if (!orderRes.ok || !orderData?.orderId) throw new Error(orderData?.error || "Unable to create payment order.");
@@ -545,7 +539,7 @@ export default function Payment() {
       key: razorpayKeyId,
       amount: orderData.amount, currency: orderData.currency, order_id: orderData.orderId,
       name: "Petals and Words",
-      description: `${selectedPlan.label} plan · ${wdActive ? "Women's Day" : "Bouquet"}`,
+      description: `${selectedPlan.label} plan  ${wdActive ? "Women's Day" : "Bouquet"}`,
       prefill: { name: senderName.trim() || "Someone special" },
       notes: { selectedPlanId },
       theme: { color: "#c0605a" },
@@ -605,28 +599,28 @@ export default function Payment() {
 
   const isCtaDisabled = !canKeepEverything || isPaying || isDetectingCountry || isVerifyingStripeReturn;
 
-  /* ─── No bouquet ─── */
+  /*  No bouquet  */
   if (!hasBouquetData) {
     return (
       <main className="pay-root flex min-h-screen items-center justify-center px-4 py-8">
         <style>{CSS}</style>
         <div className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-rose-100 bg-white p-6 text-center shadow-xl">
           {wdActive && <DoodleFlower className="absolute -right-2 -top-2 h-14 w-14 fp2 opacity-20" />}
-          <p className="mb-3 text-4xl">🌸</p>
+          <p className="mb-3 text-4xl"></p>
           <h1 className="text-xl font-light text-stone-800" style={{ fontFamily: '"Cormorant Garamond",serif' }}>
             No bouquet found
           </h1>
           <p className="mt-2 text-sm text-stone-500">Create your bouquet first, then come back to pay.</p>
           <Link to="/create"
             className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#3a3028] px-6 py-3 text-sm font-semibold text-[#faf6f0] shadow-md hover:bg-[#8e3e3a] transition-all">
-            {wdActive ? "Create her bouquet 🌸" : "Create bouquet →"}
+            {wdActive ? "Create her bouquet " : "Create bouquet "}
           </Link>
         </div>
       </main>
     );
   }
 
-  /* ─── Success state ─── */
+  /*  Success state  */
   if (hasPaid && shareUrl) {
     return (
       <main className="pay-root min-h-screen px-4 pb-16 pt-8">
@@ -643,10 +637,10 @@ export default function Payment() {
         <div className="mx-auto max-w-sm">
           <div className="au au-1 mb-5 text-center">
             <div className="check-pop mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-4 border-emerald-300 bg-emerald-50 text-3xl shadow-lg">
-              ✅
+              
             </div>
             <h1 className="text-2xl font-light text-stone-800" style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-              {wdActive ? "Her bouquet is ready! 🌸" : "Payment successful!"}
+              {wdActive ? "Her bouquet is ready! " : "Payment successful!"}
             </h1>
             <p className="mt-1 text-sm text-stone-500">
               {wdActive
@@ -662,12 +656,12 @@ export default function Payment() {
               <button onClick={copyLink}
                 className={["flex-1 rounded-xl py-3 text-[13px] font-semibold uppercase tracking-[0.1em] transition-all active:scale-95",
                   copied ? "bg-emerald-700 text-white" : "bg-emerald-600 text-white hover:bg-emerald-700"].join(" ")}>
-                {copied ? "✓ Copied!" : "Copy link"}
+                {copied ? " Copied!" : "Copy link"}
               </button>
               <a href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
                 wdActive
-                  ? `Happy Women's Day! 🌸 Here's a special bouquet I made for you 💐 ${shareUrl}`
-                  : `Here's a bouquet I made for you 🌸 ${shareUrl}`
+                  ? `Happy Women's Day!  Here's a special bouquet I made for you  ${shareUrl}`
+                  : `Here's a bouquet I made for you  ${shareUrl}`
               )}`} target="_blank" rel="noreferrer"
                 className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#25D366] py-3 text-[13px] font-semibold uppercase tracking-[0.1em] text-white transition-all hover:bg-[#1da851] active:scale-95">
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
@@ -690,7 +684,7 @@ export default function Payment() {
               className="mb-2 w-full resize-none rounded-xl border border-stone-100 bg-[#faf6f0] px-3 py-2.5 text-sm text-stone-800 outline-none focus:border-rose-300 focus:ring-2 focus:ring-rose-100" />
             <button onClick={sendFeedback}
               className="rounded-xl border border-stone-200 bg-stone-50 px-4 py-2 text-[12px] font-semibold text-stone-700 transition hover:bg-stone-100 active:scale-95">
-              Send feedback →
+              Send feedback 
             </button>
             {fbStatus && <p className="mt-2 text-[12px] text-emerald-700">{fbStatus}</p>}
           </div>
@@ -703,8 +697,8 @@ export default function Payment() {
     );
   }
 
-  /* ─── Checkout state ─── */
-  const ctaLabel = isPaying ? "Processing..." : `Pay ${displayPlanAmount} · Get share link`;
+  /*  Checkout state  */
+  const ctaLabel = isPaying ? "Processing..." : `Pay ${displayPlanAmount} | Get share link`;
 
   return (
     <main className="pay-root min-h-screen pb-36">
@@ -721,7 +715,7 @@ export default function Payment() {
         </div>
       )}
 
-      {/* ── Sticky header ── */}
+      {/*  Sticky header  */}
       <header className="sticky top-0 z-30 border-b border-rose-100/60 backdrop-blur"
         style={{ background: "rgba(253,246,240,.97)" }}>
 
@@ -732,13 +726,13 @@ export default function Payment() {
             <div className="flex ticker-track whitespace-nowrap select-none">
               {[0, 1].map(gi => (
                 <span key={gi} className="flex shrink-0 items-center gap-8 px-6 text-[11px] font-medium text-rose-100/90">
-                  {["🌸 Happy Women's Day · March 8",
-                    "💐 She deserves more than a text",
-                    "✨ Today-only special offer",
-                    "🎀 Pay · Get link · Share on WhatsApp",
-                    "🌺 Almost there — just one step left",
+                  {[" Happy Women's Day  March 8",
+                    " She deserves more than a text",
+                    " Today-only special offer",
+                    " Pay  Get link  Share on WhatsApp",
+                    " Almost there  just one step left",
                   ].map((t, i) => (
-                    <span key={i} className="flex items-center gap-8">{t}<span className="text-rose-400/50">✦</span></span>
+                    <span key={i} className="flex items-center gap-8">{t}<span className="text-rose-400/50"></span></span>
                   ))}
                 </span>
               ))}
@@ -751,19 +745,19 @@ export default function Payment() {
             <img src="/logo-transparent.png" alt="Petals and Words" className="h-8 w-auto" />
             {wdActive && (
               <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700">
-                🌸 Women's Day
+                 Women's Day
               </span>
             )}
           </div>
           <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
-            🔒 Secure
+             Secure
           </span>
         </div>
       </header>
 
       <div className="relative z-10 mx-auto max-w-sm space-y-4 px-4 pt-5">
 
-        {/* ── WD top banner ── */}
+        {/*  WD top banner  */}
         {wdActive && (
           <div className="au au-1">
             <div className="relative overflow-hidden rounded-2xl px-4 py-4"
@@ -773,7 +767,7 @@ export default function Payment() {
               <DoodleSparkle className="absolute top-2 right-16 h-5 w-5 fp3 opacity-40" />
               <div className="relative flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-200">March 8 · Final step</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-200">March 8  Final step</p>
                   <p className="mt-0.5 text-[1.15rem] font-light leading-tight text-white"
                     style={{ fontFamily: '"Cormorant Garamond",serif' }}>
                     <em>She's worth every rupee.</em>
@@ -789,18 +783,18 @@ export default function Payment() {
           </div>
         )}
 
-        {/* ── Heading ── */}
+        {/*  Heading  */}
         <div className="au au-1 text-center">
           {wdActive ? (
             <>
               <div className="mb-1 flex items-center justify-center gap-2">
                 <DoodleStar className="h-5 w-5 opacity-65" />
-                <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-rose-500">Women's Day · Final step</p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-rose-500">Women's Day  Final step</p>
                 <DoodleStar className="h-5 w-5 opacity-65" />
               </div>
               <h1 className="text-[1.85rem] font-light leading-tight text-stone-900"
                 style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                Almost there —{" "}
+                Almost there {" "}
                 <em className="wd-shimmer">pay &amp; make her day</em>
               </h1>
               <p className="mt-2 text-[13px] text-stone-500">One payment. Instant link. She sees it in seconds.</p>
@@ -810,30 +804,30 @@ export default function Payment() {
               <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-500">Final step</p>
               <h1 className="mt-1 text-[1.85rem] font-light leading-tight text-stone-800"
                 style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                Almost there — <em>pay &amp; share</em>
+                Almost there  <em>pay &amp; share</em>
               </h1>
               <p className="mt-1.5 text-[13px] text-stone-500">One-time payment. Instant link. No subscription ever.</p>
             </>
           )}
         </div>
 
-        {/* ── Social proof ── */}
+        {/*  Social proof  */}
         <div className="au au-2"><SocialProofTicker wdActive={wdActive} /></div>
 
-        {/* ── Bouquet preview ── */}
+        {/*  Bouquet preview  */}
         <div className="au au-2">
           <BouquetPreview flowerCount={flowerCount} wordCount={wordCount} note={note} wdActive={wdActive} />
         </div>
 
-        {/* ── Plan selector ── */}
+        {/*  Plan selector  */}
         <div className="au au-3 rounded-2xl border border-rose-100 bg-white p-4 shadow-md">
           <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-500">Choose your plan</p>
           <div className="space-y-2">
             {plans.map(plan => {
               const isSelected = selectedPlanId === plan.id;
               const isTooSmall = plan.id === "small" && requiredPlanId !== "small";
-              const planAmount = `₹${plan.inrValue}`;
-              const planOriginal = plan.inrOriginalValue ? `₹${plan.inrOriginalValue}` : null;
+              const planAmount = formatUsdFromCents(plan.amountCents);
+              const planOriginal = plan.originalCents ? formatUsdFromCents(plan.originalCents) : null;
               return (
                 <button key={plan.id} type="button"
                   onClick={() => !isTooSmall && setSelectedPlanId(plan.id)}
@@ -847,7 +841,7 @@ export default function Payment() {
                         <span className="text-[14px] font-semibold text-stone-800">{plan.label}</span>
                         {plan.badge && <span className="rounded-full bg-[#c0605a] px-2 py-0.5 text-[10px] font-semibold text-white">{plan.badge}</span>}
                         {offerActive && plan.id === "small" && <span className="rounded-full bg-amber-100 border border-amber-200 px-2 py-0.5 text-[10px] font-semibold text-amber-800">Sale</span>}
-                        {wdActive && plan.id === "small" && !isTooSmall && <span className="rounded-full bg-rose-100 border border-rose-200 px-2 py-0.5 text-[10px] font-semibold text-rose-700">🌸 WD</span>}
+                        {wdActive && plan.id === "small" && !isTooSmall && <span className="rounded-full bg-rose-100 border border-rose-200 px-2 py-0.5 text-[10px] font-semibold text-rose-700"> WD</span>}
                       </div>
                       <p className="text-[11px] text-stone-400 mt-0.5">{plan.sublabel}</p>
                       {isTooSmall && <p className="text-[11px] text-amber-600 mt-0.5">Your bouquet exceeds this plan's limit</p>}
@@ -862,12 +856,12 @@ export default function Payment() {
             })}
           </div>
           <div className="mt-3 flex items-center gap-2 rounded-xl border border-stone-100 bg-[#faf6f0] px-3 py-2.5">
-            <span className="text-sm">💳</span>
-            <p className="text-[12px] text-stone-600">UPI · Credit/Debit · Netbanking · Wallets</p>
+            <span className="text-sm"></span>
+            <p className="text-[12px] text-stone-600">UPI | Credit/Debit | Netbanking | Wallets</p>
           </div>
         </div>
 
-        {/* ── Sender name ── */}
+        {/*  Sender name  */}
         <div className="au au-3 rounded-2xl border border-stone-100 bg-white p-4 shadow-sm">
           <label htmlFor="sender-name" className="block text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-500 mb-2">
             {wdActive ? "Sign her bouquet (optional)" : "Sign your bouquet (optional)"}
@@ -876,11 +870,11 @@ export default function Payment() {
             placeholder={wdActive ? "Your name, e.g. Priya" : "Your name, e.g. Rahul"}
             className="w-full rounded-xl border border-stone-100 bg-[#faf6f0] px-3 py-3 text-[14px] text-stone-800 outline-none transition focus:border-[#c0605a] focus:ring-2 focus:ring-[#c0605a]/15" />
           <p className="mt-1.5 text-[11px] text-stone-400">
-            {wdActive ? "She'll see \"From [name]\" with her bouquet 🌸" : "Shown to the recipient as \"From [name]\""}
+            {wdActive ? "She'll see \"From [name]\" with her bouquet " : "Shown to the recipient as \"From [name]\""}
           </p>
         </div>
 
-        {/* ── WD midnight countdown strip ── */}
+        {/*  WD midnight countdown strip  */}
         {wdActive && (
           <div className="au au-4 relative overflow-hidden rounded-2xl px-4 py-4"
             style={{ background: "linear-gradient(135deg,#3a3028,#8e3e3a)" }}>
@@ -889,7 +883,7 @@ export default function Payment() {
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200">Offer ends at midnight</p>
                 <p className="mt-0.5 text-[13px] text-white">
-                  {offerActive ? `Women's Day price: ₹${getSmallPlanPrice()}` : `Plans from ₹${getSmallPlanPrice()} · One-time`}
+                  {offerActive ? `Special price: ${formatUsdFromCents(getSmallPlanUsdCents())}` : `Plans from ${formatUsdFromCents(getSmallPlanUsdCents())} | One-time`}
                 </p>
               </div>
               <MidnightCountdown dark />
@@ -897,26 +891,26 @@ export default function Payment() {
           </div>
         )}
 
-        {/* ── Offer banner (non-WD) ── */}
+        {/*  Offer banner (non-WD)  */}
         {offerActive && !wdActive && (
           <div className="au au-4 flex items-center gap-3 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-rose-50 px-4 py-3">
-            <span className="text-xl shrink-0">⏰</span>
+            <span className="text-xl shrink-0"></span>
             <div className="flex-1 min-w-0">
               <p className="text-[12px] font-semibold text-stone-800 leading-tight">Limited offer active</p>
-              <p className="text-[11px] text-stone-500">Small plan discounted · {getOfferDateLabel()}</p>
+              <p className="text-[11px] text-stone-500">Small plan discounted | {getOfferDateLabel()}</p>
             </div>
             <span className="shrink-0 rounded-full border border-amber-300 bg-amber-100 px-2.5 py-1 text-[11px] font-bold text-amber-800">Save now</span>
           </div>
         )}
 
-        {/* ── Trust bar ── */}
+        {/*  Trust bar  */}
         <div className="au au-4 rounded-2xl border border-stone-100 bg-white px-3 py-2 shadow-sm">
           <TrustBar />
         </div>
 
-        {/* ── Guarantee ── */}
+        {/*  Guarantee  */}
         <div className="au au-5 flex gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3">
-          <span className="text-xl shrink-0">🛡️</span>
+          <span className="text-xl shrink-0"></span>
           <div>
             <p className="text-[12px] font-semibold text-emerald-900">
               {wdActive ? "Every Women's Day bouquet is guaranteed" : "We stand behind every bouquet"}
@@ -927,7 +921,7 @@ export default function Payment() {
           </div>
         </div>
 
-        {/* ── WD emotional closer ── */}
+        {/*  WD emotional closer  */}
         {wdActive && (
           <div className="au au-5 relative overflow-hidden rounded-2xl border border-rose-100 bg-white px-4 py-4 text-center">
             <DoodleFlower className="absolute -left-2 -top-2 h-12 w-12 fp2 opacity-20" />
@@ -936,11 +930,11 @@ export default function Payment() {
               style={{ fontFamily: '"Cormorant Garamond",serif' }}>
               "The best gifts are the ones that show you were thinking of her."
             </p>
-            <p className="mt-1 text-[11px] text-stone-400">Happy Women's Day 🌸</p>
+            <p className="mt-1 text-[11px] text-stone-400">Happy Women's Day </p>
           </div>
         )}
 
-        {/* ── Error message ── */}
+        {/*  Error message  */}
         {checkoutMsg && !hasPaid && (
           <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] text-rose-800">
             {checkoutMsg}
@@ -951,14 +945,14 @@ export default function Payment() {
         <div className="h-4" />
       </div>
 
-      {/* ── Fixed bottom CTA ── */}
+      {/*  Fixed bottom CTA  */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-rose-100/60 px-4 pb-5 pt-3 shadow-[0_-8px_30px_rgba(0,0,0,0.08)] backdrop-blur"
         style={{ background: "rgba(253,246,240,.97)" }}>
         <div className="mx-auto max-w-sm">
           {/* WD emotional nudge above CTA */}
           {wdActive && hasBouquetData && (
             <p className="mb-2 text-center text-[11px] font-medium text-rose-600">
-              🌸 She'll see this on Women's Day — make it count
+               She'll see this on Women's Day  make it count
             </p>
           )}
 
@@ -974,7 +968,7 @@ export default function Payment() {
               </>
             ) : (
               <>
-                🔒 {wdActive ? `Pay ${displayPlanAmount} · Gift her this moment` : ctaLabel}
+                 {wdActive ? `Pay ${displayPlanAmount}  Gift her this moment` : ctaLabel}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
@@ -983,10 +977,10 @@ export default function Payment() {
           </button>
 
           <div className="mt-2 flex items-center justify-center gap-3 text-[11px] text-stone-400">
-            <span>✅ One-time</span><span>·</span>
-            <span>⚡ Instant link</span><span>·</span>
-            <span>🔒 Razorpay</span>
-            {wdActive && <><span>·</span><span className="font-medium text-rose-500">🌸 WD Special</span></>}
+            <span> One-time</span><span></span>
+            <span> Instant link</span><span></span>
+            <span> Razorpay</span>
+            {wdActive && <><span></span><span className="font-medium text-rose-500"> WD Special</span></>}
           </div>
 
           {!canKeepEverything && (
@@ -1001,7 +995,7 @@ export default function Payment() {
       <div className="relative z-10 mx-auto max-w-sm px-4 pb-2 pt-3 text-center">
         <button type="button" onClick={() => navigate(-1)}
           className="text-[12px] text-stone-400 underline underline-offset-2 hover:text-stone-600">
-          ← Edit my bouquet
+           Edit my bouquet
         </button>
       </div>
     </main>
