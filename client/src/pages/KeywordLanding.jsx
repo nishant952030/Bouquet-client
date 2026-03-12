@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import SoftButton from "../components/SoftButton";
-import { getOfferDateLabel, getSmallPlanPrice, getUnlimitedPlanPrice, isLaunchOfferActive } from "../lib/pricing";
+import { formatUsdFromCents, getOfferDateLabel, getSmallPlanUsdCents, getUnlimitedPlanUsdCents, isLaunchOfferActive } from "../lib/pricing";
 import { applySeo } from "../lib/seo";
 
 const LANDING_CONTENT = {
@@ -47,15 +47,78 @@ const LANDING_CONTENT = {
     intro:
       "If you are searching for an online bouquet maker, this page takes you directly to a fast bouquet builder with message support.",
   },
+  "/digital-bouquet-maker-usa": {
+    title: "Digital Bouquet Maker USA",
+    seoTitle: "Digital Bouquet Maker USA | Send Virtual Flowers Online",
+    description:
+      "Send virtual flowers in the USA with a digital bouquet maker. Create a bouquet, add your note, and share instantly with one secure link.",
+    keywords: [
+      "digital bouquet maker usa",
+      "send virtual flowers usa",
+      "online bouquet usa",
+      "virtual bouquet maker usa",
+    ],
+    intro:
+      "Designed for US users who want a fast, thoughtful digital gift. Build your bouquet online and send your message instantly.",
+  },
+  "/digital-bouquet-maker-uk": {
+    title: "Digital Bouquet Maker UK",
+    seoTitle: "Digital Bouquet Maker UK | Send Online Flowers with Message",
+    description:
+      "Create and send online flowers in the UK with a custom message. Build your digital bouquet in minutes and share instantly.",
+    keywords: [
+      "digital bouquet maker uk",
+      "online flowers uk digital",
+      "virtual bouquet uk",
+      "send bouquet link uk",
+    ],
+    intro:
+      "Built for UK gifting moments: birthdays, anniversaries, apologies, and everyday surprises with a personalised flower note.",
+  },
+  "/digital-bouquet-maker-canada": {
+    title: "Digital Bouquet Maker Canada",
+    seoTitle: "Digital Bouquet Maker Canada | Virtual Flower Gift Online",
+    description:
+      "Use our digital bouquet maker in Canada to create virtual flower gifts with personalised notes. Quick checkout and instant share link.",
+    keywords: [
+      "digital bouquet maker canada",
+      "virtual flower gift canada",
+      "online bouquet maker canada",
+      "digital flowers canada",
+    ],
+    intro:
+      "A simple digital gifting tool for Canada: choose flowers, write your message, and share a bouquet link in seconds.",
+  },
+  "/digital-bouquet-maker-australia": {
+    title: "Digital Bouquet Maker Australia",
+    seoTitle: "Digital Bouquet Maker Australia | Online Virtual Bouquet",
+    description:
+      "Create a virtual bouquet in Australia with a custom note. Send meaningful digital flowers instantly with one secure link.",
+    keywords: [
+      "digital bouquet maker australia",
+      "virtual bouquet australia",
+      "online digital flowers australia",
+      "flower message gift australia",
+    ],
+    intro:
+      "Made for Australian users who want quick, personal flower gifting online without delivery delays.",
+  },
 };
 
 export default function KeywordLanding() {
   const navigate = useNavigate();
   const location = useLocation();
   const page = useMemo(() => LANDING_CONTENT[location.pathname] ?? LANDING_CONTENT["/online-bouquet-maker"], [location.pathname]);
-  const smallPrice = getSmallPlanPrice();
-  const unlimitedPrice = getUnlimitedPlanPrice();
+  const smallPrice = formatUsdFromCents(getSmallPlanUsdCents());
+  const unlimitedPrice = formatUsdFromCents(getUnlimitedPlanUsdCents());
   const offerActive = isLaunchOfferActive();
+  const countryAlternates = useMemo(() => ([
+    { hreflang: "x-default", href: "/digital-bouquet-maker" },
+    { hreflang: "en-us", href: "/digital-bouquet-maker-usa" },
+    { hreflang: "en-gb", href: "/digital-bouquet-maker-uk" },
+    { hreflang: "en-ca", href: "/digital-bouquet-maker-canada" },
+    { hreflang: "en-au", href: "/digital-bouquet-maker-australia" },
+  ]), []);
 
   useEffect(() => {
     applySeo({
@@ -63,6 +126,7 @@ export default function KeywordLanding() {
       description: page.description,
       keywords: page.keywords,
       path: location.pathname,
+      alternates: countryAlternates,
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "WebPage",
@@ -71,7 +135,7 @@ export default function KeywordLanding() {
         description: page.description,
       },
     });
-  }, [location.pathname, page]);
+  }, [countryAlternates, location.pathname, page]);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-4 py-8 sm:py-12">
@@ -111,7 +175,7 @@ export default function KeywordLanding() {
             Transparent pricing
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-stone-700">
-            Plans start from Rs {smallPrice} with an Unlimited option at Rs {unlimitedPrice}. Checkout supports secure UPI/cards via Razorpay.
+            Plans start from {smallPrice} with an Unlimited option at {unlimitedPrice}. Checkout supports secure card payments via Razorpay.
             {offerActive ? ` Limited offer live (${getOfferDateLabel()}).` : ""}
           </p>
         </article>
@@ -122,6 +186,18 @@ export default function KeywordLanding() {
           </Link>
           <Link to="/create" className="rounded-full border border-rose-200 bg-white px-4 py-2 text-rose-700 hover:border-rose-300">
             Bouquet Builder
+          </Link>
+          <Link to="/digital-bouquet-maker-usa" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
+            USA
+          </Link>
+          <Link to="/digital-bouquet-maker-uk" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
+            UK
+          </Link>
+          <Link to="/digital-bouquet-maker-canada" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
+            Canada
+          </Link>
+          <Link to="/digital-bouquet-maker-australia" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
+            Australia
           </Link>
         </div>
       </section>

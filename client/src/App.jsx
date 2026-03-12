@@ -12,6 +12,10 @@ export default function App() {
         <Route path="/virtual-bouquet-maker" element={<KeywordLanding />} />
         <Route path="/digital-bouquet-maker" element={<KeywordLanding />} />
         <Route path="/online-bouquet-maker" element={<KeywordLanding />} />
+        <Route path="/digital-bouquet-maker-usa" element={<KeywordLanding />} />
+        <Route path="/digital-bouquet-maker-uk" element={<KeywordLanding />} />
+        <Route path="/digital-bouquet-maker-canada" element={<KeywordLanding />} />
+        <Route path="/digital-bouquet-maker-australia" element={<KeywordLanding />} />
         <Route path="/create" element={<Create />} />
         <Route path="/creaete" element={<Navigate to="/create" replace />} />
         <Route path="/payment" element={<Payment />} />

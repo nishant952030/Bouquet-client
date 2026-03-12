@@ -45,6 +45,7 @@ export function applySeo({
   image = "/logo-transparent.png",
   robots = "index,follow",
   jsonLd,
+  alternates = [],
 }) {
   const baseUrl = window.location.origin;
   const canonical = `${baseUrl}${path}`;
@@ -70,6 +71,18 @@ export function applySeo({
   upsertMeta('meta[name="twitter:image"]', { name: "twitter:image", content: `${baseUrl}${image}` });
 
   upsertLink('link[rel="canonical"]', { rel: "canonical", href: canonical });
+  document.head.querySelectorAll('link[data-seo-alt="page"]').forEach((el) => el.remove());
+  if (Array.isArray(alternates)) {
+    alternates.forEach((alt) => {
+      if (!alt?.href || !alt?.hreflang) return;
+      const element = document.createElement("link");
+      element.setAttribute("rel", "alternate");
+      element.setAttribute("hreflang", alt.hreflang);
+      element.setAttribute("href", `${baseUrl}${alt.href}`);
+      element.setAttribute("data-seo-alt", "page");
+      document.head.appendChild(element);
+    });
+  }
 
   if (jsonLd) {
     upsertScript('script[data-seo-ld="page"]', jsonLd);

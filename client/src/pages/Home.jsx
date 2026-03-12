@@ -170,6 +170,17 @@ export default function Home() {
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
+  const [countryCode, setCountryCode] = useState("IN");
+
+  const countryTarget = useMemo(() => {
+    const map = {
+      US: { code: "US", name: "USA", path: "/digital-bouquet-maker-usa" },
+      GB: { code: "GB", name: "UK", path: "/digital-bouquet-maker-uk" },
+      CA: { code: "CA", name: "Canada", path: "/digital-bouquet-maker-canada" },
+      AU: { code: "AU", name: "Australia", path: "/digital-bouquet-maker-australia" },
+    };
+    return map[countryCode] || null;
+  }, [countryCode]);
 
   useEffect(() => {
     applySeo({
@@ -198,6 +209,23 @@ export default function Home() {
     }, 3400);
     return () => window.clearInterval(timer);
   }, [testimonials.length]);
+
+  useEffect(() => {
+    let ignore = false;
+    fetch("/api/geo")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (ignore) return;
+        const code = String(data?.country || "IN").toUpperCase();
+        setCountryCode(code);
+      })
+      .catch(() => {
+        if (!ignore) setCountryCode("IN");
+      });
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   return (
     <main className="home-root relative min-h-screen overflow-x-hidden"
@@ -292,15 +320,20 @@ export default function Home() {
                 ? `Limited-time offer: from ${smallPrice} | ${getOfferDateLabel()}`
                 : `One-time plans from ${smallPrice} | No subscription`}
             </div>
+            {countryTarget && (
+              <p className="mt-2 text-center text-[11px] font-medium text-stone-500">
+                Showing offers for {countryTarget.name} visitors
+              </p>
+            )}
           </div>
 
           {/* CTA */}
           <div className="mt-6">
             <button
-              onClick={() => navigate("/create")}
+              onClick={() => navigate(countryTarget ? countryTarget.path : "/create")}
               className="inline-flex min-h-[52px] w-full max-w-xs items-center justify-center gap-2 rounded-full bg-[#3a3028] px-8 text-[14px] font-semibold uppercase tracking-[0.1em] text-[#faf6f0] shadow-lg shadow-stone-900/20 transition-all hover:-translate-y-0.5 hover:bg-[#8e3e3a] active:scale-[.98]"
             >
-              Create bouquet
+              {countryTarget ? `See ${countryTarget.name} page` : "Create bouquet"}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -406,6 +439,18 @@ export default function Home() {
             </Link>
             <Link to="/online-bouquet-maker" className="rounded-full border border-rose-200 bg-white px-4 py-2 text-[13px] font-medium text-rose-700 transition hover:bg-rose-50 hover:border-rose-300">
                Online Bouquet Maker
+            </Link>
+            <Link to="/digital-bouquet-maker-usa" className="rounded-full border border-amber-200 bg-white px-4 py-2 text-[13px] font-medium text-amber-700 transition hover:bg-amber-50 hover:border-amber-300">
+               USA Digital Bouquet
+            </Link>
+            <Link to="/digital-bouquet-maker-uk" className="rounded-full border border-amber-200 bg-white px-4 py-2 text-[13px] font-medium text-amber-700 transition hover:bg-amber-50 hover:border-amber-300">
+               UK Digital Bouquet
+            </Link>
+            <Link to="/digital-bouquet-maker-canada" className="rounded-full border border-amber-200 bg-white px-4 py-2 text-[13px] font-medium text-amber-700 transition hover:bg-amber-50 hover:border-amber-300">
+               Canada Digital Bouquet
+            </Link>
+            <Link to="/digital-bouquet-maker-australia" className="rounded-full border border-amber-200 bg-white px-4 py-2 text-[13px] font-medium text-amber-700 transition hover:bg-amber-50 hover:border-amber-300">
+               Australia Digital Bouquet
             </Link>
           </div>
         </section>
