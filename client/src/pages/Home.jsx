@@ -454,6 +454,10 @@ export default function Home() {
                 { to: "/virtual-bouquet-maker", label: "🌐 Virtual Bouquet Maker" },
                 { to: "/digital-bouquet-maker", label: "💻 Digital Bouquet Maker" },
                 { to: "/online-bouquet-maker", label: "🌸 Online Bouquet Maker" },
+                { to: "/virtual-bouquet-maker-online-free", label: "🆓 Virtual Maker Online Free" },
+                { to: "/digital-bouquet-maker-online-free", label: "🆓 Digital Maker Online Free" },
+                { to: "/digital-flower-bouquet-maker", label: "💐 Digital Flower Bouquet Maker" },
+                { to: "/bouquet-maker-online", label: "🌼 Bouquet Maker Online" },
               ].map(item => (
                 <Link key={item.to} to={item.to} className="vv-btn-ghost" style={{ fontSize: "0.78rem" }}>
                   {item.label}
