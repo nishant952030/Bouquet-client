@@ -175,7 +175,7 @@ export default function KeywordLanding() {
             Transparent pricing
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-stone-700">
-            Plans start from {smallPrice} with an Unlimited option at {unlimitedPrice}. Checkout supports secure card payments via Razorpay.
+            Plans start from {smallPrice} with an Unlimited option at {unlimitedPrice}. Checkout supports secure card payments via PayPal.
             {offerActive ? ` Limited offer live (${getOfferDateLabel()}).` : ""}
           </p>
         </article>

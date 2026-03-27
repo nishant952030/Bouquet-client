@@ -9,7 +9,8 @@ export default function RecipientBouquetCanvas({ stems }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    const canvas = new Canvas("recipient-bouquet-canvas", {
+    if (!canvasRef.current) return undefined;
+    const canvas = new Canvas(canvasRef.current, {
       width: CANVAS_WIDTH,
       height: CANVAS_HEIGHT,
       selection: false,
@@ -46,26 +47,8 @@ export default function RecipientBouquetCanvas({ stems }) {
   }, [stems]);
 
   return (
-    <div className="w-full max-w-[360px]">
-      {/* Decorative top label */}
-      <div className="mb-2 flex items-center justify-center gap-2">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-rose-200" />
-        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-400">Your bouquet</span>
-        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-rose-200" />
-      </div>
-
-      {/* Canvas card */}
-      <div className="overflow-hidden rounded-2xl border border-amber-100 bg-[#fff8f2] shadow-xl shadow-rose-100/40">
-        <canvas id="recipient-bouquet-canvas" ref={canvasRef} className="mx-auto block" />
-      </div>
-
-      {/* Bottom flourish */}
-      <p
-        className="mt-3 text-center text-sm text-stone-400 italic"
-        style={{ fontFamily: '"Cormorant Garamond", serif' }}
-      >
-        Made with love, just for you.
-      </p>
+    <div className="flex w-full items-center justify-center">
+      <canvas ref={canvasRef} className="mx-auto block" />
     </div>
   );
 }

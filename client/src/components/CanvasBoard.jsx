@@ -1,22 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas, FabricImage, FabricText } from "fabric";
+import { Canvas, FabricImage } from "fabric";
 import { getCleanFlowerImageSrc } from "../lib/flowerImage";
 
 const MAX_CANVAS_WIDTH = 340;
 const MIN_CANVAS_WIDTH = 260;
 const CANVAS_RATIO = 440 / 340;
 const CANVAS_STATE_STORAGE_KEY = "bouquet_canvas_state_v1";
-
-function readStoredStems() {
-  try {
-    const raw = localStorage.getItem(CANVAS_STATE_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
 
 function writeStoredStems(stems) {
   try {
@@ -30,7 +19,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const fabricCanvas = useRef(null);
-  const watermarkObjects = useRef([]);
+
   const activationTimerRef = useRef(null);
   const touchStartRef = useRef({ x: 0, y: 0 });
   const [canvasSize, setCanvasSize] = useState({ width: 300, height: Math.round(300 * CANVAS_RATIO) });
@@ -113,52 +102,21 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
   useEffect(() => () => clearTimeout(activationTimerRef.current), []);
 
   useEffect(() => {
-    const canvas = new Canvas("bouquet-canvas", {
+    if (!canvasRef.current) return undefined;
+    const canvas = new Canvas(canvasRef.current, {
       width: canvasSize.width,
       height: canvasSize.height,
       selection: false,
     });
     canvas.backgroundColor = "#fff8f2";
 
-    const previewMark = new FabricText("BOUQUET PREVIEW", {
-      left: canvasSize.width / 2,
-      top: canvasSize.height / 2 - 14,
-      originX: "center",
-      originY: "center",
-      fontSize: 28,
-      fontWeight: "700",
-      angle: -24,
-      opacity: 0.12,
-      fill: "#7c2d12",
-      selectable: false,
-      evented: false,
-    });
-    const paymentMark = new FabricText("Payment required to remove watermark", {
-      left: canvasSize.width / 2,
-      top: canvasSize.height - 22,
-      originX: "center",
-      originY: "center",
-      fontSize: 11,
-      opacity: 0.45,
-      fill: "#9a3412",
-      selectable: false,
-      evented: false,
-    });
-    watermarkObjects.current = [previewMark, paymentMark];
-    canvas.add(previewMark, paymentMark);
     canvas.renderAll();
     fabricCanvas.current = canvas;
 
-    const storedStems = readStoredStems().sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0));
-    loadStemImages(canvas, storedStems).then((images) => {
-      images.filter(Boolean).forEach((img) => canvas.add(img));
-      watermarkObjects.current.forEach((item) => canvas.bringObjectToFront(item));
-      canvas.renderAll();
-      persistAndEmit(canvas);
-    });
+    persistAndEmit(canvas);
 
     const onObjectModified = () => {
-      watermarkObjects.current.forEach((item) => canvas.bringObjectToFront(item));
+
       canvas.renderAll();
       persistAndEmit(canvas);
       updateRemoveState(canvas);
@@ -170,7 +128,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
       if (!active || active.type !== "image" || !active.flowerSrc) return;
       canvas.remove(active);
       canvas.discardActiveObject();
-      watermarkObjects.current.forEach((item) => canvas.bringObjectToFront(item));
+
       canvas.renderAll();
       persistAndEmit(canvas);
       updateRemoveState(canvas);
@@ -219,7 +177,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
         });
         currentCanvas.add(img);
         currentCanvas.setActiveObject(img);
-        watermarkObjects.current.forEach((item) => currentCanvas.bringObjectToFront(item));
+
         currentCanvas.renderAll();
         persistAndEmit(currentCanvas);
         updateRemoveState(currentCanvas);
@@ -235,7 +193,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
     const orderedStems = [...presetRequest.stems].sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0));
     loadStemImages(currentCanvas, orderedStems).then((images) => {
       images.filter(Boolean).forEach((img) => currentCanvas.add(img));
-      watermarkObjects.current.forEach((item) => currentCanvas.bringObjectToFront(item));
+
       currentCanvas.renderAll();
       persistAndEmit(currentCanvas);
       updateRemoveState(currentCanvas);
@@ -249,7 +207,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
     if (!active || !active.flowerSrc) return;
     canvas.remove(active);
     canvas.discardActiveObject();
-    watermarkObjects.current.forEach((item) => canvas.bringObjectToFront(item));
+
     canvas.renderAll();
     persistAndEmit(canvas);
     updateRemoveState(canvas);
@@ -260,7 +218,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
     if (!canvas) return;
     canvas.getObjects().filter((item) => item.type === "image" && item.flowerSrc).forEach((item) => canvas.remove(item));
     canvas.discardActiveObject();
-    watermarkObjects.current.forEach((item) => canvas.bringObjectToFront(item));
+
     canvas.renderAll();
     persistAndEmit(canvas);
     updateRemoveState(canvas);
@@ -272,7 +230,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
     const active = canvas.getActiveObject();
     if (!active || !active.flowerSrc) return;
     canvas.bringObjectForward(active);
-    watermarkObjects.current.forEach((item) => canvas.bringObjectToFront(item));
+
     canvas.renderAll();
     persistAndEmit(canvas);
   };
@@ -318,7 +276,6 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
         style={{ touchAction: isTouchDevice && !isCanvasActive ? "pan-y" : "none" }}
       >
         <canvas
-          id="bouquet-canvas"
           ref={canvasRef}
           className={["mx-auto block rounded-2xl", isTouchDevice && !isCanvasActive ? "pointer-events-none" : ""].join(" ")}
         />

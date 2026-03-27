@@ -1,4 +1,5 @@
 import process from "node:process";
+import { getSmallPlanPrice, getUnlimitedPlanPrice } from "../../src/lib/pricing.js";
 
 async function createRazorpayOrder({ amountMinor, currency, receipt, notes }) {
   const keyId = process.env.RAZORPAY_KEY_ID;
@@ -37,17 +38,23 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { amountPaise, receipt, notes } = req.body || {};
-  if (!amountPaise || Number(amountPaise) < 1) {
+  const { amountPaise, planId = "small", receipt, notes } = req.body || {};
+  const serverAmountPaise =
+    String(planId) === "medium" ? getUnlimitedPlanPrice() * 100 : getSmallPlanPrice() * 100;
+  const requestedAmount = Number(amountPaise);
+  const finalAmountPaise =
+    Number.isFinite(requestedAmount) && requestedAmount > 0 ? Math.round(requestedAmount) : serverAmountPaise;
+
+  if (!finalAmountPaise || finalAmountPaise < 1) {
     return res.status(400).json({ error: "Invalid amount" });
   }
 
   try {
     const order = await createRazorpayOrder({
-      amountMinor: Math.round(Number(amountPaise)),
-      currency: "USD",
+      amountMinor: finalAmountPaise,
+      currency: "INR",
       receipt: receipt || `pw_${Date.now()}`,
-      notes: notes || {},
+      notes: { ...(notes || {}), planId: String(planId || "small") },
     });
     return res.status(200).json({
       orderId: order.id,

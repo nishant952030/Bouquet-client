@@ -4,6 +4,8 @@ import Create from "./pages/Create.jsx";
 import Payment from "./pages/Payment.jsx";
 import ViewBouquet from "./pages/ViewBouquet.jsx";
 import KeywordLanding from "./pages/KeywordLanding.jsx";
+import Blog from "./pages/Blog.jsx";
+import BlogPost from "./pages/BlogPost.jsx";
 export default function App() {
   return (
     <BrowserRouter>
@@ -16,6 +18,8 @@ export default function App() {
         <Route path="/digital-bouquet-maker-uk" element={<KeywordLanding />} />
         <Route path="/digital-bouquet-maker-canada" element={<KeywordLanding />} />
         <Route path="/digital-bouquet-maker-australia" element={<KeywordLanding />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/create" element={<Create />} />
         <Route path="/creaete" element={<Navigate to="/create" replace />} />
         <Route path="/payment" element={<Payment />} />

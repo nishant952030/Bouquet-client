@@ -44,38 +44,21 @@ The note generator also supports Groq and will use it automatically when `VITE_G
 - `VITE_GROQ_MODEL` (default: `llama-3.3-70b-versatile`)
 - `VITE_GROQ_API_URL` (default: `https://api.groq.com/openai/v1/chat/completions`)
 
-## Razorpay Setup
+## PayPal Setup
 
 Add this variable in `client/.env` (and Vercel project env):
 
-- `VITE_RAZORPAY_KEY_ID`
-- `RAZORPAY_KEY_ID`
-- `RAZORPAY_KEY_SECRET`
+- `VITE_PAYPAL_CLIENT_ID`
+- `PAYPAL_CLIENT_ID`
+- `PAYPAL_CLIENT_SECRET`
+- `PAYPAL_ENV` (`sandbox` or `live`)
 
-Paid plans open Razorpay checkout and only create share links after successful payment.
+Paid plans open PayPal checkout and only create share links after successful payment capture.
 
-The project now creates orders and verifies signatures through serverless routes:
+The project creates and captures orders through serverless routes:
 
-- `POST /api/razorpay/create-order`
-- `POST /api/razorpay/verify`
-
-## Razorpay Webhook Setup
-
-This project includes a Vercel serverless webhook endpoint:
-
-- `POST /api/razorpay/webhook`
-
-Add this server env variable (do not prefix with `VITE_`):
-
-- `RAZORPAY_WEBHOOK_SECRET`
-
-Razorpay dashboard configuration:
-
-1. Go to Webhooks and create a webhook for `https://www.petalsandwords.com/api/razorpay/webhook`
-2. Set the same secret value you use in `RAZORPAY_WEBHOOK_SECRET`
-3. Select events you need (at minimum `payment.captured`, optionally `payment.failed`)
-
-The endpoint verifies `x-razorpay-signature` before accepting events.
+- `POST /api/paypal/create-order`
+- `POST /api/paypal/capture-order`
 
 ## Global Checkout Setup (Stripe)
 
@@ -94,12 +77,25 @@ Serverless endpoints included:
 
 Payment flow behavior:
 
-1. `/api/geo` detects country via Vercel headers.
-2. India users go through Razorpay in INR.
-3. Non-India users go through Stripe checkout in USD.
-4. Returning Stripe users are verified via `session_id` before bouquet link generation.
+1. PayPal flow: create order (`/api/paypal/create-order`) and capture order (`/api/paypal/capture-order`).
+2. Stripe flow (if enabled in app): create + verify checkout sessions.
+
+## Razorpay Setup (India)
+
+For Indian users (UPI/cards/wallets), add these variables in `client/.env` and Vercel env:
+
+- `VITE_RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_ID`
+- `RAZORPAY_KEY_SECRET`
+- `RAZORPAY_WEBHOOK_SECRET` (optional unless using webhook route)
+
+Serverless endpoints:
+
+- `POST /api/razorpay/create-order`
+- `POST /api/razorpay/verify`
+- `POST /api/razorpay/webhook`
 
 ## Recommended Platform Mix
 
-- India: Razorpay (best UPI conversion)
-- Global: Stripe Checkout (best card conversion, no fixed monthly fee)
+- Global default: PayPal
+- Optional alternative: Stripe Checkout

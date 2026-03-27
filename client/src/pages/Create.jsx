@@ -5,162 +5,23 @@ import CanvasBoard from "../components/CanvasBoard";
 import FlowerPicker from "../components/FlowerPicker";
 import NoteCard from "../components/NoteCard";
 import { bouquetSuggestions, noteSuggestions } from "../data/bouquetSuggestions";
+import { flowers } from "../data/flowerCatalog";
 import { trackEvent } from "../lib/analytics";
-import { generateNoteWithGrok } from "../lib/grok";
-import { formatUsdFromCents, getSmallPlanUsdCents, getUnlimitedPlanUsdCents, isLaunchOfferActive } from "../lib/pricing";
+
 import { applySeo, seoKeywords } from "../lib/seo";
 import { loadCheckoutDraft, saveCheckoutDraft } from "../lib/checkoutStorage";
-
-/* 
-   WOMEN'S DAY EXPIRY LOGIC
-   isWomensDay() returns true while it is still March 8
-   (local device time). At midnight the flag flips to false
-   and ALL Women's Day UI disappears automatically.
- */
-function isWomensDay() {
-  const now = new Date();
-  return now.getMonth() === 2 && now.getDate() === 8; // month 0-indexed
-}
-function msUntilMidnight() {
-  const now = new Date();
-  const midnight = new Date(now);
-  midnight.setHours(24, 0, 0, 0);
-  return midnight.getTime() - now.getTime();
-}
-
-/*  SVG Doodles  */
-function DoodleFlower({ className = "", style = {} }) {
-  return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"
-      className={className} style={style} aria-hidden="true">
-      <path d="M40 40C40 40 36 28 40 22C44 28 40 40 40 40Z" stroke="#c0605a" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M40 40C40 40 52 36 58 40C52 44 40 40 40 40Z" stroke="#c0605a" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M40 40C40 40 44 52 40 58C36 52 40 40 40 40Z" stroke="#c0605a" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M40 40C40 40 28 44 22 40C28 36 40 40 40 40Z" stroke="#c0605a" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M40 40C40 40 30 30 29 24C35 27 40 40 40 40Z" stroke="#e8a9a4" strokeWidth="1.2" strokeLinecap="round" />
-      <path d="M40 40C40 40 50 30 56 29C53 35 40 40 40 40Z" stroke="#e8a9a4" strokeWidth="1.2" strokeLinecap="round" />
-      <path d="M40 40C40 40 50 50 51 56C45 53 40 40 40 40Z" stroke="#e8a9a4" strokeWidth="1.2" strokeLinecap="round" />
-      <path d="M40 40C40 40 30 50 24 51C27 45 40 40 40 40Z" stroke="#e8a9a4" strokeWidth="1.2" strokeLinecap="round" />
-      <circle cx="40" cy="40" r="4" fill="#f7d6d0" stroke="#c0605a" strokeWidth="1.5" />
-    </svg>
-  );
-}
-function DoodleHeart({ className = "", style = {} }) {
-  return (
-    <svg viewBox="0 0 50 46" fill="none" xmlns="http://www.w3.org/2000/svg"
-      className={className} style={style} aria-hidden="true">
-      <path d="M25 42C25 42 4 28 4 15C4 8 9 3 16 4C20 4.5 23 7 25 10C27 7 30 4.5 34 4C41 3 46 8 46 15C46 28 25 42 25 42Z"
-        stroke="#c0605a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M15 12C13 12 11 14 11 17" stroke="#e8a9a4" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-function DoodleStar({ className = "", style = {} }) {
-  return (
-    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"
-      className={className} style={style} aria-hidden="true">
-      <path d="M20 4L21.8 15.5L33 12L24.5 20L33 28L21.8 24.5L20 36L18.2 24.5L7 28L15.5 20L7 12L18.2 15.5Z"
-        stroke="#c8a96e" strokeWidth="1.5" strokeLinejoin="round" />
-    </svg>
-  );
-}
-function DoodleSparkle({ className = "", style = {} }) {
-  return (
-    <svg viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg"
-      className={className} style={style} aria-hidden="true">
-      <path d="M15 2L15 28M2 15L28 15" stroke="#c8a96e" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M6 6L24 24M24 6L6 24" stroke="#c8a96e" strokeWidth="1" strokeLinecap="round" />
-    </svg>
-  );
-}
-function DoodleLeaf({ className = "", style = {} }) {
-  return (
-    <svg viewBox="0 0 50 60" fill="none" xmlns="http://www.w3.org/2000/svg"
-      className={className} style={style} aria-hidden="true">
-      <path d="M25 55C25 55 8 40 10 20C15 8 25 5 25 5C25 5 35 8 40 20C42 40 25 55 25 55Z"
-        stroke="#7a9e72" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M25 55L25 10" stroke="#7a9e72" strokeWidth="1.2" strokeLinecap="round" />
-      <path d="M25 38C20 34 14 32 12 28" stroke="#7a9e72" strokeWidth="1" strokeLinecap="round" />
-      <path d="M25 38C30 34 36 32 38 28" stroke="#7a9e72" strokeWidth="1" strokeLinecap="round" />
-    </svg>
-  );
-}
-function DoodleWreathLeft({ className = "", style = {} }) {
-  return (
-    <svg viewBox="0 0 60 200" fill="none" xmlns="http://www.w3.org/2000/svg"
-      className={className} style={style} aria-hidden="true">
-      <path d="M30 190C28 160 32 130 26 100C22 75 28 50 24 20" stroke="#7a9e72" strokeWidth="2" strokeLinecap="round" />
-      <path d="M26 160C18 152 10 148 8 140C16 138 24 144 26 160Z" stroke="#7a9e72" strokeWidth="1.2" />
-      <path d="M28 130C36 120 44 118 48 110C40 108 32 116 28 130Z" stroke="#7a9e72" strokeWidth="1.2" />
-      <path d="M26 100C16 94 8 88 6 78C14 78 22 86 26 100Z" stroke="#7a9e72" strokeWidth="1.2" />
-      <path d="M28 70C36 62 44 56 50 46C42 46 34 56 28 70Z" stroke="#7a9e72" strokeWidth="1.2" />
-      <circle cx="24" cy="40" r="5" stroke="#c0605a" strokeWidth="1.5" />
-      <path d="M24 35L24 28M29 40L36 40M24 45L24 52M19 40L12 40" stroke="#c0605a" strokeWidth="1" strokeLinecap="round" />
-      <circle cx="32" cy="155" r="4" stroke="#e8a9a4" strokeWidth="1.3" />
-    </svg>
-  );
-}
-function DoodleWreathRight({ className = "", style = {} }) {
-  return (
-    <svg viewBox="0 0 60 200" fill="none" xmlns="http://www.w3.org/2000/svg"
-      className={className} style={style} aria-hidden="true">
-      <path d="M30 190C32 160 28 130 34 100C38 75 32 50 36 20" stroke="#7a9e72" strokeWidth="2" strokeLinecap="round" />
-      <path d="M34 160C42 152 50 148 52 140C44 138 36 144 34 160Z" stroke="#7a9e72" strokeWidth="1.2" />
-      <path d="M32 130C24 120 16 118 12 110C20 108 28 116 32 130Z" stroke="#7a9e72" strokeWidth="1.2" />
-      <path d="M34 100C44 94 52 88 54 78C46 78 38 86 34 100Z" stroke="#7a9e72" strokeWidth="1.2" />
-      <path d="M32 70C24 62 16 56 10 46C18 46 26 56 32 70Z" stroke="#7a9e72" strokeWidth="1.2" />
-      <circle cx="36" cy="40" r="5" stroke="#c0605a" strokeWidth="1.5" />
-      <path d="M36 35L36 28M41 40L48 40M36 45L36 52M31 40L24 40" stroke="#c0605a" strokeWidth="1" strokeLinecap="round" />
-      <circle cx="28" cy="155" r="4" stroke="#e8a9a4" strokeWidth="1.3" />
-    </svg>
-  );
-}
-function DoodleCurly({ className = "", style = {} }) {
-  return (
-    <svg viewBox="0 0 120 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-      className={className} style={style} aria-hidden="true">
-      <path d="M2 12C12 4 22 20 32 12C42 4 52 20 62 12C72 4 82 20 92 12C102 4 112 20 118 12"
-        stroke="#f2cfc8" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-function DoodleBow({ className = "", style = {} }) {
-  return (
-    <svg viewBox="0 0 80 40" fill="none" xmlns="http://www.w3.org/2000/svg"
-      className={className} style={style} aria-hidden="true">
-      <path d="M40 20C35 14 22 8 12 12C8 16 10 24 16 26C26 30 38 22 40 20Z"
-        stroke="#c0605a" strokeWidth="1.5" strokeLinecap="round" />
-      <path d="M40 20C45 14 58 8 68 12C72 16 70 24 64 26C54 30 42 22 40 20Z"
-        stroke="#c0605a" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="40" cy="20" r="3" fill="#f7d6d0" stroke="#c0605a" strokeWidth="1.5" />
-      <path d="M40 23L37 34M40 23L43 34" stroke="#c0605a" strokeWidth="1.2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-/*  Countdown  */
-function MidnightCountdown() {
-  const [ms, setMs] = useState(msUntilMidnight());
-  useEffect(() => {
-    const id = setInterval(() => setMs(msUntilMidnight()), 1000);
-    return () => clearInterval(id);
-  }, []);
-  const h = String(Math.floor(ms / 3600000)).padStart(2, "0");
-  const m = String(Math.floor((ms % 3600000) / 60000)).padStart(2, "0");
-  const s = String(Math.floor((ms % 60000) / 1000)).padStart(2, "0");
-  return (
-    <div className="flex items-center gap-1 font-mono">
-      {[h, m, s].map((unit, i) => (
-        <span key={i} className="flex items-center gap-1">
-          <span className="flex h-8 min-w-[30px] items-center justify-center rounded-lg bg-white/20 px-1.5 text-[14px] font-bold text-white tabular-nums">
-            {unit}
-          </span>
-          {i < 2 && <span className="text-rose-300 text-[12px]">:</span>}
-        </span>
-      ))}
-    </div>
-  );
-}
+import {
+  DoodleFlower,
+  DoodleHeart,
+  DoodleStar,
+  DoodleSparkle,
+  DoodleLeaf,
+  DoodleWreathLeft,
+  DoodleWreathRight,
+  DoodleCurly,
+  DoodleBow
+} from "../components/Doodles";
+import MidnightCountdown from "../components/MidnightCountdown";
 
 /*  WD data  */
 const WD_NOTE_SUGGESTIONS = [
@@ -178,82 +39,209 @@ const WD_OCCASIONS = [
   { emoji: "", label: "For Sister", desc: "Bold & heartfelt" },
 ];
 
-/*  CSS  */
+/* ─── DESIGN SYSTEM: Velvet & Vellum ─── */
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Manrope:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; }
 
   .cr-root {
-    font-family:'Jost',sans-serif;
-    background:linear-gradient(160deg,#fdf6f0 0%,#fceef0 50%,#fdf8f0 100%);
-    min-height:100vh;
+    font-family: 'Manrope', sans-serif;
+    background: #fbf9f5;
+    color: #3E2723;
+    min-height: 100vh;
   }
 
-  @keyframes floatUp {
-    0%,100% { transform:translateY(0) rotate(0deg); opacity:.55; }
-    50%      { transform:translateY(-14px) rotate(6deg); opacity:.85; }
+  /* Header glass */
+  .cr-header {
+    position: sticky; top: 0; z-index: 40;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(251,249,245,0.88);
   }
-  @keyframes fadeSlide {
-    from { opacity:0; transform:translateY(18px); }
-    to   { opacity:1; transform:translateY(0); }
+
+  /* Progress bar */
+  .prog-track { height: 3px; background: #ede8e9; border-radius: 9999px; overflow: hidden; }
+  .prog-fill  { height: 100%; background: linear-gradient(90deg, #7b5455, #ecbaba); border-radius: 9999px; transition: width .5s ease; }
+
+  /* Tab bar */
+  .cr-tab-on  { background: #3E2723; color: #fbf9f5; border-color: #3E2723; }
+  .cr-tab-off { color: #6b5e5f; border-color: transparent; background: transparent; }
+  .cr-tab-off:hover { background: #f5f3ef; }
+
+  /* Note suggestion chips */
+  .note-chip-on  { border-color: #7b5455 !important; background: #fff5f4 !important; }
+  .note-chip-off { border-color: #ede8e9; background: #f5f3ef; }
+  .note-chip-off:hover { border-color: #7b5455; }
+
+  /* VV Button */
+  .vv-btn-primary {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: linear-gradient(135deg, #7b5455 0%, #ffd9d8 160%);
+    color: #fff;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.88rem; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    border: none; border-radius: 9999px;
+    padding: 0 2rem; min-height: 52px; width: 100%;
+    cursor: pointer;
+    box-shadow: 0 12px 36px rgba(123,84,85,0.22);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
   }
+  .vv-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 44px rgba(123,84,85,0.3);
+  }
+  .vv-btn-primary:active { transform: scale(0.98); }
+  .vv-btn-primary:disabled {
+    background: #e4e2de;
+    color: #9e8f90;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Ghost btn */
+  .vv-btn-ghost {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: transparent;
+    color: #7b5455;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.78rem; font-weight: 600;
+    border: 1.5px solid rgba(210,195,196,0.5);
+    border-radius: 9999px;
+    padding: 0.35rem 0.9rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    text-decoration: none;
+  }
+  .vv-btn-ghost:hover { background: #ffd9d8; border-color: #7b5455; }
+
+  /* VV card with ambient shadow */
+  .vv-card {
+    background: #ffffff;
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(27,28,26,0.06), 0 2px 6px rgba(27,28,26,0.04);
+    overflow: hidden;
+  }
+  .vv-card-low { background: #f5f3ef; border-radius: 1.5rem; }
+
+  /* VV label */
+  .vv-label {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.68rem; font-weight: 600;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    color: #7b5455;
+  }
+
+  /* Magic compose pill */
+  .magic-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: linear-gradient(135deg, #e8f4fd, #dbeafe);
+    color: #1d4ed8;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.06em;
+    border: none; border-radius: 9999px;
+    padding: 0.3rem 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(29,78,216,0.14);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .magic-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(29,78,216,0.22); }
+  .magic-btn:active { transform: scale(0.97); }
+
+  /* Count pill */
+  .count-pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 9999px; padding: 0.25rem 0.65rem;
+    font-family: 'Manrope', sans-serif; font-size: 0.72rem; font-weight: 700;
+  }
+
+  /* Flower type button */
+  .flower-type-btn {
+    width: 100%; border-radius: 0.75rem; padding: 0.5rem 0.75rem;
+    text-align: left; font-family: 'Manrope', sans-serif;
+    font-size: 0.8rem; font-weight: 600;
+    border: 1.5px solid transparent; background: #ffffff;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .flower-type-btn.active  { border-color: #7b5455; color: #7b5455; background: #fff5f4; }
+  .flower-type-btn.inactive { color: #4f4445; }
+  .flower-type-btn.inactive:hover { border-color: #d2c3c4; background: #f5f3ef; }
+
+  /* Flower tile */
+  .flower-tile {
+    overflow: hidden; border-radius: 0.875rem;
+    border: 2px solid transparent;
+    background: #ffffff; padding: 0.4rem;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .flower-tile.selected { border-color: #7b5455; box-shadow: 0 0 0 3px rgba(123,84,85,0.15); }
+  .flower-tile:not(.selected):hover { border-color: #d2c3c4; }
+  .flower-tile:active { transform: scale(0.97); }
+
+  /* Preset card */
+  .preset-card {
+    border-radius: 1rem; padding: 0.75rem 0.875rem;
+    background: #f5f3ef; border: 1.5px solid transparent;
+    text-align: left; transition: all 0.15s; cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+  }
+  .preset-card:hover { border-color: #d2c3c4; background: #ffd9d8; }
+  .preset-card:active { transform: scale(0.98); }
+
+  /* Shimmer for WD */
   @keyframes shimmerGrad {
-    0%   { background-position:-200% center; }
-    100% { background-position:200% center; }
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
   }
+  .wd-shimmer {
+    background: linear-gradient(90deg, #7b5455 0%, #ecbaba 40%, #c8a96e 70%, #7b5455 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmerGrad 4s linear infinite;
+  }
+
+  /* Ticker */
+  @keyframes tickerMove { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  .ticker-inner { animation: tickerMove 24s linear infinite; }
+
+  /* Fade-up animations */
+  @keyframes vvFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fs1 { animation: vvFadeUp 0.4s ease forwards; }
+  .fs2 { animation: vvFadeUp 0.4s ease 0.08s forwards; opacity:0; }
+  .fs3 { animation: vvFadeUp 0.4s ease 0.16s forwards; opacity:0; }
+  .fs4 { animation: vvFadeUp 0.4s ease 0.24s forwards; opacity:0; }
+  .fs5 { animation: vvFadeUp 0.4s ease 0.32s forwards; opacity:0; }
+  .fs6 { animation: vvFadeUp 0.4s ease 0.40s forwards; opacity:0; }
+
+  /* CTA glow pulse */
   @keyframes ctaPulse {
-    0%,100% { box-shadow:0 0 0 0 rgba(192,96,90,.4); }
-    50%     { box-shadow:0 0 0 9px rgba(192,96,90,0); }
+    0%,100% { box-shadow: 0 12px 36px rgba(123,84,85,0.22); }
+    50%      { box-shadow: 0 12px 36px rgba(123,84,85,0.4), 0 0 0 8px rgba(123,84,85,0); }
   }
-  @keyframes tickerMove {
-    0%   { transform:translateX(0); }
-    100% { transform:translateX(-50%); }
+  .cta-glow { animation: ctaPulse 2.4s ease-in-out infinite; }
+
+  /* Fixed bottom bar */
+  .cr-bottom {
+    position: fixed; inset: auto 0 0;
+    z-index: 40;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(251,249,245,0.92);
+    padding: 0.75rem 1rem 1.25rem;
   }
-
-  .fp1 { animation:floatUp 4s ease-in-out infinite; }
-  .fp2 { animation:floatUp 5.5s ease-in-out infinite 1.2s; }
-  .fp3 { animation:floatUp 3.8s ease-in-out infinite .6s; }
-  .fp4 { animation:floatUp 6s ease-in-out infinite 2s; }
-
-  .fs1 { animation:fadeSlide .5s ease forwards; }
-  .fs2 { animation:fadeSlide .5s ease .1s forwards; opacity:0; }
-  .fs3 { animation:fadeSlide .5s ease .2s forwards; opacity:0; }
-  .fs4 { animation:fadeSlide .5s ease .3s forwards; opacity:0; }
-  .fs5 { animation:fadeSlide .5s ease .4s forwards; opacity:0; }
-  .fs6 { animation:fadeSlide .5s ease .5s forwards; opacity:0; }
-
-  .wd-headline {
-    background:linear-gradient(90deg,#c0605a 0%,#e8a9a4 40%,#c8a96e 70%,#c0605a 100%);
-    background-size:200% auto;
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-    background-clip:text;
-    animation:shimmerGrad 4s linear infinite;
-  }
-
-  .cta-glow { animation:ctaPulse 2.4s ease-in-out infinite; }
-
-  .ticker-inner { animation:tickerMove 24s linear infinite; }
-
-  .prog-track { height:3px; background:#f0e4d8; border-radius:2px; overflow:hidden; }
-  .prog-fill  { height:100%; background:linear-gradient(90deg,#c0605a,#c8a96e); border-radius:2px; transition:width .5s ease; }
-
-  .tab-on  { background:#3a3028; color:#faf6f0; }
-  .tab-off { color:#7a6e65; }
-  .tab-off:hover { background:#f5ede6; }
-
-  .note-chip-on  { border-color:#c0605a !important; background:#fff5f4 !important; }
-  .note-chip-off { border-color: #ffe4e0; background:#faf6f0; }
-  .note-chip-off:hover { border-color:#c0605a; }
 `;
 
 function countWords(t) { const n = t.trim(); return n ? n.split(/\s+/).length : 0; }
 
-/* 
-   MAIN
- */
 export default function Create() {
   const navigate = useNavigate();
-
   const wdActive = false;
 
   /* core state */
@@ -261,32 +249,67 @@ export default function Create() {
   const [stems, setStems] = useState([]);
   const [note, setNote] = useState("");
   const [presetRequest, setPresetRequest] = useState(null);
-  const [situationText, setSituationText] = useState("");
-  const [isGeneratingNote, setIsGeneratingNote] = useState(false);
-  const [generationError, setGenerationError] = useState("");
   const [showMoreBouquets, setShowMoreBouquets] = useState(false);
   const [showMoreNotes, setShowMoreNotes] = useState(false);
   const [activeTab, setActiveTab] = useState("flowers");
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(min-width: 1024px)").matches;
+  });
   const hasTracked = useRef(false);
 
   const flowerCount = stems.length;
   const wordCount = countWords(note);
   const hasBouquetContent = flowerCount > 0 || note.trim().length > 0;
-  const offerActive = isLaunchOfferActive();
-  const smallPriceCents = getSmallPlanUsdCents();
-  const unlimitedPriceCents = getUnlimitedPlanUsdCents();
-  const smallPrice = formatUsdFromCents(smallPriceCents);
-  const unlimitedPrice = formatUsdFromCents(unlimitedPriceCents);
   const progress = Math.min(100, (flowerCount > 0 ? 40 : 0) + Math.min(60, wordCount * 4));
 
-  const canAiNote = useMemo(() => situationText.trim().length > 0 && !isGeneratingNote, [situationText, isGeneratingNote]);
   const visibleBouquets = showMoreBouquets ? bouquetSuggestions : bouquetSuggestions.slice(0, 4);
   const visibleNotes = showMoreNotes ? noteSuggestions : noteSuggestions.slice(0, 4);
+
+  const desktopFlowerGroups = useMemo(() => {
+    const byType = flowers.reduce((acc, flower) => {
+      const key = (flower.type || "Mixed").toLowerCase();
+      if (!acc[key]) acc[key] = { id: key, label: flower.type || "Mixed", items: [] };
+      acc[key].items.push(flower);
+      return acc;
+    }, {});
+    const preferred = ["rose", "jasmine", "lily", "tulip", "sunflower", "marigold", "mixed"];
+    return Object.values(byType).sort((a, b) => {
+      const ai = preferred.indexOf(a.id), bi = preferred.indexOf(b.id);
+      const av = ai === -1 ? 999 : ai, bv = bi === -1 ? 999 : bi;
+      if (av !== bv) return av - bv;
+      return a.label.localeCompare(b.label);
+    });
+  }, []);
+
+  const [selectedFlowerType, setSelectedFlowerType] = useState("");
+  const desktopFlowersForType = useMemo(
+    () => desktopFlowerGroups.find((g) => g.id === selectedFlowerType)?.items ?? desktopFlowerGroups[0]?.items ?? [],
+    [desktopFlowerGroups, selectedFlowerType],
+  );
+
+  useEffect(() => {
+    if (!desktopFlowerGroups.length) return;
+    const exists = desktopFlowerGroups.some((g) => g.id === selectedFlowerType);
+    if (!exists) setSelectedFlowerType(desktopFlowerGroups[0].id);
+  }, [desktopFlowerGroups, selectedFlowerType]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktop(media.matches);
+    sync();
+    if (media.addEventListener) { media.addEventListener("change", sync); return () => media.removeEventListener("change", sync); }
+    media.addListener(sync); return () => media.removeListener(sync);
+  }, []);
+
+  useEffect(() => {
+    if (isDesktop && activeTab === "flowers") setActiveTab("note");
+  }, [activeTab, isDesktop]);
 
   useEffect(() => {
     applySeo({
       title: "Create Digital Bouquet Online | Add Flowers and Note",
-      description: "Create a digital bouquet online, add your personal note, and continue to secure checkout to share your bouquet link instantly.",
+      description: "Create a free digital bouquet online, add your personal note, and share your bouquet link instantly.",
       keywords: seoKeywords.create,
       path: "/create",
       jsonLd: {
@@ -295,13 +318,13 @@ export default function Create() {
         name: "Petals and Words Bouquet Builder",
         applicationCategory: "LifestyleApplication",
         operatingSystem: "Web",
-        offers: { "@type": "AggregateOffer", lowPrice: (smallPriceCents / 100).toFixed(2), highPrice: (unlimitedPriceCents / 100).toFixed(2), offerCount: "2", priceCurrency: "USD" },
+        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
         url: `${window.location.origin}/create`,
       },
     });
     track("create_start", { source: "create_page" });
     trackEvent("create_start", { source: "create_page" });
-  }, [smallPriceCents, unlimitedPriceCents]);
+  }, []);
 
   useEffect(() => {
     if (hasTracked.current || !hasBouquetContent) return;
@@ -324,36 +347,47 @@ export default function Create() {
     if (Array.isArray(nextStems)) setStems(nextStems);
   }, []);
 
-  const applyBouquet = (s) => {
+  const applyBouquet = useCallback((s) => {
     const built = s.build();
     if (built.length) setPresetRequest({ id: `${s.id}_${Date.now()}`, stems: built });
-  };
+  }, []);
 
-  const generateAiNote = async () => {
-    if (!canAiNote) return;
-    setGenerationError(""); setIsGeneratingNote(true);
-    try {
-      const gen = await generateNoteWithGrok({ situation: situationText });
-      setNote(gen); setActiveTab("note");
-    } catch (err) {
-      setGenerationError(err instanceof Error ? err.message : "Could not generate note right now.");
-    } finally { setIsGeneratingNote(false); }
-  };
+  const generateMagicBouquet = useCallback(() => {
+    const shuffled = [...flowers].sort(() => 0.5 - Math.random());
+    const selectedFlowers = shuffled.slice(0, 2 + Math.floor(Math.random() * 3));
+    const newStems = [];
+    const numStems = 7 + Math.floor(Math.random() * 6);
+    for (let i = 0; i < numStems; i++) {
+      const isCenter = i >= numStems - 2;
+      const f = selectedFlowers[Math.floor(Math.random() * selectedFlowers.length)];
+      let r, theta;
+      if (isCenter) { r = Math.random() * 0.05; theta = Math.random() * Math.PI * 2; }
+      else { r = 0.08 + Math.random() * 0.14; theta = (i / (numStems - 2)) * Math.PI * 2 + (Math.random() * 0.5 - 0.25); }
+      const x = 0.5 + r * Math.cos(theta);
+      const y = 0.55 + Math.random() * 0.05 + r * Math.sin(theta);
+      newStems.push({
+        stemId: `magic_${Date.now()}_${i}`, src: f.src,
+        x: Math.max(0.15, Math.min(0.85, x)), y: Math.max(0.2, Math.min(0.85, y)),
+        width: (isCenter ? 0.35 : 0.25) * (0.85 + Math.random() * 0.3),
+        angle: (Math.random() * 50 - 25), zIndex: i,
+      });
+    }
+    setPresetRequest({ id: `magic_${Date.now()}`, stems: newStems });
+  }, []);
 
-  const goToPayment = () => {
+  const goToShare = () => {
     if (!hasBouquetContent) return;
     saveCheckoutDraft({ stems, note });
-    track("payment_page_open", { flowerCount, wordCount });
-    trackEvent("payment_page_open", { flowerCount, wordCount });
+    track("share_page_open", { flowerCount, wordCount });
+    trackEvent("share_page_open", { flowerCount, wordCount });
     navigate("/payment", { state: { flowerCount, stems, note } });
   };
 
-  /*  RENDER  */
   return (
-    <main className="cr-root pb-32" style={{ position: "relative", overflowX: "hidden" }}>
+    <main className="cr-root" style={{ paddingBottom: "6.5rem", position: "relative", overflowX: "hidden" }}>
       <style>{CSS}</style>
 
-      {/* floating bg doodles  WD only */}
+      {/* WD floating bg doodles */}
       {wdActive && (
         <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
           <DoodleFlower className="absolute -top-2 left-1 h-14 w-14 fp2 opacity-[.12]" />
@@ -366,27 +400,17 @@ export default function Create() {
         </div>
       )}
 
-      {/*  STICKY HEADER  */}
-      <header className="sticky top-0 z-30 border-b border-rose-100/60 backdrop-blur"
-        style={{ background: "rgba(253,246,240,.97)" }}>
-
-        {/* WD scrolling ticker */}
+      {/* ── STICKY HEADER ── */}
+      <header className="cr-header">
+        {/* WD ticker */}
         {wdActive && (
-          <div className="overflow-hidden border-b border-rose-200/50 py-1.5"
-            style={{ background: "linear-gradient(90deg,#3a3028,#8e3e3a,#c0605a,#8e3e3a,#3a3028)" }}>
+          <div className="overflow-hidden py-1.5" style={{ background: "linear-gradient(90deg,#3E2723,#7b5455,#ecbaba,#7b5455,#3E2723)" }}>
             <div className="flex ticker-inner whitespace-nowrap select-none">
               {[0, 1].map((gi) => (
-                <span key={gi} className="flex shrink-0 items-center gap-8 px-6 text-[11px] font-medium text-rose-100/90">
-                  {[" Happy Women's Day  March 8",
-                    " Send a bouquet she'll treasure",
-                    " Today-only special offer",
-                    " For Mom  Sister  Best Friend  Her",
-                    " Celebrate every woman in your life",
-                    " She deserves more than a text",
-                  ].map((txt, i) => (
-                    <span key={i} className="flex items-center gap-8">
-                      {txt}<span className="text-rose-400/60"></span>
-                    </span>
+                <span key={gi} className="flex shrink-0 items-center gap-8 px-6 text-[11px] font-medium" style={{ color: "rgba(253,217,216,0.9)" }}>
+                  {["Happy Women's Day  March 8", "Send a bouquet she'll treasure", "Today-only special offer",
+                    "For Mom  Sister  Best Friend  Her", "Celebrate every woman in your life", "She deserves more than a text"].map((txt, i) => (
+                    <span key={i} className="flex items-center gap-8">{txt}<span style={{ color: "rgba(255,180,170,0.5)" }}>✿</span></span>
                   ))}
                 </span>
               ))}
@@ -394,49 +418,39 @@ export default function Create() {
           </div>
         )}
 
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3">
-          <div className="flex items-center gap-2">
-            <img src="/logo-transparent.png" alt="Petals and Words" className="h-8 w-auto" />
-            {wdActive && (
-              <span className="rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700">
-                 Women's Day
-              </span>
-            )}
+        <div style={{ maxWidth: 680, margin: "0 auto", padding: "0.75rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <img src="/logo-transparent.png" alt="Petals and Words" style={{ height: 30, width: "auto" }} />
           </div>
-          <div className="flex items-center gap-2">
-            <div className="hidden items-center gap-1.5 sm:flex">
-              <span className="text-[11px] text-stone-400">{progress}%</span>
-              <div className="prog-track w-16"><div className="prog-fill" style={{ width: `${progress}%` }} /></div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            {/* Progress pill */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "#7b5455", letterSpacing: "0.1em" }}>{progress}%</span>
+              <div className="prog-track" style={{ width: 56 }}>
+                <div className="prog-fill" style={{ width: `${progress}%` }} />
+              </div>
             </div>
-            <Link to="/" className="rounded-full border border-rose-200 bg-white px-3 py-1.5 text-[12px] font-medium text-rose-700 transition hover:bg-rose-50">
-               Home
-            </Link>
+            <Link to="/" className="vv-btn-ghost">← Home</Link>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-2xl px-4 pt-4">
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "1rem 1.25rem" }}>
 
-        {/*  WD banner with countdown  */}
+        {/* WD Banner */}
         {wdActive && (
-          <div className="fs1 mb-4">
-            <div className="relative overflow-hidden rounded-2xl px-4 py-4"
-              style={{ background: "linear-gradient(135deg,#3a3028 0%,#8e3e3a 55%,#c0605a 100%)" }}>
+          <div className="fs1" style={{ marginBottom: "1rem" }}>
+            <div style={{ borderRadius: "1.5rem", overflow: "hidden", background: "linear-gradient(135deg, #3E2723 0%, #7b5455 100%)", padding: "1rem 1.25rem", position: "relative" }}>
               <DoodleWreathLeft className="absolute left-0 top-0 h-full w-10 opacity-35" />
               <DoodleWreathRight className="absolute right-0 top-0 h-full w-10 opacity-35" />
-              <DoodleSparkle className="absolute top-2 right-16 h-5 w-5 opacity-40 fp2" />
-              <DoodleSparkle className="absolute bottom-2 left-16 h-4 w-4 opacity-30 fp3" />
-              <div className="relative flex items-center justify-between gap-3">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", position: "relative" }}>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-rose-200">March 8  Women's Day</p>
-                  <p className="mt-0.5 text-[1.2rem] font-light leading-tight text-white"
-                    style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                    Happy Women's Day 
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-rose-100/80">This offer disappears at midnight</p>
+                  <p className="vv-label" style={{ color: "#ecbaba" }}>March 8 · Women's Day</p>
+                  <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.2rem", fontWeight: 400, color: "#fbf9f5", lineHeight: 1.3, marginTop: "0.2rem" }}>Happy Women's Day 🌸</p>
+                  <p style={{ fontSize: "0.75rem", color: "rgba(251,249,245,0.7)", marginTop: "0.2rem" }}>This offer disappears at midnight</p>
                 </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-rose-300">Ends in</p>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem", flexShrink: 0 }}>
+                  <p className="vv-label" style={{ color: "#ecbaba" }}>Ends in</p>
                   <MidnightCountdown />
                 </div>
               </div>
@@ -444,141 +458,160 @@ export default function Create() {
           </div>
         )}
 
-        {/*  Page heading  */}
-        <div className="fs2 mb-4 text-center">
+        {/* ── Page heading ── */}
+        <div className="fs2" style={{ marginBottom: "1rem", textAlign: "center" }}>
           {wdActive ? (
             <>
-              <div className="mb-1 flex items-center justify-center gap-2">
-                <DoodleStar className="h-5 w-5 opacity-65" />
-                <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-rose-500">Women's Day Bouquet Builder</p>
-                <DoodleStar className="h-5 w-5 opacity-65" />
-              </div>
-              <h1 className="text-[1.95rem] font-light leading-tight text-stone-900"
-                style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                Build a bouquet{" "}
-                <em className="wd-headline">she'll treasure forever</em>
+              <p className="vv-label" style={{ marginBottom: "0.4rem" }}>Women's Day Bouquet Builder</p>
+              <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "clamp(1.7rem, 6vw, 2.2rem)", fontWeight: 400, lineHeight: 1.2, margin: 0 }}>
+                Build a bouquet <em className="wd-shimmer">she'll treasure forever</em>
               </h1>
-              <p className="mx-auto mt-2 max-w-xs text-[13px] leading-relaxed text-stone-500">
-                Pick flowers  write her words  share in 60 seconds
+              <p style={{ fontSize: "0.82rem", color: "#6b5e5f", lineHeight: 1.6, marginTop: "0.5rem" }}>
+                Pick flowers · write her words · share in 60 seconds
               </p>
-              <DoodleCurly className="mx-auto mt-3 w-24 opacity-45" />
             </>
           ) : (
             <>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-rose-500">Bouquet builder</p>
-              <h1 className="mt-1 text-[1.9rem] font-light leading-tight text-stone-800"
-                style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                Create something <em>beautiful</em>
+              <p className="vv-label" style={{ marginBottom: "0.4rem" }}>Bouquet Builder</p>
+              <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "clamp(1.7rem, 6vw, 2.2rem)", fontWeight: 400, lineHeight: 1.2, margin: 0 }}>
+                Create something <em style={{ fontStyle: "italic", color: "#7b5455" }}>beautiful</em>
               </h1>
-              <p className="mt-1.5 text-[13px] text-stone-500">Add flowers  write a note  share instantly</p>
             </>
           )}
-          <div className="mx-auto mt-3 max-w-xs">
+          <div style={{ maxWidth: 280, margin: "0.75rem auto 0" }}>
             <div className="prog-track"><div className="prog-fill" style={{ width: `${progress}%` }} /></div>
           </div>
         </div>
 
-        {/*  WD occasion quick-pick chips  */}
+        {/* WD occasion chips */}
         {wdActive && (
-          <div className="fs3 mb-4 flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: "none" }}>
+          <div className="fs3" style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem", overflowX: "auto", scrollbarWidth: "none", paddingBottom: "0.25rem" }}>
             {WD_OCCASIONS.map((item) => (
               <button key={item.label} type="button"
                 onClick={() => setNote((n) => n || `Happy Women's Day! ${item.emoji}`)}
-                className="flex shrink-0 items-center gap-2 rounded-xl border border-rose-100 bg-white px-3 py-2 transition hover:border-rose-300 hover:bg-rose-50 active:scale-95">
-                <span className="text-xl leading-none">{item.emoji}</span>
-                <div className="text-left">
-                  <p className="text-[12px] font-semibold text-stone-800 leading-none">{item.label}</p>
-                  <p className="text-[10px] text-stone-400 leading-snug">{item.desc}</p>
+                style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: "0.5rem", background: "#ffffff", borderRadius: "0.875rem", border: "1.5px solid #ede8e9", padding: "0.5rem 0.75rem", cursor: "pointer", transition: "all 0.15s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#7b5455"; e.currentTarget.style.background = "#ffd9d8"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#ede8e9"; e.currentTarget.style.background = "#ffffff"; }}
+              >
+                <span style={{ fontSize: "1.1rem", lineHeight: 1 }}>{item.emoji}</span>
+                <div style={{ textAlign: "left" }}>
+                  <p style={{ fontSize: "0.78rem", fontWeight: 600, color: "#3E2723", lineHeight: 1 }}>{item.label}</p>
+                  <p style={{ fontSize: "0.68rem", color: "#9e8f90", lineHeight: 1.3, marginTop: "0.1rem" }}>{item.desc}</p>
                 </div>
               </button>
             ))}
           </div>
         )}
 
-        {/*  Canvas card  */}
-        <section className="fs3 mb-4 rounded-2xl border border-rose-100 bg-white p-4 shadow-md"
-          style={{ position: "relative" }}>
+        {/* ── CANVAS CARD ── */}
+        <section className="fs3 vv-card" style={{ marginBottom: "1rem", padding: "1rem", position: "relative" }}>
           {wdActive && (
             <>
               <DoodleBow className="absolute -top-2 left-1/2 h-9 w-20 -translate-x-1/2 opacity-55" />
               <DoodleFlower className="absolute -right-2 -top-2 h-11 w-11 opacity-22 fp2" />
-              <DoodleFlower className="absolute -left-2 -top-2 h-11 w-11 opacity-18 fp3"
-                style={{ transform: "scaleX(-1)" }} />
+              <DoodleFlower className="absolute -left-2 -top-2 h-11 w-11 opacity-18 fp3" style={{ transform: "scaleX(-1)" }} />
             </>
           )}
-          <div className="mb-3 flex items-center justify-between gap-2 pt-2">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{wdActive ? "" : ""}</span>
-              <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-500">
-                  {wdActive ? "Her bouquet" : "Your canvas"}
-                </p>
-                <p className="text-[15px] font-light text-stone-800 leading-tight"
-                  style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                  {wdActive ? "Arrange with love" : "Arrange your bouquet"}
-                </p>
+
+          {/* Canvas header row */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.875rem", paddingTop: wdActive ? "0.5rem" : 0 }}>
+            <div>
+              <p className="vv-label">{wdActive ? "Her bouquet" : "Your canvas"}</p>
+              <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1rem", fontWeight: 400, color: "#3E2723", lineHeight: 1.3, marginTop: "0.15rem" }}>
+                {wdActive ? "Arrange with love" : "Arrange your bouquet"}
+              </p>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <button type="button" className="magic-btn" onClick={generateMagicBouquet}>✨ Auto Generate</button>
+              <span className="count-pill" style={{ background: "#ffd9d8", color: "#7b5455" }}>🌸 {flowerCount}</span>
+              <span className="count-pill" style={{ background: "#fef9ec", color: "#b45309" }}>✍️ {wordCount}w</span>
+            </div>
+          </div>
+
+          {/* Canvas area - desktop or mobile */}
+          {isDesktop ? (
+            <div style={{ display: "grid", gridTemplateColumns: "156px 1fr 156px", gap: "0.75rem" }}>
+              {/* Left: flower types */}
+              <aside className="vv-card-low" style={{ padding: "0.75rem" }}>
+                <p className="vv-label" style={{ marginBottom: "0.5rem" }}>Flower type</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+                  {desktopFlowerGroups.map((group) => (
+                    <button key={group.id} type="button"
+                      className={`flower-type-btn ${selectedFlowerType === group.id ? "active" : "inactive"}`}
+                      onClick={() => setSelectedFlowerType(group.id)}>
+                      {group.label}
+                      <span style={{ marginLeft: "4px", fontSize: "0.68rem", fontWeight: 400, color: "#9e8f90" }}>({group.items.length})</span>
+                    </button>
+                  ))}
+                </div>
+              </aside>
+
+              {/* Center: canvas */}
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <CanvasBoard selectedFlower={selectedFlower} onCanvasStateChange={handleCanvasStateChange} presetRequest={presetRequest} />
               </div>
+
+              {/* Right: flowers for type */}
+              <aside className="vv-card-low" style={{ padding: "0.75rem" }}>
+                <p className="vv-label" style={{ marginBottom: "0.5rem" }}>Flowers</p>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem", maxHeight: 360, overflowY: "auto" }}>
+                  {desktopFlowersForType.map((flower) => (
+                    <button key={flower.id} type="button"
+                      className={`flower-tile ${selectedFlower === flower.src ? "selected" : ""}`}
+                      onClick={() => setSelectedFlower(flower.src)} title={flower.label}>
+                      <img src={flower.src} alt={flower.label} style={{ height: 56, width: "100%", objectFit: "contain" }} loading="lazy" />
+                    </button>
+                  ))}
+                </div>
+              </aside>
             </div>
-            <div className="flex gap-1.5">
-              <span className="rounded-full border border-rose-100 bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700">
-                 {flowerCount}
-              </span>
-              <span className="rounded-full border border-amber-100 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
-                 {wordCount}w
-              </span>
+          ) : (
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <CanvasBoard selectedFlower={selectedFlower} onCanvasStateChange={handleCanvasStateChange} presetRequest={presetRequest} />
             </div>
-          </div>
-          <div className="flex justify-center">
-            <CanvasBoard selectedFlower={selectedFlower} onCanvasStateChange={handleCanvasStateChange} presetRequest={presetRequest} />
-          </div>
+          )}
         </section>
 
-        {/*  Tab bar  */}
-        <div className="fs4 mb-4">
-          <div className="flex gap-1.5 rounded-2xl border border-stone-100 bg-white p-1.5 shadow-sm">
-            {[
-              { id: "flowers", label: wdActive ? "Flowers" : "Flowers", sub: wdActive ? "Her bouquet" : "Build bouquet" },
-              { id: "note", label: wdActive ? "Her Note" : "Note", sub: "Write message" },
-              { id: "ai", label: "AI Write", sub: "Auto-generate" },
-            ].map((tab) => (
-              <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
-                className={["flex-1 rounded-xl px-2 py-2.5 text-center transition-all duration-150 text-[13px] font-semibold",
-                  activeTab === tab.id ? "tab-on shadow-md" : "tab-off"].join(" ")}>
-                <div className="leading-none">{tab.label}</div>
-                <div className={`mt-0.5 text-[10px] leading-none ${activeTab === tab.id ? "text-rose-200" : "text-stone-400"}`}>
-                  {tab.sub}
-                </div>
-              </button>
-            ))}
+        {/* ── TAB BAR (mobile only) ── */}
+        {!isDesktop && (
+          <div className="fs4" style={{ marginBottom: "1rem" }}>
+            <div style={{ display: "flex", gap: "0.5rem", background: "#f5f3ef", borderRadius: "1.25rem", padding: "0.4rem" }}>
+              {[
+                { id: "flowers", label: "🌸 Flowers", sub: "Pick stems" },
+                { id: "note", label: "✍️ Note", sub: "Write message" },
+              ].map((tab) => (
+                <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
+                  className={`cr-tab-${activeTab === tab.id ? "on" : "off"}`}
+                  style={{ flex: 1, borderRadius: "0.875rem", padding: "0.6rem 0.5rem", border: "none", cursor: "pointer", fontFamily: "'Manrope', sans-serif", transition: "all 0.18s" }}>
+                  <div style={{ fontSize: "0.82rem", fontWeight: 700, lineHeight: 1 }}>{tab.label}</div>
+                  <div style={{ fontSize: "0.68rem", marginTop: "0.2rem", opacity: 0.65, lineHeight: 1 }}>{tab.sub}</div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/*  FLOWERS TAB  */}
+        {/* ── FLOWERS TAB ── */}
         {activeTab === "flowers" && (
-          <div className="fs5 space-y-4">
-            <FlowerPicker onPick={setSelectedFlower} selectedFlower={selectedFlower} />
+          <div className="fs5" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {/* Mobile flower picker */}
+            {!isDesktop && <FlowerPicker onPick={setSelectedFlower} selectedFlower={selectedFlower} />}
 
-            <div className="rounded-2xl border border-rose-100 bg-white p-4 shadow-md">
-              <div className="mb-3 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  {wdActive && <DoodleHeart className="h-5 w-6 shrink-0 opacity-70" />}
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-500">
-                    {wdActive ? "Women's Day styles" : "Bouquet presets"}
-                  </p>
-                </div>
+            {/* Bouquet presets */}
+            <div className="vv-card" style={{ padding: "1rem" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                <p className="vv-label">{wdActive ? "Women's Day styles" : "Bouquet presets"}</p>
                 {bouquetSuggestions.length > 4 && (
-                  <button type="button" onClick={() => setShowMoreBouquets(v => !v)}
-                    className="rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-[11px] font-semibold text-rose-700 transition hover:bg-rose-100">
+                  <button type="button" className="vv-btn-ghost" onClick={() => setShowMoreBouquets(v => !v)}>
                     {showMoreBouquets ? "Less" : "See all"}
                   </button>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-2">
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
                 {visibleBouquets.map((s) => (
-                  <button key={s.id} type="button" onClick={() => applyBouquet(s)}
-                    className="rounded-xl border border-rose-100 bg-[#faf6f0] px-3 py-2.5 text-left transition hover:border-rose-300 hover:bg-rose-50 active:scale-[.97]">
-                    <p className="text-[13px] font-semibold text-stone-800 leading-tight">{s.title}</p>
-                    <p className="mt-0.5 text-[11px] text-stone-500 leading-tight">{s.description}</p>
+                  <button key={s.id} type="button" className="preset-card" onClick={() => applyBouquet(s)}>
+                    <p style={{ fontSize: "0.82rem", fontWeight: 700, color: "#3E2723", lineHeight: 1.3 }}>{s.title}</p>
+                    <p style={{ fontSize: "0.72rem", color: "#6b5e5f", lineHeight: 1.4, marginTop: "0.2rem" }}>{s.description}</p>
                   </button>
                 ))}
               </div>
@@ -586,30 +619,23 @@ export default function Create() {
           </div>
         )}
 
-        {/*  NOTE TAB  */}
+        {/* ── NOTE TAB ── */}
         {activeTab === "note" && (
-          <div className="fs5 space-y-4">
+          <div className="fs5" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <NoteCard text={note} setText={setNote} />
 
             {/* WD note suggestions */}
             {wdActive && (
-              <div className="rounded-2xl border border-rose-100 bg-white p-4 shadow-md">
-                <div className="mb-3 flex items-center gap-2">
-                  <DoodleHeart className="h-5 w-6 shrink-0 opacity-70" />
-                  <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-500">Women's Day messages</p>
-                    <p className="text-[12px] text-stone-400">Tap to use | edit freely</p>
-                  </div>
-                </div>
-                <div className="space-y-2">
+              <div className="vv-card" style={{ padding: "1rem" }}>
+                <p className="vv-label" style={{ marginBottom: "0.25rem" }}>Women's Day messages</p>
+                <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginBottom: "0.75rem" }}>Tap to use · edit freely</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                   {WD_NOTE_SUGGESTIONS.map((s) => (
-                    <button key={s} type="button" onClick={() => setNote(s)}
-                      className={["w-full rounded-xl border px-3 py-3 text-left transition-all active:scale-[.98]",
-                        note === s ? "note-chip-on border-[#c0605a] bg-[#fff5f4]" : "note-chip-off"].join(" ")}>
-                      <p className="text-[14px] italic leading-relaxed text-stone-700"
-                        style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                        {s}
-                      </p>
+                    <button key={s} type="button"
+                      className={`w-full text-left px-3 py-3 rounded-xl border transition-all active:scale-[.98] ${note === s ? "note-chip-on" : "note-chip-off"}`}
+                      onClick={() => setNote(s)}
+                      style={{ fontFamily: "'Noto Serif', serif", fontSize: "0.88rem", color: "#3E2723", lineHeight: 1.65, cursor: "pointer" }}>
+                      {s}
                     </button>
                   ))}
                 </div>
@@ -618,22 +644,21 @@ export default function Create() {
 
             {/* Regular note suggestions */}
             {!wdActive && (
-              <div className="rounded-2xl border border-amber-100 bg-white p-4 shadow-md">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-amber-600">Note ideas</p>
+              <div className="vv-card" style={{ padding: "1rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                  <p className="vv-label">Note ideas</p>
                   {noteSuggestions.length > 4 && (
-                    <button type="button" onClick={() => setShowMoreNotes(v => !v)}
-                      className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-700 transition hover:bg-amber-100">
+                    <button type="button" className="vv-btn-ghost" onClick={() => setShowMoreNotes(v => !v)}>
                       {showMoreNotes ? "Less" : "See all"}
                     </button>
                   )}
                 </div>
-                <div className="space-y-2">
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                   {visibleNotes.map((s) => (
-                    <button key={s} type="button" onClick={() => setNote(s)}
-                      className={["w-full rounded-xl border px-3 py-2.5 text-left transition active:scale-[.98]",
-                        note === s ? "note-chip-on" : "note-chip-off"].join(" ")}
-                      style={{ fontFamily: '"Cormorant Garamond",serif', fontSize: "15px", color: "#78350f" }}>
+                    <button key={s} type="button"
+                      className={note === s ? "note-chip-on" : "note-chip-off"}
+                      onClick={() => setNote(s)}
+                      style={{ width: "100%", textAlign: "left", padding: "0.65rem 0.875rem", borderRadius: "0.875rem", border: "1.5px solid", fontFamily: "'Noto Serif', serif", fontSize: "0.9rem", color: "#3E2723", lineHeight: 1.6, cursor: "pointer", transition: "all 0.15s" }}>
                       {s}
                     </button>
                   ))}
@@ -643,72 +668,16 @@ export default function Create() {
           </div>
         )}
 
-        {/*  AI TAB  */}
-        {activeTab === "ai" && (
-          <div className="fs5">
-            <div className="rounded-2xl border border-sky-100 bg-white p-4 shadow-md">
-              <div className="mb-3 flex items-center gap-2">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 text-lg text-white shadow-md"></div>
-                <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-sky-600">AI Note Writer</p>
-                  <p className="text-[15px] font-light text-stone-800 leading-tight"
-                    style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                    {wdActive ? "Write a Women's Day note for her" : "Generate your note"}
-                  </p>
-                </div>
-              </div>
-              <p className="mb-3 text-[13px] leading-relaxed text-stone-500">
-                {wdActive
-                  ? "Tell us who she is to you  AI will craft a heartfelt Women's Day message in your voice."
-                  : "Describe your situation and AI will write a personal note for your bouquet."}
-              </p>
-              <textarea rows={4} value={situationText} onChange={(e) => setSituationText(e.target.value)}
-                placeholder={wdActive
-                  ? "E.g. It's for my mom who raised me alone and never once complained."
-                  : "E.g. We had a tough week and I want to apologize and make her smile."}
-                className="w-full resize-none rounded-xl border border-sky-100 bg-[#f7fbff] p-3 text-[14px] text-stone-800 outline-none placeholder:text-stone-300 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 transition"
-              />
-              <button type="button" onClick={generateAiNote} disabled={!canAiNote}
-                className={["mt-3 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl text-[13px] font-semibold uppercase tracking-[0.12em] transition-all active:scale-[.98]",
-                  canAiNote
-                    ? "bg-gradient-to-r from-sky-500 to-blue-500 text-white shadow-lg shadow-sky-200 hover:from-sky-600 hover:to-blue-600"
-                    : "cursor-not-allowed bg-stone-100 text-stone-400"
-                ].join(" ")}>
-                {isGeneratingNote
-                  ? <><svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>Writing...</>
-                  : <> {wdActive ? "Write Women's Day Note" : "Generate Note"}</>}
-              </button>
-              {generationError && (
-                <p className="mt-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-[12px] text-rose-700">{generationError}</p>
-              )}
-              {note && (
-                <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-emerald-700">Note ready </p>
-                  <p className="mt-1 text-[14px] italic leading-relaxed text-emerald-900"
-                    style={{ fontFamily: '"Cormorant Garamond",serif' }}>
-                    "{note.slice(0, 80)}{note.length > 80 ? "" : ""}"
-                  </p>
-                  <button type="button" onClick={() => setActiveTab("note")}
-                    className="mt-1 text-[11px] font-semibold text-emerald-700 underline underline-offset-2">
-                    View &amp; edit 
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/*  WD countdown strip  */}
+        {/* WD countdown strip */}
         {wdActive && (
-          <div className="fs6 mt-4">
-            <div className="relative overflow-hidden rounded-2xl px-4 py-4"
-              style={{ background: "linear-gradient(135deg,#3a3028,#8e3e3a)" }}>
+          <div className="fs6" style={{ marginTop: "1rem" }}>
+            <div style={{ borderRadius: "1.5rem", overflow: "hidden", background: "linear-gradient(135deg, #3E2723, #7b5455)", padding: "1rem 1.25rem" }}>
               <DoodleLeaf className="absolute -right-1 bottom-0 h-14 w-12 rotate-12 opacity-20" />
-              <div className="flex items-center justify-between gap-3">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200">Offer disappears at midnight</p>
-                  <p className="mt-0.5 text-[13px] text-white">
-                    {offerActive ? `Special price: ${smallPrice}` : `Plans from ${smallPrice} | One-time`}
+                  <p className="vv-label" style={{ color: "#ecbaba" }}>Offer disappears at midnight</p>
+                  <p style={{ fontSize: "0.82rem", color: "#fbf9f5", marginTop: "0.2rem" }}>
+                    {/* Pricing removed */}
                   </p>
                 </div>
                 <MidnightCountdown />
@@ -717,42 +686,33 @@ export default function Create() {
           </div>
         )}
 
-      </div>{/* /max-w-2xl */}
+      </div>{/* /max-w */}
 
-      {/*  FIXED BOTTOM CTA  */}
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-rose-100/60 backdrop-blur px-4 pb-5 pt-3 shadow-[0_-8px_30px_rgba(0,0,0,0.07)]"
-        style={{ background: "rgba(253,246,240,.97)" }}>
-        <div className="mx-auto max-w-2xl">
-          {wdActive && hasBouquetContent && (
-            <p className="mb-2 text-center text-[11px] font-medium text-rose-600">
-               She'll receive this on Women's Day  make it count
-            </p>
-          )}
-          <button type="button" onClick={goToPayment} disabled={!hasBouquetContent}
-            className={["flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl text-[14px] font-semibold uppercase tracking-[0.1em] transition-all active:scale-[.98]",
-              hasBouquetContent
-                ? wdActive
-                  ? "cta-glow bg-gradient-to-r from-[#3a3028] to-[#8e3e3a] text-[#faf6f0] shadow-lg"
-                  : "bg-[#3a3028] text-[#faf6f0] shadow-lg hover:bg-[#8e3e3a]"
-                : "cursor-not-allowed bg-stone-200 text-stone-400"
-            ].join(" ")}>
+      {/* ── FIXED BOTTOM CTA ── */}
+      <div className="cr-bottom">
+        <div style={{ maxWidth: 680, margin: "0 auto" }}>
+
+          <button
+            type="button"
+            onClick={goToShare}
+            disabled={!hasBouquetContent}
+            className={`vv-btn-primary ${hasBouquetContent ? "cta-glow" : ""}`}
+          >
             {hasBouquetContent ? (
               <>
-                {wdActive ? " Send her bouquet" : "Continue to checkout"}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                  strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                Share Bouquet 🎉
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </>
             ) : (
-              wdActive ? "Add flowers or a note for her first" : "Add flowers or a note to continue"
+              "Add flowers or a note to continue"
             )}
           </button>
-          <div className="mt-2 flex items-center justify-center gap-3 text-[11px] text-stone-400">
-            <span>Secure</span><span>|</span>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", marginTop: "0.6rem", fontSize: "0.7rem", color: "#9e8f90", letterSpacing: "0.08em" }}>
+            <span>✨ 100% Free</span><span>|</span>
             <span>Instant link</span><span>|</span>
-            <span>{smallPrice} one-time</span>
-            {wdActive && <><span>|</span><span className="font-medium text-rose-500">WD Special</span></>}
+            <span>No login needed</span>
           </div>
         </div>
       </div>
