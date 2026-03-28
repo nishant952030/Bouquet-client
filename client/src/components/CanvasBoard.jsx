@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import { Canvas, FabricImage } from "fabric";
 import { getCleanFlowerImageSrc } from "../lib/flowerImage";
 
@@ -20,13 +20,9 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
   const wrapperRef = useRef(null);
   const fabricCanvas = useRef(null);
 
-  const activationTimerRef = useRef(null);
-  const touchStartRef = useRef({ x: 0, y: 0 });
   const [canvasSize, setCanvasSize] = useState({ width: 300, height: Math.round(300 * CANVAS_RATIO) });
   const [canRemoveSelected, setCanRemoveSelected] = useState(false);
   const [canRaiseSelected, setCanRaiseSelected] = useState(false);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [isCanvasActive, setIsCanvasActive] = useState(true);
 
   const serializeStems = (canvas) =>
     canvas
@@ -71,6 +67,9 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
               angle: stem.angle ?? 0,
               cornerStyle: "circle",
               transparentCorners: false,
+              cornerSize: 18,
+              touchCornerSize: 28,
+              padding: 8,
               flowerSrc: stem.src,
               stemId: stem.stemId ?? `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
             });
@@ -79,12 +78,6 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
           .catch(() => null),
       ),
     );
-
-  useEffect(() => {
-    const coarsePointer = typeof window !== "undefined" && (window.matchMedia?.("(pointer: coarse)")?.matches || "ontouchstart" in window);
-    setIsTouchDevice(Boolean(coarsePointer));
-    setIsCanvasActive(!coarsePointer);
-  }, []);
 
   useEffect(() => {
     const updateCanvasSize = () => {
@@ -99,16 +92,16 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
     return () => window.removeEventListener("resize", updateCanvasSize);
   }, []);
 
-  useEffect(() => () => clearTimeout(activationTimerRef.current), []);
-
   useEffect(() => {
     if (!canvasRef.current) return undefined;
     const canvas = new Canvas(canvasRef.current, {
       width: canvasSize.width,
       height: canvasSize.height,
       selection: false,
+      preserveObjectStacking: true,
     });
     canvas.backgroundColor = "#fff8f2";
+    canvas.targetFindTolerance = 10;
 
     canvas.renderAll();
     fabricCanvas.current = canvas;
@@ -172,6 +165,9 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
           angle: Math.random() * 16 - 8,
           cornerStyle: "circle",
           transparentCorners: false,
+          cornerSize: 18,
+          touchCornerSize: 28,
+          padding: 8,
           flowerSrc: selectedFlower,
           stemId: `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
         });
@@ -235,77 +231,17 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
     persistAndEmit(canvas);
   };
 
-  const deactivateCanvasTouchMode = () => {
-    setIsCanvasActive(false);
-    const canvas = fabricCanvas.current;
-    if (!canvas) return;
-    canvas.discardActiveObject();
-    canvas.renderAll();
-    updateRemoveState(canvas);
-  };
-
-  const handleOverlayTouchStart = (event) => {
-    const touch = event.touches?.[0];
-    if (!touch) return;
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-    clearTimeout(activationTimerRef.current);
-    activationTimerRef.current = setTimeout(() => {
-      setIsCanvasActive(true);
-    }, 160);
-  };
-
-  const handleOverlayTouchMove = (event) => {
-    const touch = event.touches?.[0];
-    if (!touch) return;
-    const dx = Math.abs(touch.clientX - touchStartRef.current.x);
-    const dy = Math.abs(touch.clientY - touchStartRef.current.y);
-    if (dx > 8 || dy > 8) {
-      clearTimeout(activationTimerRef.current);
-    }
-  };
-
-  const clearOverlayActivationTimer = () => {
-    clearTimeout(activationTimerRef.current);
-  };
-
   return (
     <div ref={wrapperRef} className="w-full">
-      {/* Canvas wrapper — warm card */}
+      {/* Canvas wrapper â€” warm card */}
       <div
         className="relative overflow-hidden rounded-2xl border border-rose-100 bg-[#fff8f2] shadow-lg shadow-rose-100/50"
-        style={{ touchAction: isTouchDevice && !isCanvasActive ? "pan-y" : "none" }}
+        style={{ touchAction: "none" }}
       >
-        <canvas
-          ref={canvasRef}
-          className={["mx-auto block rounded-2xl", isTouchDevice && !isCanvasActive ? "pointer-events-none" : ""].join(" ")}
-        />
-        {isTouchDevice && !isCanvasActive && (
-          <button
-            type="button"
-            onClick={() => setIsCanvasActive(true)}
-            onTouchStart={handleOverlayTouchStart}
-            onTouchMove={handleOverlayTouchMove}
-            onTouchEnd={clearOverlayActivationTimer}
-            onTouchCancel={clearOverlayActivationTimer}
-            className="absolute inset-0 z-20 flex items-center justify-center bg-white/20 px-4 text-center backdrop-blur-[0.5px]"
-          >
-            <span className="rounded-full border border-rose-200 bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em] text-rose-700">
-              Hold or tap to edit bouquet
-            </span>
-          </button>
-        )}
-        {isTouchDevice && isCanvasActive && (
-          <button
-            type="button"
-            onClick={deactivateCanvasTouchMode}
-            className="absolute right-2 top-2 z-20 rounded-full border border-rose-200 bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-rose-700"
-          >
-            Done
-          </button>
-        )}
+        <canvas ref={canvasRef} className="mx-auto block rounded-2xl" />
       </div>
 
-      {/* Controls row — touch-friendly, 48px tall minimum */}
+      {/* Controls row â€” touch-friendly, 48px tall minimum */}
       <div className="mt-3 grid grid-cols-3 gap-2">
         <button
           type="button"
@@ -318,7 +254,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
               : "cursor-not-allowed border border-stone-100 bg-stone-50 text-stone-300",
           ].join(" ")}
         >
-          <span className="text-base">↑</span>
+          <span className="text-base">â†‘</span>
           Forward
         </button>
         <button
@@ -332,7 +268,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
               : "cursor-not-allowed border border-stone-100 bg-stone-50 text-stone-300",
           ].join(" ")}
         >
-          <span className="text-base">✕</span>
+          <span className="text-base">âœ•</span>
           Remove
         </button>
         <button
@@ -340,14 +276,16 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
           onClick={clearCanvasFlowers}
           className="flex min-h-[44px] w-full flex-col items-center justify-center gap-0.5 rounded-xl border border-amber-200 bg-amber-50 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-amber-800 transition-all hover:bg-amber-100 active:scale-95"
         >
-          <span className="text-base">🗑</span>
+          <span className="text-base">ðŸ—‘</span>
           Clear
         </button>
       </div>
 
       <p className="mt-2 text-center text-[11px] text-stone-400">
-        Tap a flower to select · drag to reposition
+        Tap to select, drag to move, use corner handles to resize or rotate
       </p>
     </div>
   );
 }
+
+
