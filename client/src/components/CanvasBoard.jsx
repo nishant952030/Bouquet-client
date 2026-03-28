@@ -254,7 +254,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
               : "cursor-not-allowed border border-stone-100 bg-stone-50 text-stone-300",
           ].join(" ")}
         >
-          <span className="text-base">â†‘</span>
+          <span className="text-base">{"\u2191"}</span>
           Forward
         </button>
         <button
@@ -268,7 +268,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
               : "cursor-not-allowed border border-stone-100 bg-stone-50 text-stone-300",
           ].join(" ")}
         >
-          <span className="text-base">âœ•</span>
+          <span className="text-base">{"\u00D7"}</span>
           Remove
         </button>
         <button
@@ -276,7 +276,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
           onClick={clearCanvasFlowers}
           className="flex min-h-[44px] w-full flex-col items-center justify-center gap-0.5 rounded-xl border border-amber-200 bg-amber-50 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-amber-800 transition-all hover:bg-amber-100 active:scale-95"
         >
-          <span className="text-base">ðŸ—‘</span>
+          <span className="text-base">{"\u{1F5D1}"}</span>
           Clear
         </button>
       </div>
