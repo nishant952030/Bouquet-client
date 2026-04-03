@@ -13,7 +13,7 @@ import { clearCheckoutDraft, loadCheckoutDraft } from "../lib/checkoutStorage";
 const PENDING_KEY = "pw_pending_global_checkout";
 
 const TIP_PRESETS_INR = [
-  { label: "☕", amount: 1, display: "₹1" },
+  { label: "☕", amount: 29, display: "₹29" },
   { label: "☕☕", amount: 99, display: "₹99" },
   { label: "☕☕☕", amount: 149, display: "₹149" },
 ];

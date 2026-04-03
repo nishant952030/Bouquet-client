@@ -370,7 +370,7 @@ export default function Create() {
 
   const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
   const TIP_PRESETS = [
-    { label: "☕", amount: 1, display: "₹1" },
+    { label: "☕", amount: 29, display: "₹29" },
     { label: "☕☕", amount: 49, display: "₹49" },
     { label: "☕☕☕", amount: 99, display: "₹99" },
   ];
