@@ -31,6 +31,7 @@ export default function App() {
         <Route path="/create" element={<Create />} />
         <Route path="/creaete" element={<Navigate to="/create" replace />} />
         <Route path="/payment" element={<Payment />} />
+        <Route path="/view/:id/*" element={<ViewBouquet />} />
         <Route path="/view/:id" element={<ViewBouquet />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

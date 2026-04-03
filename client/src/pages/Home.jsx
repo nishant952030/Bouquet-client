@@ -274,15 +274,15 @@ export default function Home() {
 
   useEffect(() => {
     applySeo({
-      title: "Free Online Bouquet Maker | Send Digital Bouquet with Note",
-      description: "Create and send a free digital bouquet with a personal note in minutes. Choose your bouquet style, add your message, and share instantly.",
+      title: "Free Online Bouquet Maker | Create & Send Digital Flowers with Note",
+      description: "Create and send a free digital bouquet with a personal note in minutes. Pick flowers, write your message, and share instantly. No signup, 100% free.",
       keywords: seoKeywords.home,
       path: "/",
       jsonLd: {
         "@context": "https://schema.org",
         "@graph": [
           { "@type": "WebSite", name: "Petals and Words", url: window.location.origin, description: "Free online bouquet maker for creating and sharing digital flowers with personal notes." },
-          { "@type": "SoftwareApplication", name: "Petals and Words Bouquet Maker", applicationCategory: "LifestyleApplication", operatingSystem: "Web", offers: { "@type": "Offer", priceCurrency: "USD", price: "0" }, url: `${window.location.origin}/create` },
+          { "@type": "SoftwareApplication", name: "Petals and Words Free Bouquet Maker", applicationCategory: "LifestyleApplication", operatingSystem: "Web", offers: { "@type": "Offer", priceCurrency: "USD", price: "0" }, url: `${window.location.origin}/create` },
         ],
       },
     });

@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { track } from "@vercel/analytics";
+import { doc, setDoc } from "firebase/firestore";
+import { db, isFirebaseConfigured } from "../lib/firebase";
+import { loadRazorpayScript } from "../lib/razorpay";
 import CanvasBoard from "../components/CanvasBoard";
 import FlowerPicker from "../components/FlowerPicker";
 import NoteCard from "../components/NoteCard";
@@ -9,7 +12,7 @@ import { flowers } from "../data/flowerCatalog";
 import { trackEvent } from "../lib/analytics";
 
 import { applySeo, seoKeywords } from "../lib/seo";
-import { loadCheckoutDraft, saveCheckoutDraft } from "../lib/checkoutStorage";
+import { loadCheckoutDraft, saveCheckoutDraft, clearCheckoutDraft } from "../lib/checkoutStorage";
 import {
   DoodleFlower,
   DoodleHeart,
@@ -227,6 +230,104 @@ const CSS = `
   }
   .cta-glow { animation: ctaPulse 2.4s ease-in-out infinite; }
 
+  /* ─── Coffee Modal ─── */
+  @keyframes modalFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(40px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .coffee-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(27,28,26,0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+    animation: modalFadeIn 0.3s ease forwards;
+  }
+  .coffee-modal {
+    background: #ffffff;
+    border-radius: 1.75rem;
+    padding: 2rem 1.5rem;
+    max-width: 380px; width: 100%;
+    position: relative;
+    box-shadow: 0 24px 60px rgba(27,28,26,0.15), 0 0 0 1px rgba(27,28,26,0.04);
+    animation: modalSlideUp 0.4s cubic-bezier(0.2,0.8,0.2,1) forwards;
+    text-align: center;
+  }
+  .coffee-close {
+    position: absolute; top: 12px; right: 14px;
+    background: #f5f3ef; border: none; border-radius: 50%;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1rem; color: #6b5e5f;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .coffee-close:hover { background: #ede8e9; transform: scale(1.1); }
+  .coffee-tip-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px;
+    background: #f5f3ef;
+    border: 2px solid transparent;
+    border-radius: 1rem;
+    padding: 0.75rem 0.5rem;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+    transition: all 0.18s;
+    flex: 1;
+  }
+  .coffee-tip-btn:hover { border-color: #d2c3c4; background: #ffd9d8; }
+  .coffee-tip-btn.selected { border-color: #7b5455; background: #fff5f4; }
+  .coffee-tip-btn .tip-emoji { font-size: 1.2rem; line-height: 1; }
+  .coffee-tip-btn .tip-amount { font-size: 0.88rem; font-weight: 700; color: #3E2723; }
+  .coffee-pay-btn {
+    width: 100%; min-height: 48px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #7b5455 0%, #ffd9d8 160%);
+    color: #ffffff;
+    border: none;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.85rem; font-weight: 700;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.18s ease;
+    box-shadow: 0 10px 30px rgba(123,84,85,0.22);
+  }
+  .coffee-pay-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 40px rgba(123,84,85,0.3);
+  }
+  .coffee-pay-btn:active:not(:disabled) { transform: scale(0.98); }
+  .coffee-pay-btn:disabled { background: #e4e2de; color: #9e8f90; cursor: not-allowed; box-shadow: none; }
+  @keyframes coffeeSpin {
+    to { transform: rotate(360deg); }
+  }
+  .coffee-spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(158, 143, 144, 0.4);
+    border-radius: 50%;
+    border-top-color: #9e8f90;
+    animation: coffeeSpin 0.8s linear infinite;
+  }
+  @keyframes coffeeSteam {
+    0%   { opacity: 0; transform: translateY(0) scaleX(1); }
+    50%  { opacity: 0.7; transform: translateY(-6px) scaleX(1.1); }
+    100% { opacity: 0; transform: translateY(-14px) scaleX(0.8); }
+  }
+  .csteam-1 { animation: coffeeSteam 2s ease-in-out infinite; }
+  .csteam-2 { animation: coffeeSteam 2s ease-in-out infinite 0.3s; }
+  .csteam-3 { animation: coffeeSteam 2s ease-in-out infinite 0.6s; }
+  @keyframes linkPulse {
+    0%,100% { opacity: 0.6; }
+    50%     { opacity: 1; }
+  }
+  .link-status-pulse { animation: linkPulse 1.5s ease-in-out infinite; }
+
   /* Fixed bottom bar */
   .cr-bottom {
     position: fixed; inset: auto 0 0;
@@ -248,6 +349,7 @@ export default function Create() {
   const [selectedFlower, setSelectedFlower] = useState(null);
   const [stems, setStems] = useState([]);
   const [note, setNote] = useState("");
+  const [senderName, setSenderName] = useState("");
   const [presetRequest, setPresetRequest] = useState(null);
   const [showMoreBouquets, setShowMoreBouquets] = useState(false);
   const [showMoreNotes, setShowMoreNotes] = useState(false);
@@ -257,6 +359,22 @@ export default function Create() {
     return window.matchMedia("(min-width: 1024px)").matches;
   });
   const hasTracked = useRef(false);
+
+  /* coffee modal state */
+  const [showCoffeeModal, setShowCoffeeModal] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [selectedTip, setSelectedTip] = useState(1);
+  const [isTipping, setIsTipping] = useState(false);
+  const [tipDone, setTipDone] = useState(false);
+
+  const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
+  const TIP_PRESETS = [
+    { label: "☕", amount: 1, display: "₹1" },
+    { label: "☕☕", amount: 49, display: "₹49" },
+    { label: "☕☕☕", amount: 99, display: "₹99" },
+  ];
+  const currentTip = TIP_PRESETS[selectedTip];
 
   const flowerCount = stems.length;
   const wordCount = countWords(note);
@@ -308,8 +426,8 @@ export default function Create() {
 
   useEffect(() => {
     applySeo({
-      title: "Create Digital Bouquet Online | Add Flowers and Note",
-      description: "Create a free digital bouquet online, add your personal note, and share your bouquet link instantly.",
+      title: "Create Free Digital Bouquet Online | Add Flowers & Personal Note",
+      description: "Create a free digital bouquet online. Choose flowers, write a heartfelt note, and share your bouquet link instantly. No signup, 100% free.",
       keywords: seoKeywords.create,
       path: "/create",
       jsonLd: {
@@ -337,11 +455,12 @@ export default function Create() {
     const draft = loadCheckoutDraft();
     if (!draft) return;
     if (draft.note) setNote(draft.note);
+    if (draft.senderName) setSenderName(draft.senderName);
     if (Array.isArray(draft.stems) && draft.stems.length)
       setPresetRequest({ id: `draft_${Date.now()}`, stems: draft.stems });
   }, []);
 
-  useEffect(() => { saveCheckoutDraft({ stems, note }); }, [stems, note]);
+  useEffect(() => { saveCheckoutDraft({ stems, note, senderName }); }, [stems, note, senderName]);
 
   const handleCanvasStateChange = useCallback((nextStems) => {
     if (Array.isArray(nextStems)) setStems(nextStems);
@@ -375,12 +494,99 @@ export default function Create() {
     setPresetRequest({ id: `magic_${Date.now()}`, stems: newStems });
   }, []);
 
+  /* ── Save bouquet & generate link (runs in background) ── */
+  const saveBouquetInBackground = useCallback(async () => {
+    if (isSaving || shareUrl) return;
+    setIsSaving(true);
+    const id = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
+    const payload = {
+      stems,
+      note,
+      senderName: senderName.trim(),
+      plan: "free",
+      createdAt: new Date().toISOString(),
+    };
+    try {
+      if (isFirebaseConfigured && db) await setDoc(doc(db, "bouquets", id), payload);
+    } catch (err) {
+      console.warn("Firebase save failed (non-fatal):", err.message);
+    }
+    try {
+      localStorage.setItem(`bouquet_share_${id}`, JSON.stringify(payload));
+      clearCheckoutDraft();
+    } catch { /* localStorage full */ }
+    const url = `${window.location.origin}/view/${id}`;
+    setShareUrl(url);
+    setIsSaving(false);
+    track("bouquet_shared_free", { flowerCount, wordCount });
+    trackEvent("bouquet_shared_free", { flowerCount, wordCount });
+  }, [isSaving, shareUrl, stems, note, flowerCount, wordCount]);
+
+  /* ── Razorpay tip from modal ── */
+  const startTip = async () => {
+    if (isTipping || !razorpayKeyId) return;
+    setIsTipping(true);
+    try {
+      const ready = await loadRazorpayScript();
+      if (!ready || !window.Razorpay) throw new Error("Unable to load Razorpay.");
+      track("tip_attempt", { provider: "razorpay", amount: currentTip.amount });
+      const orderRes = await fetch("/api/razorpay/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId: "tip",
+          amountPaise: currentTip.amount * 100,
+          receipt: `tip_${Date.now()}`,
+          notes: { type: "buy_me_a_coffee", amount: currentTip.amount },
+        }),
+      });
+      const orderData = await orderRes.json();
+      if (!orderRes.ok || !orderData?.orderId) throw new Error("Unable to create tip order.");
+      
+      const razorpay = new window.Razorpay({
+        key: razorpayKeyId,
+        order_id: orderData.orderId,
+        name: "Petals and Words",
+        description: "Buy me a coffee ☕",
+        theme: { color: "#7b5455" },
+        modal: { 
+          ondismiss: () => { setIsTipping(false); } 
+        },
+        handler: async (response) => {
+          try {
+            await fetch("/api/razorpay/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response),
+            });
+          } catch { /* still mark done */ }
+          setIsTipping(false);
+          setTipDone(true);
+          track("tip_success", { provider: "razorpay", amount: currentTip.amount });
+        },
+      });
+      razorpay.on("payment.failed", () => { setIsTipping(false); });
+      razorpay.open();
+    } catch (err) {
+      console.error(err);
+      setIsTipping(false);
+    }
+  };
+
+  /* ── Open coffee modal + start saving ── */
   const goToShare = () => {
     if (!hasBouquetContent) return;
-    saveCheckoutDraft({ stems, note });
+    saveCheckoutDraft({ stems, note, senderName });
     track("share_page_open", { flowerCount, wordCount });
     trackEvent("share_page_open", { flowerCount, wordCount });
-    navigate("/payment", { state: { flowerCount, stems, note } });
+    setShowCoffeeModal(true);
+    saveBouquetInBackground();
+  };
+
+  /* ── Proceed to payment/share page ── */
+  const proceedToShare = () => {
+    setShowCoffeeModal(false);
+    navigate("/payment", { state: { flowerCount, stems, note, senderName, shareUrl } });
   };
 
   return (
@@ -624,6 +830,28 @@ export default function Create() {
           <div className="fs5" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <NoteCard text={note} setText={setNote} />
 
+            <div className="vv-card" style={{ padding: "1rem" }}>
+              <label htmlFor="senderNameInput" className="vv-label" style={{ display: "block", marginBottom: "0.4rem" }}>
+                Who is it from?
+              </label>
+              <input
+                id="senderNameInput"
+                type="text"
+                placeholder="Your Name (Optional)"
+                value={senderName}
+                onChange={(e) => setSenderName(e.target.value)}
+                style={{
+                  width: "100%", padding: "0.75rem 1rem",
+                  borderRadius: "0.875rem", border: "1.5px solid #ede8e9",
+                  fontFamily: "'Manrope', sans-serif", fontSize: "0.9rem",
+                  color: "#3E2723", background: "#fbf9f5",
+                  outline: "none", transition: "border-color 0.2s"
+                }}
+                onFocus={(e) => e.target.style.borderColor = "#7b5455"}
+                onBlur={(e) => e.target.style.borderColor = "#ede8e9"}
+              />
+            </div>
+
             {/* WD note suggestions */}
             {wdActive && (
               <div className="vv-card" style={{ padding: "1rem" }}>
@@ -687,6 +915,120 @@ export default function Create() {
         )}
 
       </div>{/* /max-w */}
+
+      {/* ── COFFEE MODAL ── */}
+      {showCoffeeModal && (
+        <div className="coffee-overlay" onClick={(e) => { if (e.target === e.currentTarget) proceedToShare(); }}>
+          <div className="coffee-modal">
+            <button type="button" className="coffee-close" onClick={proceedToShare} aria-label="Close">
+              ✕
+            </button>
+
+            {/* Link status indicator */}
+            <div style={{ marginBottom: "1rem" }}>
+              {isSaving ? (
+                <p className="link-status-pulse" style={{ fontSize: "0.75rem", color: "#7b5455", fontWeight: 600 }}>
+                  ⏳ Generating your link...
+                </p>
+              ) : shareUrl ? (
+                <p style={{ fontSize: "0.75rem", color: "#22c55e", fontWeight: 600 }}>
+                  ✅ Your bouquet link is ready!
+                </p>
+              ) : null}
+            </div>
+
+            {!tipDone ? (
+              <>
+                {/* Coffee cup with steam */}
+                <div style={{ position: "relative", display: "inline-block", marginBottom: "0.25rem" }}>
+                  <div style={{ display: "flex", justifyContent: "center", gap: "3px", marginBottom: "-4px" }}>
+                    <span className="csteam-1" style={{ fontSize: "0.65rem", color: "#d2c3c4" }}>~</span>
+                    <span className="csteam-2" style={{ fontSize: "0.65rem", color: "#d2c3c4" }}>~</span>
+                    <span className="csteam-3" style={{ fontSize: "0.65rem", color: "#d2c3c4" }}>~</span>
+                  </div>
+                  <span style={{ fontSize: "2rem" }}>☕</span>
+                </div>
+
+                <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.2rem", fontWeight: 400, marginBottom: "0.25rem", color: "#3E2723" }}>
+                  Enjoying Petals & Words?
+                </h2>
+                <p style={{ fontSize: "0.8rem", color: "#6b5e5f", lineHeight: 1.6, marginBottom: "1rem" }}>
+                  This tool is 100% free. If you liked it,<br />
+                  consider buying me a coffee!
+                </p>
+
+                {/* Tip presets */}
+                <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.875rem" }}>
+                  {TIP_PRESETS.map((preset, i) => (
+                    <button
+                      key={preset.display}
+                      type="button"
+                      className={`coffee-tip-btn ${selectedTip === i ? "selected" : ""}`}
+                      onClick={() => setSelectedTip(i)}
+                    >
+                      <span className="tip-emoji">{preset.label}</span>
+                      <span className="tip-amount">{preset.display}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Pay button */}
+                <button
+                  type="button"
+                  className="coffee-pay-btn"
+                  onClick={startTip}
+                  disabled={isTipping}
+                >
+                  {isTipping ? (
+                    <>
+                      <span className="coffee-spinner" /> Opening payment...
+                    </>
+                  ) : (
+                    `Buy me a coffee · ${currentTip.display}`
+                  )}
+                </button>
+
+                <p style={{ fontSize: "0.7rem", color: "#c4b5b6", marginTop: "0.75rem" }}>
+                  Completely optional — your bouquet is free! 🌸
+                </p>
+
+                {/* Skip link */}
+                <button
+                  type="button"
+                  onClick={proceedToShare}
+                  style={{
+                    marginTop: "0.75rem",
+                    background: "none", border: "none", cursor: "pointer",
+                    fontSize: "0.78rem", color: "#9e8f90",
+                    textDecoration: "underline", textUnderlineOffset: "3px",
+                    fontFamily: "'Manrope', sans-serif",
+                  }}
+                >
+                  No thanks, show my link →
+                </button>
+              </>
+            ) : (
+              /* Thank you state */
+              <>
+                <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>💜</span>
+                <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.25rem", fontWeight: 400, marginBottom: "0.3rem", color: "#7b5455" }}>
+                  Thank you so much!
+                </h2>
+                <p style={{ fontSize: "0.82rem", color: "#6b5e5f", lineHeight: 1.6, marginBottom: "1rem" }}>
+                  Your support means the world 💐
+                </p>
+                <button
+                  type="button"
+                  className="coffee-pay-btn"
+                  onClick={proceedToShare}
+                >
+                  Get your share link →
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── FIXED BOTTOM CTA ── */}
       <div className="cr-bottom">

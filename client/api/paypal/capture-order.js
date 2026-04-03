@@ -1,4 +1,5 @@
 import process from "node:process";
+import { notifyPayment } from "../_lib/notify.js";
 
 function getBaseUrl() {
   return process.env.PAYPAL_ENV === "live"
@@ -54,9 +55,24 @@ export default async function handler(req, res) {
       throw new Error(capture?.message || "Unable to capture PayPal order");
     }
 
-    const captureId = capture?.purchase_units?.[0]?.payments?.captures?.[0]?.id || "";
+    const captureUnit = capture?.purchase_units?.[0]?.payments?.captures?.[0];
+    const captureId = captureUnit?.id || "";
     const status = capture?.status || "";
     const ok = status === "COMPLETED";
+
+    // Send email notification (best-effort, non-blocking)
+    if (ok) {
+      const amountCents = Math.round(
+        parseFloat(captureUnit?.amount?.value || "0") * 100
+      );
+      notifyPayment({
+        provider: "PayPal",
+        amount: amountCents,
+        currency: captureUnit?.amount?.currency_code || "USD",
+        paymentId: captureId,
+        orderId: capture?.id || orderId,
+      }).catch(() => {});
+    }
 
     return res.status(200).json({
       ok,
@@ -70,3 +86,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Unable to capture PayPal order" });
   }
 }
+

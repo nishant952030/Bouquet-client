@@ -13,7 +13,7 @@ import { clearCheckoutDraft, loadCheckoutDraft } from "../lib/checkoutStorage";
 const PENDING_KEY = "pw_pending_global_checkout";
 
 const TIP_PRESETS_INR = [
-  { label: "☕", amount: 49, display: "₹49" },
+  { label: "☕", amount: 1, display: "₹1" },
   { label: "☕☕", amount: 99, display: "₹99" },
   { label: "☕☕☕", amount: 149, display: "₹149" },
 ];
@@ -216,7 +216,7 @@ export default function Payment() {
   const wordCount = countWords(note);
 
   const [senderName] = useState(initName);
-  const [shareUrl, setShareUrl] = useState("");
+  const [shareUrl, setShareUrl] = useState(location.state?.shareUrl || "");
   const [isSaving, setIsSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");

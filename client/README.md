@@ -99,3 +99,18 @@ Serverless endpoints:
 
 - Global default: PayPal
 - Optional alternative: Stripe Checkout
+
+## Custom Analytics (Self-Hosted)
+
+Privacy-focused, open-source website analytics. See `analytics-tracker/` directory.
+
+1. Deploy `analytics-tracker/` to Vercel
+2. Add Firebase credentials to the tracker project
+3. Set `VITE_ANALYTICS_WEBSITE_ID` in `client/.env`
+4. Add to `client/.env`:
+   - `VITE_ANALYTICS_WEBSITE_ID=petalsandwords` (or your custom ID)
+5. Deploy client — tracking starts automatically
+
+Dashboard: `https://your-analytics-domain.vercel.app`
+
+Features: Pageviews, unique visitors, referrers, top pages, devices, countries.

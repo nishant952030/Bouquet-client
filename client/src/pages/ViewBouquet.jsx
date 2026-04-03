@@ -57,6 +57,7 @@ const CSS = `
     position: relative;
     z-index: 1;
     isolation: isolate;
+    overflow: visible;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -102,8 +103,8 @@ const CSS = `
   }
   .vb-hanging-tag-container {
     position: absolute;
-    bottom: 3.5rem; /* higher up so it overlaps the canvas nicely */
-    right: 1rem;    /* brought inwards so it never gets clipped by screen edges */
+    bottom: -2.5rem; /* much lower so it does not hide the bouquet */
+    right: -1rem;    /* pushed to the side */
     z-index: 120;
     transform-origin: top center;
     transform: translateZ(0);
@@ -300,7 +301,11 @@ function FloatingDecorations() {
 
 /* ── MAIN COMPONENT ── */
 export default function ViewBouquet() {
-  const { id } = useParams();
+  const { id: rawId } = useParams();
+  // Bouquet IDs are Date.now() (13 digits) + base36 random (4-8 chars),
+  // so they only contain [a-z0-9]. Strip anything after the first non-ID
+  // character (spaces, slashes, encoded chars, appended text, etc.).
+  const id = rawId ? rawId.match(/^[a-z0-9]+/i)?.[0] || rawId : rawId;
   const [shared, setShared] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -405,7 +410,7 @@ export default function ViewBouquet() {
       <style>{CSS}</style>
       <FloatingDecorations />
 
-      <div style={{ maxWidth: 420, margin: "0 auto", padding: "0 1.25rem" }}>
+      <div style={{ maxWidth: 420, margin: "0 auto", padding: "0 1.25rem", overflow: "visible" }}>
 
         {/* ── Header ── */}
         <div className="vb-header envelope-reveal er-1">
