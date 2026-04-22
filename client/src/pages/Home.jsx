@@ -262,7 +262,7 @@ export default function Home() {
   const testimonials = useMemo(() => [
     { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi", city: "Mumbai" },
     { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Priya", city: "Hyderabad" },
-    { quote: "Instant share link after payment was exactly what I needed.", author: "Neha", city: "Delhi" },
+    { quote: "Got the share link in seconds. So quick and easy!", author: "Neha", city: "Delhi" },
     { quote: "I sent it to my mom and she called me immediately.", author: "Shruti", city: "Pune" },
   ], []);
 
@@ -275,7 +275,7 @@ export default function Home() {
   useEffect(() => {
     applySeo({
       title: "Free Online Bouquet Maker | Create & Send Digital Flowers with Note",
-      description: "Create and send a free digital bouquet with a personal note in minutes. Pick flowers, write your message, and share instantly. No signup, 100% free.",
+      description: "Create and send a digital bouquet with a personal note in minutes. Pick flowers, write your message, and share instantly. No signup needed.",
       keywords: seoKeywords.home,
       path: "/",
       jsonLd: {
@@ -350,7 +350,7 @@ export default function Home() {
             {/* Offer badge */}
             <div style={{ marginBottom: "1.5rem" }}>
               <span style={{ display: "inline-block", background: "#f5f3ef", borderRadius: "9999px", padding: "0.5rem 1.2rem", fontSize: "0.8rem", fontWeight: 600, color: "#4f4445" }}>
-                ✨ 100% Free · No login · No subscription
+                ✨ No login · Ready in 60 seconds
               </span>
             </div>
 
@@ -376,7 +376,7 @@ export default function Home() {
               {[
                 { n: "1", emoji: "🌸", title: "Pick your flowers", desc: "Choose stems and arrange them into a bouquet they'll love." },
                 { n: "2", emoji: "✍️", title: "Write from the heart", desc: "Add a personal note — or pick from our curated message ideas." },
-                { n: "3", emoji: "🔗", title: "Pay and share instantly", desc: "One-time payment. Get a link. Send over WhatsApp in seconds." },
+                { n: "3", emoji: "🔗", title: "Share instantly", desc: "Get a unique link. Send over WhatsApp in seconds." },
               ].map(s => (
                 <div key={s.n} style={{ display: "flex", alignItems: "flex-start", gap: "0.9rem", background: "#ffffff", borderRadius: "1.25rem", padding: "0.9rem 1rem" }}>
                   <div className="step-circle">{s.n}</div>
