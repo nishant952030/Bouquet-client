@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { track } from "@vercel/analytics";
-import { doc, setDoc } from "firebase/firestore";
-import { db, isFirebaseConfigured } from "../lib/firebase";
-import { loadRazorpayScript } from "../lib/razorpay";
 import CanvasBoard from "../components/CanvasBoard";
 import FlowerPicker from "../components/FlowerPicker";
 import NoteCard from "../components/NoteCard";
@@ -12,7 +9,7 @@ import { flowers } from "../data/flowerCatalog";
 import { trackEvent } from "../lib/analytics";
 
 import { applySeo, seoKeywords } from "../lib/seo";
-import { loadCheckoutDraft, saveCheckoutDraft, clearCheckoutDraft } from "../lib/checkoutStorage";
+import { loadCheckoutDraft, saveCheckoutDraft } from "../lib/checkoutStorage";
 import {
   DoodleFlower,
   DoodleHeart,
@@ -360,22 +357,6 @@ export default function Create() {
   });
   const hasTracked = useRef(false);
 
-  /* coffee modal state */
-  const [showCoffeeModal, setShowCoffeeModal] = useState(false);
-  const [shareUrl, setShareUrl] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
-  const [selectedTip, setSelectedTip] = useState(1);
-  const [isTipping, setIsTipping] = useState(false);
-  const [tipDone, setTipDone] = useState(false);
-
-  const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
-  const TIP_PRESETS = [
-    { label: "☕", amount: 29, display: "₹29" },
-    { label: "☕☕", amount: 49, display: "₹49" },
-    { label: "☕☕☕", amount: 99, display: "₹99" },
-  ];
-  const currentTip = TIP_PRESETS[selectedTip];
-
   const flowerCount = stems.length;
   const wordCount = countWords(note);
   const hasBouquetContent = flowerCount > 0 || note.trim().length > 0;
@@ -494,100 +475,15 @@ export default function Create() {
     setPresetRequest({ id: `magic_${Date.now()}`, stems: newStems });
   }, []);
 
-  /* ── Save bouquet & generate link (runs in background) ── */
-  const saveBouquetInBackground = useCallback(async () => {
-    if (isSaving || shareUrl) return;
-    setIsSaving(true);
-    const id = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
-    const payload = {
-      stems,
-      note,
-      senderName: senderName.trim(),
-      plan: "free",
-      createdAt: new Date().toISOString(),
-    };
-    try {
-      if (isFirebaseConfigured && db) await setDoc(doc(db, "bouquets", id), payload);
-    } catch (err) {
-      console.warn("Firebase save failed (non-fatal):", err.message);
-    }
-    try {
-      localStorage.setItem(`bouquet_share_${id}`, JSON.stringify(payload));
-      clearCheckoutDraft();
-    } catch { /* localStorage full */ }
-    const url = `${window.location.origin}/view/${id}`;
-    setShareUrl(url);
-    setIsSaving(false);
-    track("bouquet_shared_free", { flowerCount, wordCount });
-    trackEvent("bouquet_shared_free", { flowerCount, wordCount });
-  }, [isSaving, shareUrl, stems, note, flowerCount, wordCount]);
-
-  /* ── Razorpay tip from modal ── */
-  const startTip = async () => {
-    if (isTipping || !razorpayKeyId) return;
-    setIsTipping(true);
-    try {
-      const ready = await loadRazorpayScript();
-      if (!ready || !window.Razorpay) throw new Error("Unable to load Razorpay.");
-      track("tip_attempt", { provider: "razorpay", amount: currentTip.amount });
-      const orderRes = await fetch("/api/razorpay/create-order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planId: "tip",
-          amountPaise: currentTip.amount * 100,
-          receipt: `tip_${Date.now()}`,
-          notes: { type: "buy_me_a_coffee", amount: currentTip.amount },
-        }),
-      });
-      const orderData = await orderRes.json();
-      if (!orderRes.ok || !orderData?.orderId) throw new Error("Unable to create tip order.");
-      
-      const razorpay = new window.Razorpay({
-        key: razorpayKeyId,
-        order_id: orderData.orderId,
-        name: "Petals and Words",
-        description: "Buy me a coffee ☕",
-        theme: { color: "#7b5455" },
-        modal: { 
-          ondismiss: () => { setIsTipping(false); } 
-        },
-        handler: async (response) => {
-          try {
-            await fetch("/api/razorpay/verify", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(response),
-            });
-          } catch { /* still mark done */ }
-          setIsTipping(false);
-          setTipDone(true);
-          track("tip_success", { provider: "razorpay", amount: currentTip.amount });
-        },
-      });
-      razorpay.on("payment.failed", () => { setIsTipping(false); });
-      razorpay.open();
-    } catch (err) {
-      console.error(err);
-      setIsTipping(false);
-    }
-  };
-
-  /* ── Open coffee modal + start saving ── */
+  /* Mandatory payment gate before link generation */
   const goToShare = () => {
     if (!hasBouquetContent) return;
     saveCheckoutDraft({ stems, note, senderName });
     track("share_page_open", { flowerCount, wordCount });
     trackEvent("share_page_open", { flowerCount, wordCount });
-    setShowCoffeeModal(true);
-    saveBouquetInBackground();
+    navigate("/payment", { state: { flowerCount, stems, note, senderName } });
   };
 
-  /* ── Proceed to payment/share page ── */
-  const proceedToShare = () => {
-    setShowCoffeeModal(false);
-    navigate("/payment", { state: { flowerCount, stems, note, senderName, shareUrl } });
-  };
 
   return (
     <main className="cr-root" style={{ paddingBottom: "6.5rem", position: "relative", overflowX: "hidden" }}>
@@ -917,118 +813,6 @@ export default function Create() {
       </div>{/* /max-w */}
 
       {/* ── COFFEE MODAL ── */}
-      {showCoffeeModal && (
-        <div className="coffee-overlay" onClick={(e) => { if (e.target === e.currentTarget) proceedToShare(); }}>
-          <div className="coffee-modal">
-            <button type="button" className="coffee-close" onClick={proceedToShare} aria-label="Close">
-              ✕
-            </button>
-
-            {/* Link status indicator */}
-            <div style={{ marginBottom: "1rem" }}>
-              {isSaving ? (
-                <p className="link-status-pulse" style={{ fontSize: "0.75rem", color: "#7b5455", fontWeight: 600 }}>
-                  ⏳ Generating your link...
-                </p>
-              ) : shareUrl ? (
-                <p style={{ fontSize: "0.75rem", color: "#22c55e", fontWeight: 600 }}>
-                  ✅ Your bouquet link is ready!
-                </p>
-              ) : null}
-            </div>
-
-            {!tipDone ? (
-              <>
-                {/* Coffee cup with steam */}
-                <div style={{ position: "relative", display: "inline-block", marginBottom: "0.25rem" }}>
-                  <div style={{ display: "flex", justifyContent: "center", gap: "3px", marginBottom: "-4px" }}>
-                    <span className="csteam-1" style={{ fontSize: "0.65rem", color: "#d2c3c4" }}>~</span>
-                    <span className="csteam-2" style={{ fontSize: "0.65rem", color: "#d2c3c4" }}>~</span>
-                    <span className="csteam-3" style={{ fontSize: "0.65rem", color: "#d2c3c4" }}>~</span>
-                  </div>
-                  <span style={{ fontSize: "2rem" }}>☕</span>
-                </div>
-
-                <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.2rem", fontWeight: 400, marginBottom: "0.25rem", color: "#3E2723" }}>
-                  Enjoying Petals & Words?
-                </h2>
-                <p style={{ fontSize: "0.8rem", color: "#6b5e5f", lineHeight: 1.6, marginBottom: "1rem" }}>
-                  This tool is 100% free. If you liked it,<br />
-                  consider buying me a coffee!
-                </p>
-
-                {/* Tip presets */}
-                <div style={{ display: "flex", gap: "0.5rem", marginBottom: "0.875rem" }}>
-                  {TIP_PRESETS.map((preset, i) => (
-                    <button
-                      key={preset.display}
-                      type="button"
-                      className={`coffee-tip-btn ${selectedTip === i ? "selected" : ""}`}
-                      onClick={() => setSelectedTip(i)}
-                    >
-                      <span className="tip-emoji">{preset.label}</span>
-                      <span className="tip-amount">{preset.display}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Pay button */}
-                <button
-                  type="button"
-                  className="coffee-pay-btn"
-                  onClick={startTip}
-                  disabled={isTipping}
-                >
-                  {isTipping ? (
-                    <>
-                      <span className="coffee-spinner" /> Opening payment...
-                    </>
-                  ) : (
-                    `Buy me a coffee · ${currentTip.display}`
-                  )}
-                </button>
-
-                <p style={{ fontSize: "0.7rem", color: "#c4b5b6", marginTop: "0.75rem" }}>
-                  Completely optional — your bouquet is free! 🌸
-                </p>
-
-                {/* Skip link */}
-                <button
-                  type="button"
-                  onClick={proceedToShare}
-                  style={{
-                    marginTop: "0.75rem",
-                    background: "none", border: "none", cursor: "pointer",
-                    fontSize: "0.78rem", color: "#9e8f90",
-                    textDecoration: "underline", textUnderlineOffset: "3px",
-                    fontFamily: "'Manrope', sans-serif",
-                  }}
-                >
-                  No thanks, show my link →
-                </button>
-              </>
-            ) : (
-              /* Thank you state */
-              <>
-                <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>💜</span>
-                <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.25rem", fontWeight: 400, marginBottom: "0.3rem", color: "#7b5455" }}>
-                  Thank you so much!
-                </h2>
-                <p style={{ fontSize: "0.82rem", color: "#6b5e5f", lineHeight: 1.6, marginBottom: "1rem" }}>
-                  Your support means the world 💐
-                </p>
-                <button
-                  type="button"
-                  className="coffee-pay-btn"
-                  onClick={proceedToShare}
-                >
-                  Get your share link →
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* ── FIXED BOTTOM CTA ── */}
       <div className="cr-bottom">

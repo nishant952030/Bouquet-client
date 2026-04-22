@@ -15,6 +15,17 @@
   ],
   "rewrites": [
     {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "x-vercel-ip-country",
+          "value": "PH"
+        }
+      ],
+      "destination": "/api/blocked"
+    },
+    {
       "source": "/create",
       "destination": "/index.html"
     },

@@ -6,11 +6,14 @@ import ViewBouquet from "./pages/ViewBouquet.jsx";
 import KeywordLanding from "./pages/KeywordLanding.jsx";
 import Blog from "./pages/Blog.jsx";
 import BlogPost from "./pages/BlogPost.jsx";
+import HugCard from "./pages/HugCard.jsx";
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/hug-card" element={<HugCard />} />
+        <Route path="/mothers-day-card" element={<HugCard />} />
         <Route path="/virtual-bouquet-maker" element={<KeywordLanding />} />
         <Route path="/virtual-bouquet-maker-online-free" element={<KeywordLanding />} />
         <Route path="/virtual-bouquet" element={<KeywordLanding />} />

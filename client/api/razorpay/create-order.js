@@ -1,5 +1,7 @@
 import process from "node:process";
-import { getSmallPlanPrice, getUnlimitedPlanPrice } from "../../src/lib/pricing.js";
+
+const DEFAULT_SMALL_PRICE_INR = 29;
+const DEFAULT_UNLIMITED_PRICE_INR = 59;
 
 async function createRazorpayOrder({ amountMinor, currency, receipt, notes }) {
   const keyId = process.env.RAZORPAY_KEY_ID;
@@ -38,21 +40,24 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { amountPaise, planId = "small", receipt, notes } = req.body || {};
+  const { amountMinor, amountPaise, currency = "INR", planId = "small", receipt, notes } = req.body || {};
+  const normalizedCurrency = String(currency || "INR").toUpperCase();
   const serverAmountPaise =
-    String(planId) === "medium" ? getUnlimitedPlanPrice() * 100 : getSmallPlanPrice() * 100;
-  const requestedAmount = Number(amountPaise);
-  const finalAmountPaise =
+    String(planId) === "medium"
+      ? DEFAULT_UNLIMITED_PRICE_INR * 100
+      : DEFAULT_SMALL_PRICE_INR * 100;
+  const requestedAmount = Number(amountMinor ?? amountPaise);
+  const finalAmountMinor =
     Number.isFinite(requestedAmount) && requestedAmount > 0 ? Math.round(requestedAmount) : serverAmountPaise;
 
-  if (!finalAmountPaise || finalAmountPaise < 1) {
+  if (!finalAmountMinor || finalAmountMinor < 1) {
     return res.status(400).json({ error: "Invalid amount" });
   }
 
   try {
     const order = await createRazorpayOrder({
-      amountMinor: finalAmountPaise,
-      currency: "INR",
+      amountMinor: finalAmountMinor,
+      currency: normalizedCurrency,
       receipt: receipt || `pw_${Date.now()}`,
       notes: { ...(notes || {}), planId: String(planId || "small") },
     });
@@ -63,6 +68,8 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error("Razorpay order creation failed:", error);
-    return res.status(500).json({ error: "Unable to create payment order" });
+    return res.status(500).json({
+      error: error?.message || "Unable to create payment order",
+    });
   }
 }
