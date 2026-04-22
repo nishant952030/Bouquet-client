@@ -22,7 +22,6 @@ const TIP_PRESETS_USD = [
   { label: "Supporter", amount: 1.99, display: "$1.99" },
 ];
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
-const TEST_COUNTRY_OVERRIDE = "US"; // Temporary override for testing non-India flow
 
 /* -- helpers -- */
 function countWords(text) {
@@ -38,7 +37,7 @@ function getLikelyCountryFromClient() {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
     const locale = String(navigator?.language || "").toUpperCase();
     if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta" || locale.includes("-IN")) return "IN";
-    return "PH";
+    return "OTHER";
   } catch {
     return "IN";
   }
@@ -264,20 +263,11 @@ export default function Payment() {
     let cancelled = false;
     (async () => {
       setIsDetectingCountry(true);
-      if (TEST_COUNTRY_OVERRIDE) {
-        if (!cancelled) {
-          setCountryCode(String(TEST_COUNTRY_OVERRIDE).toUpperCase());
-          setIsDetectingCountry(false);
-        }
-        return;
-      }
       try {
         const res = await fetch(apiUrl("/api/geo"));
         const data = await readApi(res);
         const c = String(data?.country || "").toUpperCase();
-        const likely = getLikelyCountryFromClient();
-        const resolved = c === "PH" && likely === "IN" ? "IN" : (c || likely);
-        if (!cancelled) setCountryCode(resolved);
+        if (!cancelled) setCountryCode(c || getLikelyCountryFromClient());
       } catch {
         if (!cancelled) setCountryCode(getLikelyCountryFromClient());
       } finally {
