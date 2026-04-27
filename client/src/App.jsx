@@ -7,11 +7,18 @@ import KeywordLanding from "./pages/KeywordLanding.jsx";
 import Blog from "./pages/Blog.jsx";
 import BlogPost from "./pages/BlogPost.jsx";
 import HugCard from "./pages/HugCard.jsx";
+import CreateCake from "./pages/CreateCake.jsx";
+import ViewCake from "./pages/ViewCake.jsx";
+import PaymentCake from "./pages/PaymentCake.jsx";
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/create-cake" element={<CreateCake />} />
+        <Route path="/payment-cake" element={<PaymentCake />} />
+        <Route path="/cake" element={<ViewCake />} />
         <Route path="/hug-card" element={<HugCard />} />
         <Route path="/mothers-day-card" element={<HugCard />} />
         <Route path="/virtual-bouquet-maker" element={<KeywordLanding />} />

@@ -354,16 +354,22 @@ export default function Home() {
               </span>
             </div>
 
-            {/* CTA */}
-            <button className="vv-btn-primary" style={{ width: "100%", maxWidth: 320 }} onClick={() => navigate("/create")}>
-              Create Bouquet
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7" />
-              </svg>
-            </button>
+            {/* CTAs */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem", width: "100%", maxWidth: 320, margin: "0 auto" }}>
+              <button className="vv-btn-primary" onClick={() => navigate("/create")}>
+                Create Bouquet
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+              
+              <button className="vv-btn-ghost" style={{ justifyContent: "center" }} onClick={() => navigate("/create-cake")}>
+                🎂 Bake a Virtual Birthday Cake
+              </button>
+            </div>
 
-            <p style={{ marginTop: "0.75rem", fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#9e8f90" }}>
-              No login · Ready in 60 seconds · Instant share
+            <p style={{ marginTop: "1rem", fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#9e8f90" }}>
+              Instant share via WhatsApp or Link
             </p>
           </div>
         </section>
