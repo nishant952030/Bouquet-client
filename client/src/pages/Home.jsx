@@ -116,6 +116,42 @@ const VV = `
     box-shadow: 0 2px 12px rgba(123,84,85,0.14);
   }
 
+  /* Cake CTA */
+  .vv-btn-cake {
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #fdf9f1 100%);
+    color: #7b5455;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.88rem; font-weight: 700;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    border: 1.5px solid #d2c3c4;
+    border-radius: 9999px;
+    padding: 0 2rem; min-height: 52px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(123,84,85,0.08);
+    transition: all 0.18s ease;
+  }
+  .vv-btn-cake:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(123,84,85,0.15);
+    border-color: #7b5455;
+    background: #fff;
+  }
+  .vv-btn-cake:active { transform: scale(0.98); }
+  
+  .vv-tag-new {
+    position: absolute; top: -12px; right: -5px;
+    background: linear-gradient(135deg, #e91e63 0%, #f48fb1 100%);
+    color: #ffffff;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em;
+    padding: 0.25rem 0.6rem; border-radius: 9999px;
+    box-shadow: 0 4px 12px rgba(233,30,99,0.3);
+    transform: rotate(8deg);
+    animation: vvFloat 4s ease-in-out infinite;
+  }
+
   /* Cards — no hard borders, ambient shadow */
   .vv-card {
     background: #ffffff;
@@ -362,9 +398,10 @@ export default function Home() {
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </button>
-              
-              <button className="vv-btn-ghost" style={{ justifyContent: "center" }} onClick={() => navigate("/create-cake")}>
-                🎂 Bake a Virtual Birthday Cake
+
+              <button className="vv-btn-cake" onClick={() => navigate("/create-cake")}>
+                <span className="vv-tag-new">NEW</span>
+                🎂 Bake a Cake
               </button>
             </div>
 
