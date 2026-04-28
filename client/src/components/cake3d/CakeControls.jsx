@@ -8,6 +8,18 @@ import {
   TOPPING_TYPES,
 } from "./cakeConfig";
 
+const OCCASIONS = [
+  { id: "birthday", label: "🎂 Birthday", default: true },
+  { id: "mothers-day", label: "🌸 Mother's Day" },
+  { id: "fathers-day", label: "🎁 Father's Day" },
+  { id: "anniversary", label: "💕 Anniversary" },
+  { id: "wedding", label: "💒 Wedding" },
+  { id: "graduation", label: "🎓 Graduation" },
+  { id: "baby-shower", label: "👶 Baby Sprinkle" },
+  { id: "just-because", label: "💝 Just Because" },
+  { id: "thank-you", label: "🙏 Thank You" },
+];
+
 export default function CakeControls({
   cakeState,
   activeTool,
@@ -15,6 +27,7 @@ export default function CakeControls({
   autoRotate,
   name,
   note,
+  occasion,
   error,
   onFlavorChange,
   onActiveToolChange,
@@ -28,6 +41,7 @@ export default function CakeControls({
   onTierChange,
   onNameChange,
   onNoteChange,
+  onOccasionChange,
   onSelectedToppingChange,
   onSubmit,
 }) {
@@ -46,6 +60,23 @@ export default function CakeControls({
           placeholder="e.g. Aanya"
           value={name}
         />
+      </div>
+
+      <div className="cake3d-field">
+        <span className="cake3d-label">Occasion</span>
+        <div className="cake3d-flavor-grid" style={{ flexWrap: "wrap" }}>
+          {OCCASIONS.map((occ) => (
+            <button
+              className={occasion === occ.id ? "active" : ""}
+              key={occ.id}
+              onClick={() => onOccasionChange(occ.id)}
+              type="button"
+              style={{ fontSize: "0.75rem", padding: "0.4rem 0.6rem" }}
+            >
+              {occ.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="cake3d-field">

@@ -50,6 +50,7 @@ export default function CakeConfigurator() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
+  const [occasion, setOccasion] = useState("birthday");
   const [error, setError] = useState("");
   const [activeTool, setActiveTool] = useState("candle");
   const [selectedTopping, setSelectedTopping] = useState("cherry");
@@ -156,12 +157,13 @@ export default function CakeConfigurator() {
     const trimmedName = name.trim();
 
     if (!trimmedName) {
-      setError("Add the birthday person's name first.");
+      setError("Add the recipient's name first.");
       return;
     }
 
     const payload = {
       name: trimmedName,
+      occasion,
       flavor: cakeState.flavor,
       tiers: cakeState.tiers,
       age: Math.max(cakeState.candles.length, 1),
@@ -174,11 +176,15 @@ export default function CakeConfigurator() {
     track("cake_create_complete", {
       flavor: payload.flavor,
       candles: payload.candles.length,
+      occasion,
       mode: "3d",
     });
     trackEvent("cake_create_complete", {
       flavor: payload.flavor,
       candles: payload.candles.length,
+      occasion,
+      mode: "3d",
+    });
       mode: "3d",
     });
 
@@ -222,6 +228,7 @@ export default function CakeConfigurator() {
               error={error}
               name={name}
               note={note}
+              occasion={occasion}
               selectedTopping={selectedTopping}
               onActiveToolChange={setActiveTool}
               onAddCandle={addGeneratedCandle}
@@ -237,6 +244,7 @@ export default function CakeConfigurator() {
                 setError("");
               }}
               onNoteChange={setNote}
+              onOccasionChange={setOccasion}
               onSelectedToppingChange={(type) => {
                 setSelectedTopping(type);
                 setActiveTool("topping");

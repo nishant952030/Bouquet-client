@@ -269,11 +269,26 @@ export default function ViewCake() {
     return () => { cancelled = true; };
   }, [id]);
 
+  const OCCASION_TITLES = {
+    "birthday": "Happy Birthday",
+    "mothers-day": "Happy Mother's Day",
+    "fathers-day": "Happy Father's Day",
+    "anniversary": "Happy Anniversary",
+    "wedding": "Wedding Wishes",
+    "graduation": "Congratulations",
+    "baby-shower": "Baby Sprinkle",
+    "just-because": "For You",
+    "thank-you": "Thank You",
+  };
+
+  const getOccasionTitle = (occasion) => OCCASION_TITLES[occasion] || "Happy Celebration";
+
   useEffect(() => {
     if (!data) return;
+    const title = `${getOccasionTitle(data.occasion)} ${data.name || "to you"}! 🎂`;
     applySeo({
-      title: `Happy Birthday ${data.name || "to you"}! 🎂`,
-      description: "You've received a virtual birthday cake. Open it to read your note!",
+      title,
+      description: `You've received a virtual cake for ${data.occasion || "a special occasion"}. Open it to read your note!`,
       path: location.pathname + location.search,
       robots: "noindex,nofollow",
     });
@@ -284,6 +299,7 @@ export default function ViewCake() {
 
   const name = data.name || "you";
   const note = data.note || "Wishing you a wonderful year ahead!";
+  const occasionTitle = getOccasionTitle(data.occasion);
   const tiers = Math.min(Math.max(Number(data.tiers) || 1, 1), 3);
   const candles = withIds(data.candles, "candle");
   const creamSwirls = withIds(data.creamSwirls, "cream");
@@ -355,7 +371,7 @@ export default function ViewCake() {
 
       <div className="vc-3d-wrap">
         <div className="vc-3d-title">
-          <h1>Happy Birthday,<br />{name}!</h1>
+          <h1>{occasionTitle},<br />{name}!</h1>
           {!allCandlesOut && (
             <button className="vc-3d-note-btn" onClick={blowAllCandles} type="button">
               Blow out the candles

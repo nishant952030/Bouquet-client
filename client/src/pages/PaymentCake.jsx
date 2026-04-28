@@ -261,8 +261,8 @@ export default function PaymentCake() {
   useEffect(() => {
     applySeo({
       title: "Your Cake is Ready! | Petals and Words",
-      description: "Your digital birthday cake is ready. Copy the link and send it!",
-      keywords: ["birthday cake", "share cake"],
+      description: "Your digital cake is ready. Copy the link and send it!",
+      keywords: ["cake", "share cake", "digital cake"],
       path: "/payment-cake",
       robots: "noindex,nofollow",
     });
