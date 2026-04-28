@@ -289,7 +289,7 @@ export default function Payment() {
   }, []);
 
   /* -- Save bouquet & generate link only after payment -- */
-  const generateShareLink = useCallback(async (provider) => {
+  const generateShareLink = useCallback(async (provider = "") => {
     if (!hasBouquetData || shareUrl) return false;
     setIsSaving(true);
     const id = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
@@ -400,15 +400,16 @@ export default function Payment() {
             const verifyData = await readApi(verifyRes);
             if (!verifyRes.ok || !verifyData?.ok) throw new Error("Verification failed");
             setTipDone(true);
+            setTipProvider("razorpay");
             setTipMsg("");
             trackEv("tip_success", { provider: "razorpay", amount: currentTip.amount });
           } catch {
             setTipDone(true);
-            setTipMsg("Thank you! We received your payment.");
+            setTipProvider("razorpay");
+            setTipMsg("Thank you! Your payment was received.");
             trackEv("tip_success", { provider: "razorpay", amount: currentTip.amount });
           }
-          await generateShareLink("razorpay");
-          setIsTipping(false);
+          generateShareLink().then(() => setIsTipping(false));
         },
       });
 

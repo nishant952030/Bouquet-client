@@ -18,6 +18,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/create-cake" element={<CreateCake />} />
         <Route path="/payment-cake" element={<PaymentCake />} />
+        <Route path="/cake/:id" element={<ViewCake />} />
         <Route path="/cake" element={<ViewCake />} />
         <Route path="/hug-card" element={<HugCard />} />
         <Route path="/mothers-day-card" element={<HugCard />} />

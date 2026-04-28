@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { track } from "@vercel/analytics";
 import { trackEvent } from "../lib/analytics";
+import { doc, setDoc } from "firebase/firestore";
+import { db, isFirebaseConfigured } from "../lib/firebase";
 import { loadRazorpayScript } from "../lib/razorpay";
 import { applySeo, seoKeywords } from "../lib/seo";
 
@@ -16,6 +18,7 @@ const TIP_PRESETS_USD = [
   { label: "Supporter", amount: 1.49, display: "$1.49" },
 ];
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
+const BYPASS_CAKE_PAYMENT_FOR_TESTING = false;
 
 /* -- helpers -- */
 function countWords(text) {
@@ -46,6 +49,26 @@ async function readApi(res) {
 function apiUrl(path) {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   return `${API_BASE_URL}${normalized}`;
+}
+function createCakeId() {
+  return `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
+}
+function compactPosition(item) {
+  return {
+    x: Number(item?.x || 0),
+    y: Number(item?.y || 0),
+    z: Number(item?.z || 0),
+  };
+}
+function compactTopping(item) {
+  return {
+    type: item?.type || "cherry",
+    x: Number(item?.x || 0),
+    y: Number(item?.y || 0),
+    z: Number(item?.z || 0),
+    rotation: Number(item?.rotation || 0),
+    colorIndex: Number(item?.colorIndex || 0),
+  };
 }
 
 /* -- CSS -- */
@@ -192,6 +215,10 @@ export default function PaymentCake() {
   const flavor = location.state?.flavor || "chocolate";
   const age = location.state?.age || 3;
   const note = location.state?.note || "";
+  const tiers = location.state?.tiers || 1;
+  const candles = Array.isArray(location.state?.candles) ? location.state.candles : [];
+  const creamSwirls = Array.isArray(location.state?.creamSwirls) ? location.state.creamSwirls : [];
+  const toppings = Array.isArray(location.state?.toppings) ? location.state.toppings : [];
 
   const hasCakeData = Boolean(name);
   const wordCount = countWords(note);
@@ -244,17 +271,41 @@ export default function PaymentCake() {
   const generateShareLink = useCallback(async (provider) => {
     if (!hasCakeData || shareUrl) return false;
     setIsSaving(true);
-    
-    // Encode data directly into URL
-    const payload = { n: name, f: flavor, a: parseInt(age) || 3, m: note };
-    const encoded = encodeURIComponent(btoa(encodeURIComponent(JSON.stringify(payload))));
-    const url = `${window.location.origin}/cake?d=${encoded}`;
+    const id = createCakeId();
+    const payload = {
+      v: 2,
+      name,
+      flavor,
+      tiers: Number(tiers) || 1,
+      candleCount: parseInt(age) || Math.max(candles.length, 1),
+      note,
+      candles: candles.map(compactPosition),
+      creamSwirls: creamSwirls.map(compactPosition),
+      toppings: toppings.map(compactTopping),
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      if (isFirebaseConfigured && db) {
+        await setDoc(doc(db, "cakes", id), payload);
+      }
+    } catch (err) {
+      console.warn("Firebase cake save failed, using local fallback only:", err.message);
+    }
+
+    try {
+      localStorage.setItem(`cake_share_${id}`, JSON.stringify(payload));
+    } catch (err) {
+      console.warn("Local cake save failed:", err.message);
+    }
+
+    const url = `${window.location.origin}/cake/${id}`;
     
     setShareUrl(url);
     setIsSaving(false);
     trackEv("cake_shared_paid", { provider });
     return true;
-  }, [hasCakeData, shareUrl, name, flavor, age, note]);
+  }, [hasCakeData, shareUrl, name, flavor, tiers, age, note, candles, creamSwirls, toppings]);
 
   const copyLink = async () => {
     if (!shareUrl) return;
@@ -335,8 +386,7 @@ export default function PaymentCake() {
             setTipMsg("Thank you! We received your payment.");
             trackEv("tip_success_cake", { provider: "razorpay", amount: currentTip.amount });
           }
-          await generateShareLink("razorpay");
-          setIsTipping(false);
+          generateShareLink("razorpay").then(() => setIsTipping(false));
         },
       });
 
@@ -497,7 +547,7 @@ export default function PaymentCake() {
           </div>
         </div>
 
-        {!tipDone ? (
+        {!tipDone && !BYPASS_CAKE_PAYMENT_FOR_TESTING ? (
           <div className="vv-card au au-4" style={{ padding: "1.5rem 1.25rem", marginBottom: "1rem", textAlign: "center" }}>
             <div style={{ position: "relative", display: "inline-block", marginBottom: "0.5rem" }}>
               <span style={{ fontSize: "2.2rem" }}>Secure</span>
@@ -558,7 +608,7 @@ export default function PaymentCake() {
               <p style={{ fontSize: "0.78rem", color: "#e91e63", marginTop: "0.75rem" }}>{tipMsg}</p>
             )}
           </div>
-        ) : (
+        ) : tipDone ? (
           <div className="vv-card thank-you-pop au au-4" style={{
             padding: "2rem 1.25rem", marginBottom: "1rem", textAlign: "center",
             background: "linear-gradient(135deg, #fdf4ff, #fce7f3, #fff1f2)",
@@ -571,7 +621,7 @@ export default function PaymentCake() {
               Enjoy celebrating their special day!
             </p>
           </div>
-        )}
+        ) : null}
 
         {statusMsg && (
           <div style={{
