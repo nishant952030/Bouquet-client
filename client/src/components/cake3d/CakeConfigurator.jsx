@@ -185,8 +185,6 @@ export default function CakeConfigurator() {
       occasion,
       mode: "3d",
     });
-      mode: "3d",
-    });
 
     navigate("/payment-cake", { state: payload });
   };
