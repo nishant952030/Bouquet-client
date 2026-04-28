@@ -15,17 +15,6 @@
   ],
   "rewrites": [
     {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "header",
-          "key": "x-vercel-ip-country",
-          "value": "PH"
-        }
-      ],
-      "destination": "/api/blocked"
-    },
-    {
       "source": "/create",
       "destination": "/index.html"
     },
@@ -35,6 +24,18 @@
     },
     {
       "source": "/view/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/create-cake",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/payment-cake",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/cake/(.*)",
       "destination": "/index.html"
     },
     {

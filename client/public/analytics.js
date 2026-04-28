@@ -1,8 +1,8 @@
 (function() {
   'use strict';
 
-  var ANALYTICS_URL = window.ANALYTICS_URL || 'https://your-analytics-domain.vercel.app';
-  var WEBSITE_ID = window.ANALYTICS_WEBSITE_ID;
+  var ANALYTICS_URL = 'https://site-tracker-ruddy.vercel.app';
+  var WEBSITE_ID = window.ANALYTICS_WEBSITE_ID || 'petalsandwords';
 
   if (!WEBSITE_ID) {
     console.warn('[Analytics] Website ID not set. Add: window.ANALYTICS_WEBSITE_ID = "your-id"');
