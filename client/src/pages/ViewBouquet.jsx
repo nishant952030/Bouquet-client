@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { doc, getDoc, getDocFromServer } from "firebase/firestore";
 import RecipientBouquetCanvas from "../components/RecipientBouquetCanvas";
 import { db, isFirebaseConfigured } from "../lib/firebase";
@@ -302,6 +304,7 @@ function FloatingDecorations() {
 /* ── MAIN COMPONENT ── */
 export default function ViewBouquet() {
   const { id: rawId } = useParams();
+  const { t } = useTranslation();
   // Bouquet IDs are Date.now() (13 digits) + base36 random (4-8 chars),
   // so they only contain [a-z0-9]. Strip anything after the first non-ID
   // character (spaces, slashes, encoded chars, appended text, etc.).
@@ -370,10 +373,10 @@ export default function ViewBouquet() {
         <div className="vb-state-card envelope-reveal er-1">
           <div className="vb-spinner" />
           <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.25rem", fontWeight: 400, color: "#3E2723" }}>
-            Unwrapping your bouquet…
+            {t("viewBouquet.unwrapping", "Unwrapping your bouquet…")}
           </p>
           <p style={{ fontSize: "0.78rem", color: "#9e8f90", marginTop: "0.5rem" }}>
-            Someone special made this for you ✨
+            {t("viewBouquet.someoneSpecialMade", "Someone special made this for you ✨")}
           </p>
         </div>
       </main>
@@ -388,21 +391,21 @@ export default function ViewBouquet() {
         <div className="vb-state-card envelope-reveal er-1">
           <p style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>🥀</p>
           <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.3rem", fontWeight: 400, color: "#3E2723", marginBottom: "0.5rem" }}>
-            Bouquet not found
+            {t("viewBouquet.bouquetNotFound", "Bouquet not found")}
           </p>
           <p style={{ fontSize: "0.82rem", color: "#6b5e5f", marginBottom: "1.25rem", lineHeight: 1.6 }}>
-            This link may be invalid or expired.<br />
-            But you can always create a fresh one!
+            {t("viewBouquet.invalidLink", "This link may be invalid or expired.")}<br />
+            {t("viewBouquet.createFresh", "But you can always create a fresh one!")}
           </p>
           <Link to="/" className="vb-cta-btn" style={{ display: "inline-flex" }}>
-            Create a Bouquet 💐
+            {t("viewBouquet.createBouquet", "Create a Bouquet 💐")}
           </Link>
         </div>
       </main>
     );
   }
 
-  const senderName = shared.senderName?.trim() || "someone special";
+  const senderName = shared.senderName?.trim() || t("viewBouquet.someoneSpecial", "someone special");
 
   /* ── Main view ── */
   return (
@@ -413,6 +416,9 @@ export default function ViewBouquet() {
       <div style={{ maxWidth: 420, margin: "0 auto", padding: "0 1.25rem", overflow: "visible" }}>
 
         {/* ── Header ── */}
+        <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: "1rem" }}>
+          <LanguageSwitcher />
+        </div>
         <div className="vb-header envelope-reveal er-1">
           <h1 style={{
             fontFamily: "'Noto Serif', serif",
@@ -422,8 +428,8 @@ export default function ViewBouquet() {
             marginTop: "1.5rem",
             color: "#3E2723",
           }}>
-            Someone sent you<br />
-            <em style={{ color: "#7b5455" }}>flowers</em> 🌸
+            {t("viewBouquet.someoneSentYouPrefix", "Someone sent you")}<br />
+            <em style={{ color: "#7b5455" }}>{t("viewBouquet.flowers", "flowers")}</em> 🌸
           </h1>
         </div>
 
@@ -452,7 +458,7 @@ export default function ViewBouquet() {
           {/* ── Sender attribution ── */}
           <div className="vb-sender envelope-reveal er-4">
             <p className="vb-sender-line">
-              Crafted with <span style={{ color: "#e25555", margin: "0 3px" }}>♥</span> by{" "}
+              {t("viewBouquet.craftedWith", "Crafted with ")} <span style={{ color: "#e25555", margin: "0 3px" }}>♥</span> {t("viewBouquet.by", "by")}{" "}
               <span className="vb-sender-name">{senderName}</span>
             </p>
           </div>
@@ -461,16 +467,16 @@ export default function ViewBouquet() {
         {/* ── Viral CTA ── */}
         <div className="vb-cta-section envelope-reveal er-5">
           <Link to="/create" className="vb-cta-btn">
-            Make a bouquet for someone 💐
+            {t("viewBouquet.makeBouquet", "Make a bouquet for someone 💐")}
           </Link>
           <p className="vb-cta-sub">
-            It's free, fun, and makes people smile ✨
+            {t("viewBouquet.itsFree", "It's free, fun, and makes people smile ✨")}
           </p>
         </div>
 
         {/* ── Branding ── */}
         <div className="vb-branding envelope-reveal er-5">
-          <p className="vb-branding-logo">petals & words</p>
+          <p className="vb-branding-logo">{t("common.logo", "petals & words")}</p>
         </div>
 
       </div>

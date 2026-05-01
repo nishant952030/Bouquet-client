@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { flowers } from "../data/flowerCatalog";
 import { getCleanFlowerImageSrc } from "../lib/flowerImage";
 
 export default function FlowerPicker({ onPick, selectedFlower, layout = "row" }) {
+  const { t } = useTranslation();
   const isColumn = layout === "column";
   const [cleanedSrcMap, setCleanedSrcMap] = useState({});
 
@@ -23,18 +25,18 @@ export default function FlowerPicker({ onPick, selectedFlower, layout = "row" })
       <div className="mb-3 flex items-center gap-2">
         <span className="text-lg">🌸</span>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-500">Step 1</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-500">{t("create.step1Label", "Step 1")}</p>
           <p
             className="text-base font-light text-stone-800 leading-tight"
             style={{ fontFamily: '"Cormorant Garamond", serif' }}
           >
-            Pick your stems
+            {t("create.pickYourStems", "Pick your stems")}
           </p>
         </div>
       </div>
 
       {flowers.length === 0 ? (
-        <p className="text-sm text-stone-500">No flower assets found.</p>
+        <p className="text-sm text-stone-500">{t("create.noFlowersFound", "No flower assets found.")}</p>
       ) : (
         <div
           className={[
@@ -54,8 +56,8 @@ export default function FlowerPicker({ onPick, selectedFlower, layout = "row" })
                 key={flower.id}
                 type="button"
                 onClick={() => onPick(displaySrc)}
-                aria-label={`Add ${flower.label}`}
-                title={flower.label}
+                aria-label={t("create.addFlower", "Add {{flower}}", { flower: t(`create.flower_${flower.id}`, flower.label) })}
+                title={t(`create.flower_${flower.id}`, flower.label)}
                 className={[
                   "relative shrink-0 overflow-hidden rounded-xl border-2 bg-[#faf6f0] transition-all duration-150 active:scale-95",
                   isColumn ? "h-14 w-14" : "h-16 w-16",
@@ -66,7 +68,7 @@ export default function FlowerPicker({ onPick, selectedFlower, layout = "row" })
               >
                 <img
                   src={displaySrc}
-                  alt={flower.label}
+                  alt={t(`create.flower_${flower.id}`, flower.label)}
                   className="h-full w-full object-contain p-1"
                   loading="lazy"
                 />
@@ -80,7 +82,7 @@ export default function FlowerPicker({ onPick, selectedFlower, layout = "row" })
       )}
 
       <p className="mt-2.5 text-[11px] text-stone-400 leading-relaxed">
-        Tap a flower to place it on your canvas. Tap again to add more.
+        {t("create.flowerHelpText", "Tap a flower to place it on your canvas. Tap again to add more.")}
       </p>
     </div>
   );

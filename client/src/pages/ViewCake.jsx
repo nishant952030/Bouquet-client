@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { doc, getDoc, getDocFromServer } from "firebase/firestore";
 import CakeScene from "../components/cake3d/CakeScene.jsx";
 import { db, isFirebaseConfigured } from "../lib/firebase";
@@ -216,6 +218,7 @@ function Confetti() {
 export default function ViewCake() {
   const { id } = useParams();
   const location = useLocation();
+  const { t } = useTranslation();
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -270,18 +273,18 @@ export default function ViewCake() {
   }, [id]);
 
   const OCCASION_TITLES = {
-    "birthday": "Happy Birthday",
-    "mothers-day": "Happy Mother's Day",
-    "fathers-day": "Happy Father's Day",
-    "anniversary": "Happy Anniversary",
-    "wedding": "Wedding Wishes",
-    "graduation": "Congratulations",
-    "baby-shower": "Baby Sprinkle",
-    "just-because": "For You",
-    "thank-you": "Thank You",
+    "birthday": t("occasions.birthday", "Happy Birthday"),
+    "mothers-day": t("occasions.mothersDay", "Happy Mother's Day"),
+    "fathers-day": t("occasions.fathersDay", "Happy Father's Day"),
+    "anniversary": t("occasions.anniversary", "Happy Anniversary"),
+    "wedding": t("occasions.wedding", "Wedding Wishes"),
+    "graduation": t("occasions.graduation", "Congratulations"),
+    "baby-shower": t("occasions.babyShower", "Baby Sprinkle"),
+    "just-because": t("occasions.justBecause", "For You"),
+    "thank-you": t("occasions.thankYou", "Thank You"),
   };
 
-  const getOccasionTitle = (occasion) => OCCASION_TITLES[occasion] || "Happy Celebration";
+  const getOccasionTitle = (occasion) => OCCASION_TITLES[occasion] || t("viewCake.happyCelebration", "Happy Celebration");
 
   useEffect(() => {
     if (!data) return;
@@ -366,15 +369,18 @@ export default function ViewCake() {
 
   return (
     <main className="vc-3d-root">
+      <div style={{ position: "absolute", top: "1rem", right: "1rem", zIndex: 100 }}>
+        <LanguageSwitcher />
+      </div>
       <style>{CSS}</style>
       {allCandlesOut && <Confetti />}
 
       <div className="vc-3d-wrap">
         <div className="vc-3d-title">
-          <h1>{occasionTitle},<br />{name}!</h1>
+          <h1 dangerouslySetInnerHTML={{ __html: t("viewCake.greetingHtml", "{{occasion}},<br/>{{name}}!", { occasion: occasionTitle, name: name }) }} />
           {!allCandlesOut && (
             <button className="vc-3d-note-btn" onClick={blowAllCandles} type="button">
-              Blow out the candles
+              {t("viewCake.blowCandles", "Blow out the candles")}
             </button>
           )}
         </div>
@@ -396,10 +402,10 @@ export default function ViewCake() {
             <p className="note-text">{note}</p>
             <div className="viral-cta">
               <Link to="/create-cake" className="viral-btn">
-                Send a cake to someone else 🎂
+                {t("viewCake.sendCake", "Send a cake to someone else 🎂")}
               </Link>
               <Link to="/" className="made-with-link">
-                Made with Petals & Words
+                {t("common.madeWith", "Made with Petals & Words")}
               </Link>
             </div>
           </div>

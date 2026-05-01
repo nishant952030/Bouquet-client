@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { track } from "@vercel/analytics";
 import { doc, setDoc } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "../lib/firebase";
@@ -228,6 +230,7 @@ const CSS = `
 /* -- MAIN COMPONENT -- */
 export default function Payment() {
   const location = useLocation();
+  const { t } = useTranslation();
 
   const pendingCheckout = useMemo(() => getPending(), []);
   const checkoutDraft = useMemo(() => loadCheckoutDraft(), []);
@@ -433,12 +436,12 @@ export default function Payment() {
       <main className="tip-root" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "2rem 1rem" }}>
         <style>{CSS}</style>
         <div className="vv-card" style={{ maxWidth: 380, padding: "2rem 1.5rem", textAlign: "center" }}>
-          <p style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>Bouquet</p>
+          <p style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>💐</p>
           <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.4rem", fontWeight: 400, marginBottom: "0.5rem" }}>
-            No bouquet found
+            {t("payment.noBouquetFound")}
           </h1>
           <p style={{ fontSize: "0.85rem", color: "#6b5e5f", marginBottom: "1.25rem" }}>
-            Create your bouquet first, then come back to share it.
+            {t("payment.createFirst")}
           </p>
           <Link to="/create" style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
@@ -448,7 +451,7 @@ export default function Payment() {
             borderRadius: "9999px", padding: "0.75rem 1.75rem", textDecoration: "none",
             boxShadow: "0 12px 36px rgba(123,84,85,0.22)",
           }}>
-            Create Bouquet
+            {t("payment.createBouquet")}
           </Link>
         </div>
       </main>
@@ -464,9 +467,9 @@ export default function Payment() {
           <div style={{ width: 48, height: 48, margin: "0 auto 1rem", border: "3px solid #f5f3ef", borderTop: "3px solid #7b5455", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.15rem", fontWeight: 400, color: "#3E2723" }}>
-            Creating your bouquet link...
+            {t("payment.creatingLink")}
           </p>
-          <p style={{ fontSize: "0.8rem", color: "#9e8f90", marginTop: "0.5rem" }}>Just a moment...</p>
+          <p style={{ fontSize: "0.8rem", color: "#9e8f90", marginTop: "0.5rem" }}>{t("payment.justAMoment")}</p>
         </div>
       </main>
     );
@@ -481,7 +484,10 @@ export default function Payment() {
       <header className="tip-header">
         <div style={{ maxWidth: 480, margin: "0 auto", padding: "0.75rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <img src="/logo-transparent.png" alt="Petals and Words" style={{ height: 30, width: "auto" }} />
-          <Link to="/" className="vv-btn-ghost">Back Home</Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <Link to="/" className="vv-btn-ghost">{t("common.home")}</Link>
+            <LanguageSwitcher />
+          </div>
         </div>
       </header>
 
@@ -498,26 +504,26 @@ export default function Payment() {
                 fontSize: "1.75rem",
                 boxShadow: "0 8px 24px rgba(34,197,94,0.2)",
               }}>
-                Paid
+                ✓
               </div>
               <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.65rem", fontWeight: 400, lineHeight: 1.25, marginBottom: "0.4rem" }}>
-                Your bouquet is <em style={{ color: "#7b5455" }}>live!</em>
+                {t("payment.liveHeadlinePrefix", "Your bouquet is ")} <em style={{ color: "#7b5455" }}>{t("payment.liveHeadlineSuffix", "live!")}</em>
               </h1>
               <p style={{ fontSize: "0.85rem", color: "#6b5e5f" }}>
-                Share your bouquet link below
+                {t("payment.shareLinkBelow")}
               </p>
             </div>
 
             {/* -- Share link card -- */}
             <div className="vv-card au au-2" style={{ padding: "1.25rem", marginBottom: "1rem" }}>
-              <p className="vv-label" style={{ marginBottom: "0.6rem" }}>Your share link</p>
+              <p className="vv-label" style={{ marginBottom: "0.6rem" }}>{t("payment.yourShareLink")}</p>
               <div className="share-url-box" style={{ marginBottom: "0.75rem" }}>{shareUrl}</div>
               <div style={{ display: "flex", gap: "0.5rem" }}>
                 <button onClick={copyLink} className="share-btn" style={{
                   background: copied ? "#166534" : "#7b5455",
                   color: "#fff",
                 }}>
-                  {copied ? "Copied" : "Copy link"}
+                  {copied ? t("payment.copied") : t("payment.copyLink")}
                 </button>
                 <a
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
@@ -531,7 +537,7 @@ export default function Payment() {
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                     <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.527 5.845L.057 23.272a.75.75 0 00.914.914l5.427-1.47A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.713 9.713 0 01-5.2-1.501l-.373-.221-3.87 1.048 1.048-3.834-.241-.385A9.713 9.713 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z" />
                   </svg>
-                  WhatsApp
+                  {t("payment.whatsapp", "WhatsApp")}
                 </a>
               </div>
             </div>
@@ -544,13 +550,13 @@ export default function Payment() {
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "1.75rem",
             }}>
-              Lock
+              🔒
             </div>
             <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.65rem", fontWeight: 400, lineHeight: 1.25, marginBottom: "0.4rem" }}>
-              Your bouquet is <em style={{ color: "#7b5455" }}>ready!</em>
+              {t("payment.readyHeadlinePrefix", "Your bouquet is ")} <em style={{ color: "#7b5455" }}>{t("payment.readyHeadlineSuffix", "ready!")}</em>
             </h1>
             <p style={{ fontSize: "0.85rem", color: "#6b5e5f" }}>
-              Complete payment to get your share link
+              {t("payment.completePayment")}
             </p>
           </div>
         )}
@@ -562,8 +568,8 @@ export default function Payment() {
               background: "#ffd9d8", borderRadius: "0.875rem", padding: "0.6rem 0.75rem",
               display: "flex", flexDirection: "column", alignItems: "center", minWidth: 56,
             }}>
-              <span style={{ fontSize: "1.4rem", lineHeight: 1 }}>Gift</span>
-              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#7b5455", marginTop: "0.2rem" }}>{flowerCount} stems</span>
+              <span style={{ fontSize: "1.4rem", lineHeight: 1 }}>🎁</span>
+              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#7b5455", marginTop: "0.2rem" }}>{flowerCount} {t("payment.stems")}</span>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               {note?.trim() ? (
@@ -571,11 +577,11 @@ export default function Payment() {
                   <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "0.92rem", fontStyle: "italic", color: "#3E2723", lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                     "{note.trim().slice(0, 80)}{note.trim().length > 80 ? "..." : ""}"
                   </p>
-                  <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginTop: "0.25rem" }}>{wordCount} words</p>
+                  <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginTop: "0.25rem" }}>{wordCount} {t("payment.words")}</p>
                 </>
               ) : (
                 <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "0.85rem", fontStyle: "italic", color: "#9e8f90" }}>
-                  No note added — bouquet only
+                  {t("payment.noNote")}
                 </p>
               )}
             </div>
@@ -587,10 +593,10 @@ export default function Payment() {
           <div className="vv-card au au-4" style={{ padding: "1.5rem 1.25rem", marginBottom: "1rem", textAlign: "center" }}>
             {/* Payment icon */}
             <div style={{ position: "relative", display: "inline-block", marginBottom: "0.5rem" }}>
-              <span style={{ fontSize: "2.2rem" }}>Secure</span>
+              <span style={{ fontSize: "2.2rem" }}>🔒</span>
             </div>
             <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.25rem", fontWeight: 400, marginBottom: "0.3rem" }}>
-              Complete Payment
+              {t("payment.completePaymentHeading", "Complete Payment")}
             </h2>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.8rem" }}>
               <a href="https://razorpay.com/" target="_blank" rel="noreferrer">
@@ -604,8 +610,8 @@ export default function Payment() {
               </a>
             </div>
             <p style={{ fontSize: "0.82rem", color: "#6b5e5f", lineHeight: 1.6, marginBottom: "1.25rem" }}>
-              Pay a small amount to generate your unique share link.<br />
-              Your bouquet will be saved after payment.
+              {t("payment.paySmallAmount", "Pay a small amount to generate your unique share link.")}<br />
+              {t("payment.savedAfterPayment", "Your bouquet will be saved after payment.")}
             </p>
 
             {/* Tip presets */}
@@ -625,7 +631,7 @@ export default function Payment() {
 
             {/* Pay button — Razorpay for all countries */}
             {isDetectingCountry ? (
-              <p style={{ fontSize: "0.78rem", color: "#9e8f90" }}>Loading payment option...</p>
+              <p style={{ fontSize: "0.78rem", color: "#9e8f90" }}>{t("payment.loadingPayment", "Loading payment option...")}</p>
             ) : (
               <button
                 type="button"
@@ -636,10 +642,10 @@ export default function Payment() {
                 {isTipping ? (
                   <>
                     <span className="tip-spinner" />
-                    Processing payment...
+                    {t("payment.processingPayment", "Processing payment...")}
                   </>
                 ) : (
-                  `Pay ${currentTip.display} to get link`
+                  t("payment.payToGetLink", `Pay ${currentTip.display} to get link`).replace('{amount}', currentTip.display)
                 )}
               </button>
             )}
@@ -651,13 +657,13 @@ export default function Payment() {
             {!isDetectingCountry && (
               <div style={{ marginTop: "0.75rem", fontSize: "0.74rem", color: "#7b5455", lineHeight: 1.5 }}>
                 {isIndia
-                  ? "Trusted checkout via Razorpay. Card, UPI, and wallets supported."
-                  : "Trusted checkout via Razorpay. International cards are supported and charged in USD."}
+                  ? t("payment.trustedCheckoutIn", "Trusted checkout via Razorpay. Card, UPI, and wallets supported.")
+                  : t("payment.trustedCheckoutOther", "Trusted checkout via Razorpay. International cards are supported and charged in USD.")}
               </div>
             )}
 
             <p style={{ fontSize: "0.7rem", color: "#c4b5b6", marginTop: "0.75rem" }}>
-              Payment is required to unlock your share link
+              {t("payment.paymentRequired", "Payment is required to unlock your share link")}
             </p>
           </div>
         ) : (
@@ -666,13 +672,13 @@ export default function Payment() {
             padding: "2rem 1.25rem", marginBottom: "1rem", textAlign: "center",
             background: "linear-gradient(135deg, #fdf4ff, #fce7f3, #fff1f2)",
           }}>
-            <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>Thank you</span>
+            <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>💖</span>
             <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.35rem", fontWeight: 400, marginBottom: "0.3rem", color: "#7b5455" }}>
-              Thank you so much!
+              {t("payment.thankYouHeadline", "Thank you so much!")}
             </h2>
             <p style={{ fontSize: "0.85rem", color: "#6b5e5f", lineHeight: 1.6 }}>
-              Your support means the world to me.<br />
-              Enjoy spreading love with your bouquets.
+              {t("payment.supportMeansWorld", "Your support means the world to me.")}<br />
+              {t("payment.enjoySpreadingLove", "Enjoy spreading love with your bouquets.")}
             </p>
           </div>
         )}
@@ -690,7 +696,7 @@ export default function Payment() {
         {/* -- Back to create -- */}
         <div className="au au-5" style={{ textAlign: "center", paddingTop: "0.5rem" }}>
           <Link to="/create" style={{ fontSize: "0.78rem", color: "#9e8f90", textDecoration: "underline", textUnderlineOffset: "3px" }}>
-            Create another bouquet
+            {t("payment.createAnother", "Create another bouquet")}
           </Link>
         </div>
 

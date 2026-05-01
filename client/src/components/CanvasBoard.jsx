@@ -1,4 +1,5 @@
-﻿import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Canvas, FabricImage } from "fabric";
 import { getCleanFlowerImageSrc } from "../lib/flowerImage";
 
@@ -16,6 +17,7 @@ function writeStoredStems(stems) {
 }
 
 export default function CanvasBoard({ selectedFlower, onCanvasStateChange, presetRequest }) {
+  const { t } = useTranslation();
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const fabricCanvas = useRef(null);
@@ -255,7 +257,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
           ].join(" ")}
         >
           <span className="text-base">{"\u2191"}</span>
-          Forward
+          {t("create.canvasForward", "Forward")}
         </button>
         <button
           type="button"
@@ -269,7 +271,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
           ].join(" ")}
         >
           <span className="text-base">{"\u00D7"}</span>
-          Remove
+          {t("create.canvasRemove", "Remove")}
         </button>
         <button
           type="button"
@@ -277,12 +279,12 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
           className="flex min-h-[44px] w-full flex-col items-center justify-center gap-0.5 rounded-xl border border-amber-200 bg-amber-50 px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-amber-800 transition-all hover:bg-amber-100 active:scale-95"
         >
           <span className="text-base">{"\u{1F5D1}"}</span>
-          Clear
+          {t("create.canvasClear", "Clear")}
         </button>
       </div>
 
       <p className="mt-2 text-center text-[11px] text-stone-400">
-        Tap to select, drag to move, use corner handles to resize or rotate
+        {t("create.canvasHelpText", "Tap to select, drag to move, use corner handles to resize or rotate")}
       </p>
     </div>
   );

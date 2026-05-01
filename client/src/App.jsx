@@ -10,8 +10,10 @@ import HugCard from "./pages/HugCard.jsx";
 import CreateCake from "./pages/CreateCake.jsx";
 import ViewCake from "./pages/ViewCake.jsx";
 import PaymentCake from "./pages/PaymentCake.jsx";
+import useDirection from "./hooks/useDirection.js";
 
 export default function App() {
+  useDirection(); // Syncs <html dir> and <html lang> with active language
   return (
     <BrowserRouter>
       <Routes>

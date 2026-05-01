@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 /* ═══════════════════════════════════════════════════════════════════
    Pop-Up Hug Card — cross-shaped reveal
@@ -462,6 +464,7 @@ function lerp(a, b, t) {
 }
 
 export default function HugCard() {
+  const { t } = useTranslation();
   const [progress, setProgress] = useState(0); // 0=closed, 1=open
   const [isOpen, setIsOpen] = useState(false);
   const [hearts, setHearts] = useState([]);
@@ -587,6 +590,9 @@ export default function HugCard() {
 
   return (
     <div className="hug-page">
+      <div style={{ position: "absolute", top: "1rem", right: "1rem", zIndex: 100 }}>
+        <LanguageSwitcher />
+      </div>
       <style>{CSS}</style>
 
       {/* Background decorations */}
@@ -647,10 +653,10 @@ export default function HugCard() {
           <div className="card-top-inner">
             <span className="front-hearts">❤️ ❤️ ❤️</span>
             <div className="front-title">
-              Happy<br />Mother's<br />Day!
+              {t("hugCard.frontTitleLine1", "Happy")}<br />{t("hugCard.frontTitleLine2", "Mother's")}<br />{t("hugCard.frontTitleLine3", "Day!")}
             </div>
             <div className="front-open" style={{ opacity: progress < 0.3 ? 1 : 0, transition: "opacity 0.3s" }}>
-              <span>Pull up to open</span>
+              <span>{t("hugCard.pullUpToOpen", "Pull up to open")}</span>
               <span className="arrow">↑</span>
             </div>
           </div>
@@ -770,14 +776,14 @@ export default function HugCard() {
               transform: `translateY(${lerp(15, 0, Math.max((progress - 0.3) / 0.4, 0))}px)`,
               transition: dragging.current ? "none" : "all 0.3s ease",
             }}>
-              I love you
+              {t("hugCard.iLoveYou", "I love you")}
             </p>
             <p className="msg-thiiis" style={{
               opacity: lerp(0, 1, Math.max((progress - 0.45) / 0.35, 0)),
               transform: `translateY(${lerp(12, 0, Math.max((progress - 0.45) / 0.35, 0))}px)`,
               transition: dragging.current ? "none" : "all 0.3s ease 0.05s",
             }}>
-              <em>thiiiiiiis</em> much
+              <em>{t("hugCard.thiiis", "thiiiiiiis")}</em> {t("hugCard.much", "much")}
             </p>
             <span className="heart-big" style={{
               display: "inline-block",
@@ -794,11 +800,11 @@ export default function HugCard() {
 
       {/* Hint or reset */}
       {!isOpen && progress < 0.05 && (
-        <p className="hug-hint">Tap the card or drag upward to open 💌</p>
+        <p className="hug-hint">{t("hugCard.hint", "Tap the card or drag upward to open 💌")}</p>
       )}
       {isOpen && (
         <button className="hug-reset" onClick={handleReset}>
-          ↻ Close &amp; replay
+          {t("hugCard.closeAndReplay", "↻ Close & replay")}
         </button>
       )}
     </div>

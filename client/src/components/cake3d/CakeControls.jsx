@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import {
   FLAVORS,
   MAX_CANDLES,
@@ -9,15 +10,15 @@ import {
 } from "./cakeConfig";
 
 const OCCASIONS = [
-  { id: "birthday", label: "🎂 Birthday", default: true },
-  { id: "mothers-day", label: "🌸 Mother's Day" },
-  { id: "fathers-day", label: "🎁 Father's Day" },
-  { id: "anniversary", label: "💕 Anniversary" },
-  { id: "wedding", label: "💒 Wedding" },
-  { id: "graduation", label: "🎓 Graduation" },
-  { id: "baby-shower", label: "👶 Baby Sprinkle" },
-  { id: "just-because", label: "💝 Just Because" },
-  { id: "thank-you", label: "🙏 Thank You" },
+  { id: "birthday", labelKey: "occasions.birthdayFull", fallback: "🎂 Birthday" },
+  { id: "mothers-day", labelKey: "occasions.mothersDayFull", fallback: "🌸 Mother's Day" },
+  { id: "fathers-day", labelKey: "occasions.fathersDayFull", fallback: "🎁 Father's Day" },
+  { id: "anniversary", labelKey: "occasions.anniversaryFull", fallback: "💕 Anniversary" },
+  { id: "wedding", labelKey: "occasions.weddingFull", fallback: "💒 Wedding" },
+  { id: "graduation", labelKey: "occasions.graduationFull", fallback: "🎓 Graduation" },
+  { id: "baby-shower", labelKey: "occasions.babyShowerFull", fallback: "👶 Baby Sprinkle" },
+  { id: "just-because", labelKey: "occasions.justBecauseFull", fallback: "💝 Just Because" },
+  { id: "thank-you", labelKey: "occasions.thankYouFull", fallback: "🙏 Thank You" },
 ];
 
 export default function CakeControls({
@@ -45,6 +46,7 @@ export default function CakeControls({
   onSelectedToppingChange,
   onSubmit,
 }) {
+  const { t } = useTranslation();
   const candleCount = cakeState.candles.length;
   const creamCount = cakeState.creamSwirls.length;
   const toppingCount = cakeState.toppings.length;
@@ -52,18 +54,18 @@ export default function CakeControls({
   return (
     <form className="cake3d-controls" onSubmit={onSubmit}>
       <div className="cake3d-field">
-        <label htmlFor="cake3d-name">Recipient name</label>
+        <label htmlFor="cake3d-name">{t("cakeControls.recipientName", "Recipient name")}</label>
         <input
           id="cake3d-name"
           maxLength={36}
           onChange={(event) => onNameChange(event.target.value)}
-          placeholder="e.g. Aanya"
+          placeholder={t("cakeControls.recipientPlaceholder", "e.g. Aanya")}
           value={name}
         />
       </div>
 
       <div className="cake3d-field">
-        <span className="cake3d-label">Occasion</span>
+        <span className="cake3d-label">{t("cakeControls.occasion", "Occasion")}</span>
         <div className="cake3d-flavor-grid" style={{ flexWrap: "wrap" }}>
           {OCCASIONS.map((occ) => (
             <button
@@ -73,14 +75,14 @@ export default function CakeControls({
               type="button"
               style={{ fontSize: "0.75rem", padding: "0.4rem 0.6rem" }}
             >
-              {occ.label}
+              {t(occ.labelKey, occ.fallback)}
             </button>
           ))}
         </div>
       </div>
 
       <div className="cake3d-field">
-        <span className="cake3d-label">Flavor</span>
+        <span className="cake3d-label">{t("cakeControls.flavor", "Flavor")}</span>
         <div className="cake3d-flavor-grid">
           {Object.entries(FLAVORS).map(([id, flavor]) => (
             <button
@@ -90,7 +92,7 @@ export default function CakeControls({
               type="button"
             >
               <span style={{ background: flavor.cake }} />
-              {flavor.label}
+              {t(`cakeControls.flavor_${id}`, flavor.label)}
             </button>
           ))}
         </div>
@@ -98,7 +100,7 @@ export default function CakeControls({
 
       <div className="cake3d-field">
         <div className="cake3d-row-label">
-          <span className="cake3d-label">Cake storeys</span>
+          <span className="cake3d-label">{t("cakeControls.cakeStoreys", "Cake storeys")}</span>
           <strong>{cakeState.tiers}/{MAX_TIERS}</strong>
         </div>
         <div className="cake3d-button-row">
@@ -107,88 +109,88 @@ export default function CakeControls({
             type="button"
             disabled={cakeState.tiers >= MAX_TIERS}
           >
-            Add storey
+            {t("cakeControls.addStorey", "Add storey")}
           </button>
           <button
             onClick={() => onTierChange(cakeState.tiers - 1)}
             type="button"
             disabled={cakeState.tiers <= MIN_TIERS}
           >
-            Remove
+            {t("cakeControls.remove", "Remove")}
           </button>
         </div>
       </div>
 
       <div className="cake3d-field">
         <div className="cake3d-row-label">
-          <span className="cake3d-label">Scene</span>
-          <strong>{autoRotate ? "Rotating" : "Stopped"}</strong>
+          <span className="cake3d-label">{t("cakeControls.scene", "Scene")}</span>
+          <strong>{autoRotate ? t("cakeControls.rotating", "Rotating") : t("cakeControls.stopped", "Stopped")}</strong>
         </div>
         <button className="cake3d-wide-button" onClick={onToggleRotation} type="button">
-          {autoRotate ? "Stop rotation" : "Start rotation"}
+          {autoRotate ? t("cakeControls.stopRotation", "Stop rotation") : t("cakeControls.startRotation", "Start rotation")}
         </button>
       </div>
 
       <div className="cake3d-field">
-        <span className="cake3d-label">Click tool</span>
+        <span className="cake3d-label">{t("cakeControls.clickTool", "Click tool")}</span>
         <div className="cake3d-tool-row">
           <button
             className={activeTool === "candle" ? "active" : ""}
             onClick={() => onActiveToolChange("candle")}
             type="button"
           >
-            Candle
+            {t("cakeControls.candle", "Candle")}
           </button>
           <button
             className={activeTool === "cream" ? "active" : ""}
             onClick={() => onActiveToolChange("cream")}
             type="button"
           >
-            Cream
+            {t("cakeControls.cream", "Cream")}
           </button>
           <button
             className={activeTool === "topping" ? "active" : ""}
             onClick={() => onActiveToolChange("topping")}
             type="button"
           >
-            Topping
+            {t("cakeControls.topping", "Topping")}
           </button>
         </div>
       </div>
 
       <div className="cake3d-field">
         <div className="cake3d-row-label">
-          <span className="cake3d-label">Candles</span>
+          <span className="cake3d-label">{t("cakeControls.candles", "Candles")}</span>
           <strong>{candleCount}/{MAX_CANDLES}</strong>
         </div>
         <div className="cake3d-button-row">
           <button onClick={onAddCandle} type="button" disabled={candleCount >= MAX_CANDLES}>
-            Add candle
+            {t("cakeControls.addCandle", "Add candle")}
           </button>
           <button onClick={onClearCandles} type="button" disabled={candleCount === 0}>
-            Clear
+            {t("cakeControls.clear", "Clear")}
           </button>
         </div>
       </div>
 
       <div className="cake3d-field">
         <div className="cake3d-row-label">
-          <span className="cake3d-label">Cream swirls</span>
+          <span className="cake3d-label">{t("cakeControls.creamSwirls", "Cream swirls")}</span>
           <strong>{creamCount}/{MAX_CREAM_SWIRLS}</strong>
         </div>
         <div className="cake3d-button-row">
           <button onClick={onAddCream} type="button" disabled={creamCount >= MAX_CREAM_SWIRLS}>
-            Add cream
+            {t("cakeControls.addCream", "Add cream")}
           </button>
           <button onClick={onClearCream} type="button" disabled={creamCount === 0}>
-            Clear
+            {t("cakeControls.clear", "Clear")}
           </button>
         </div>
       </div>
 
       <div className="cake3d-field">
         <div className="cake3d-row-label">
-          <span className="cake3d-label">Toppings</span>
+          <span className="cake3d-label">{t("cakeControls.toppings", "Toppings")}</span>
           <strong>{toppingCount}/{MAX_TOPPINGS}</strong>
         </div>
         <div className="cake3d-topping-grid">
@@ -200,7 +202,7 @@ export default function CakeControls({
               type="button"
             >
               <span style={{ background: topping.color }} />
-              {topping.label}
+              {t(`cakeControls.topping_${id}`, topping.label)}
             </button>
           ))}
         </div>
@@ -210,21 +212,21 @@ export default function CakeControls({
             type="button"
             disabled={toppingCount >= MAX_TOPPINGS}
           >
-            Add topping
+            {t("cakeControls.addTopping", "Add topping")}
           </button>
           <button onClick={onClearToppings} type="button" disabled={toppingCount === 0}>
-            Clear
+            {t("cakeControls.clear", "Clear")}
           </button>
         </div>
       </div>
 
       <div className="cake3d-field">
-        <label htmlFor="cake3d-note">Birthday note</label>
+        <label htmlFor="cake3d-note">{t("cakeControls.birthdayNote", "Birthday note")}</label>
         <textarea
           id="cake3d-note"
           maxLength={240}
           onChange={(event) => onNoteChange(event.target.value)}
-          placeholder="Write a wish they will see after the candles are out."
+          placeholder={t("cakeControls.notePlaceholder", "Write a wish they will see after the candles are out.")}
           value={note}
         />
       </div>
@@ -232,7 +234,7 @@ export default function CakeControls({
       {error && <div className="cake3d-error">{error}</div>}
 
       <button className="cake3d-submit" type="submit">
-        Bake cake
+        {t("cakeControls.bakeCake", "Bake cake")}
       </button>
     </form>
   );

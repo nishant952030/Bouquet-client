@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { track } from "@vercel/analytics";
 import { trackEvent } from "../lib/analytics";
 import { doc, setDoc } from "firebase/firestore";
@@ -8,14 +10,14 @@ import { loadRazorpayScript } from "../lib/razorpay";
 import { applySeo, seoKeywords } from "../lib/seo";
 
 const TIP_PRESETS_INR = [
-  { label: "Basic", amount: 9, display: "Rs 9" },
-  { label: "Popular", amount: 19, display: "Rs 19" },
-  { label: "Supporter", amount: 29, display: "Rs 29" },
+  { labelKey: "payment.tipBasic", fallback: "Basic", amount: 9, display: "Rs 9" },
+  { labelKey: "payment.tipPopular", fallback: "Popular", amount: 19, display: "Rs 19" },
+  { labelKey: "payment.tipSupporter", fallback: "Supporter", amount: 29, display: "Rs 29" },
 ];
 const TIP_PRESETS_USD = [
-  { label: "Basic", amount: 0.49, display: "$0.49" },
-  { label: "Popular", amount: 0.99, display: "$0.99" },
-  { label: "Supporter", amount: 1.49, display: "$1.49" },
+  { labelKey: "payment.tipBasic", fallback: "Basic", amount: 0.49, display: "$0.49" },
+  { labelKey: "payment.tipPopular", fallback: "Popular", amount: 0.99, display: "$0.99" },
+  { labelKey: "payment.tipSupporter", fallback: "Supporter", amount: 1.49, display: "$1.49" },
 ];
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 const BYPASS_CAKE_PAYMENT_FOR_TESTING = false;
@@ -210,6 +212,7 @@ const CSS = `
 
 export default function PaymentCake() {
   const location = useLocation();
+  const { t } = useTranslation();
 
   const name = location.state?.name || "";
   const flavor = location.state?.flavor || "chocolate";
@@ -408,13 +411,16 @@ export default function PaymentCake() {
     return (
       <main className="tip-root" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "2rem 1rem" }}>
         <style>{CSS}</style>
+        <div style={{ position: "absolute", top: "1rem", right: "1rem", zIndex: 100 }}>
+          <LanguageSwitcher />
+        </div>
         <div className="vv-card" style={{ maxWidth: 380, padding: "2rem 1.5rem", textAlign: "center" }}>
           <p style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>🎂</p>
           <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.4rem", fontWeight: 400, marginBottom: "0.5rem" }}>
-            No cake found
+            {t("paymentCake.noCakeFound", "No cake found")}
           </h1>
           <p style={{ fontSize: "0.85rem", color: "#6b5e5f", marginBottom: "1.25rem" }}>
-            Bake your cake first, then come back to share it.
+            {t("paymentCake.bakeFirst", "Bake your cake first, then come back to share it.")}
           </p>
           <Link to="/create-cake" style={{
             display: "inline-flex", alignItems: "center", gap: "6px",
@@ -424,7 +430,7 @@ export default function PaymentCake() {
             borderRadius: "9999px", padding: "0.75rem 1.75rem", textDecoration: "none",
             boxShadow: "0 12px 36px rgba(233,30,99,0.22)",
           }}>
-            Create Cake
+            {t("paymentCake.createCake", "Create Cake")}
           </Link>
         </div>
       </main>
@@ -439,7 +445,7 @@ export default function PaymentCake() {
           <div style={{ width: 48, height: 48, margin: "0 auto 1rem", border: "3px solid #f5f3ef", borderTop: "3px solid #e91e63", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.15rem", fontWeight: 400, color: "#3E2723" }}>
-            Boxing up your cake...
+            {t("paymentCake.boxingUp", "Boxing up your cake...")}
           </p>
         </div>
       </main>
@@ -453,7 +459,10 @@ export default function PaymentCake() {
       <header className="tip-header">
         <div style={{ maxWidth: 480, margin: "0 auto", padding: "0.75rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <img src="/logo-transparent.png" alt="Petals and Words" style={{ height: 30, width: "auto" }} />
-          <Link to="/" className="vv-btn-ghost">Back Home</Link>
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            <LanguageSwitcher />
+            <Link to="/" className="vv-btn-ghost">{t("common.backHome", "Back Home")}</Link>
+          </div>
         </div>
       </header>
 
@@ -472,21 +481,21 @@ export default function PaymentCake() {
                 🎂
               </div>
               <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.65rem", fontWeight: 400, lineHeight: 1.25, marginBottom: "0.4rem" }}>
-                Your cake is <em style={{ color: "#e91e63" }}>ready!</em>
+                {t("paymentCake.yourCakeIs", "Your cake is")} <em style={{ color: "#e91e63" }}>{t("paymentCake.readyEm", "ready!")}</em>
               </h1>
               <p style={{ fontSize: "0.85rem", color: "#6b5e5f" }}>
-                Share your birthday cake link below
+                {t("paymentCake.shareLinkBelow", "Share your birthday cake link below")}
               </p>
             </div>
 
             <div className="vv-card au au-2" style={{ padding: "1.25rem", marginBottom: "1rem" }}>
-              <p className="vv-label" style={{ marginBottom: "0.6rem" }}>Your share link</p>
+              <p className="vv-label" style={{ marginBottom: "0.6rem" }}>{t("paymentCake.yourShareLink", "Your share link")}</p>
               <div className="share-url-box" style={{ marginBottom: "0.75rem" }}>{shareUrl}</div>
               <div style={{ display: "flex", gap: "0.5rem" }}>
                 <button onClick={copyLink} className="share-btn" style={{
                   background: copied ? "#166534" : "#e91e63", color: "#fff"
                 }}>
-                  {copied ? "Copied" : "Copy link"}
+                  {copied ? t("paymentCake.copied", "Copied") : t("paymentCake.copyLink", "Copy link")}
                 </button>
                 <a
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
@@ -496,7 +505,7 @@ export default function PaymentCake() {
                   className="share-btn"
                   style={{ background: "#25D366", color: "#fff", textDecoration: "none" }}
                 >
-                  WhatsApp
+                  {t("paymentCake.whatsapp", "WhatsApp")}
                 </a>
               </div>
             </div>
@@ -512,10 +521,10 @@ export default function PaymentCake() {
               ✨
             </div>
             <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.65rem", fontWeight: 400, lineHeight: 1.25, marginBottom: "0.4rem" }}>
-              Cake is baked and <em style={{ color: "#e91e63" }}>ready!</em>
+              {t("paymentCake.cakeIsBakedAnd", "Cake is baked and")} <em style={{ color: "#e91e63" }}>{t("paymentCake.readyEm", "ready!")}</em>
             </h1>
             <p style={{ fontSize: "0.85rem", color: "#6b5e5f" }}>
-              Complete payment to get your share link
+              {t("paymentCake.completePaymentToGetLink", "Complete payment to get your share link")}
             </p>
           </div>
         )}
@@ -528,7 +537,7 @@ export default function PaymentCake() {
               display: "flex", flexDirection: "column", alignItems: "center", minWidth: 56,
             }}>
               <span style={{ fontSize: "1.4rem", lineHeight: 1 }}>🎂</span>
-              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#e91e63", marginTop: "0.2rem" }}>For {name}</span>
+              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#e91e63", marginTop: "0.2rem" }}>{t("paymentCake.forName", "For {{name}}", { name })}</span>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               {note?.trim() ? (
@@ -536,11 +545,11 @@ export default function PaymentCake() {
                   <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "0.92rem", fontStyle: "italic", color: "#3E2723", lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                     "{note.trim().slice(0, 80)}{note.trim().length > 80 ? "..." : ""}"
                   </p>
-                  <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginTop: "0.25rem" }}>{wordCount} words</p>
+                  <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginTop: "0.25rem" }}>{t("paymentCake.wordsCount", "{{count}} words", { count: wordCount })}</p>
                 </>
               ) : (
                 <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "0.85rem", fontStyle: "italic", color: "#9e8f90" }}>
-                  A sweet cake for {name}
+                  {t("paymentCake.sweetCakeFor", "A sweet cake for {{name}}", { name })}
                 </p>
               )}
             </div>
@@ -550,10 +559,10 @@ export default function PaymentCake() {
         {!tipDone && !BYPASS_CAKE_PAYMENT_FOR_TESTING ? (
           <div className="vv-card au au-4" style={{ padding: "1.5rem 1.25rem", marginBottom: "1rem", textAlign: "center" }}>
             <div style={{ position: "relative", display: "inline-block", marginBottom: "0.5rem" }}>
-              <span style={{ fontSize: "2.2rem" }}>Secure</span>
+              <span style={{ fontSize: "2.2rem" }}>{t("payment.secure", "Secure")}</span>
             </div>
             <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.25rem", fontWeight: 400, marginBottom: "0.3rem" }}>
-              Complete Payment
+              {t("payment.completePayment", "Complete Payment")}
             </h2>
             <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.8rem" }}>
               <a href="https://razorpay.com/" target="_blank" rel="noreferrer">
@@ -567,7 +576,7 @@ export default function PaymentCake() {
               </a>
             </div>
             <p style={{ fontSize: "0.82rem", color: "#6b5e5f", lineHeight: 1.6, marginBottom: "1.25rem" }}>
-              Pay a tiny amount to get your unique share link.<br />
+              {t("paymentCake.payTinyAmount", "Pay a tiny amount to get your unique share link.")}<br />
             </p>
 
             <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
@@ -578,14 +587,14 @@ export default function PaymentCake() {
                   className={`tip-btn ${selectedTip === i ? "selected" : ""}`}
                   onClick={() => setSelectedTip(i)}
                 >
-                  <span className="tip-emoji">{preset.label}</span>
+                  <span className="tip-emoji">{t(preset.labelKey, preset.fallback)}</span>
                   <span className="tip-amount">{preset.display}</span>
                 </button>
               ))}
             </div>
 
             {isDetectingCountry ? (
-              <p style={{ fontSize: "0.78rem", color: "#9e8f90" }}>Loading payment option...</p>
+              <p style={{ fontSize: "0.78rem", color: "#9e8f90" }}>{t("payment.loadingOptions", "Loading payment option...")}</p>
             ) : (
               <button
                 type="button"
@@ -596,10 +605,10 @@ export default function PaymentCake() {
                 {isTipping ? (
                   <>
                     <span className="tip-spinner" />
-                    Processing payment...
+                    {t("payment.processing", "Processing payment...")}
                   </>
                 ) : (
-                  `Pay ${currentTip.display} to get link`
+                  t("paymentCake.payAmountToGetLink", "Pay {{amount}} to get link", { amount: currentTip.display })
                 )}
               </button>
             )}
@@ -613,12 +622,12 @@ export default function PaymentCake() {
             padding: "2rem 1.25rem", marginBottom: "1rem", textAlign: "center",
             background: "linear-gradient(135deg, #fdf4ff, #fce7f3, #fff1f2)",
           }}>
-            <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>Thank you</span>
+            <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>{t("payment.thankYouEmoji", "🎉")}</span>
             <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.35rem", fontWeight: 400, marginBottom: "0.3rem", color: "#e91e63" }}>
-              Thank you so much!
+              {t("payment.thankYouSoMuch", "Thank you so much!")}
             </h2>
             <p style={{ fontSize: "0.85rem", color: "#6b5e5f", lineHeight: 1.6 }}>
-              Enjoy celebrating their special day!
+              {t("paymentCake.enjoyCelebrating", "Enjoy celebrating their special day!")}
             </p>
           </div>
         ) : null}
@@ -634,7 +643,7 @@ export default function PaymentCake() {
 
         <div className="au au-5" style={{ textAlign: "center", paddingTop: "0.5rem" }}>
           <Link to="/create-cake" style={{ fontSize: "0.78rem", color: "#9e8f90", textDecoration: "underline", textUnderlineOffset: "3px" }}>
-            Create another cake
+            {t("paymentCake.createAnotherCake", "Create another cake")}
           </Link>
         </div>
 

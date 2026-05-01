@@ -44,3 +44,39 @@ body {
     inset 0 1px 2px rgba(120, 87, 53, 0.08),
     inset 0 -1px 0 rgba(255, 255, 255, 0.7);
 }
+
+/* ── RTL support for Arabic ────────────────────────────────── */
+[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] .vv-label,
+[dir="rtl"] .vv-body,
+[dir="rtl"] .vv-display {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Flip flex row layouts */
+[dir="rtl"] .vv-btn-primary,
+[dir="rtl"] .vv-btn-ghost,
+[dir="rtl"] .vv-btn-cake,
+[dir="rtl"] .vb-cta-btn,
+[dir="rtl"] .share-btn,
+[dir="rtl"] .tip-cta {
+  flex-direction: row-reverse;
+}
+
+/* Ensure centered text stays centered */
+[dir="rtl"] [style*="text-align: center"],
+[dir="rtl"] [style*="textAlign"] {
+  text-align: center;
+}
+
+/* Tag position flip for RTL */
+[dir="rtl"] .vv-tag-new {
+  right: auto;
+  left: -5px;
+  transform: rotate(-8deg);
+}

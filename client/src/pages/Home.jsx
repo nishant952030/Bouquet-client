@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import * as THREE from "three";
 
 import { applySeo, seoKeywords } from "../lib/seo";
@@ -294,6 +296,7 @@ function HeroThreeBloom() {
 
 export default function Home() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const testimonials = useMemo(() => [
     { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi", city: "Mumbai" },
@@ -306,7 +309,12 @@ export default function Home() {
   const [isSliding, setIsSliding] = useState(false);
   const featuredPosts = useMemo(() => blogPosts.slice(0, 3), []);
 
-  const occasions = ["For Mom", "For Partner", "For Best Friend", "For Family"];
+  const occasions = [
+    { key: "home.forMom", label: t("home.forMom") },
+    { key: "home.forPartner", label: t("home.forPartner") },
+    { key: "home.forBestFriend", label: t("home.forBestFriend") },
+    { key: "home.forFamily", label: t("home.forFamily") },
+  ];
 
   useEffect(() => {
     applySeo({
@@ -340,7 +348,10 @@ export default function Home() {
       <header className="vv-header">
         <div style={{ maxWidth: 480, margin: "0 auto", padding: "0.9rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <img src="/logo-transparent.png" alt="Petals and Words" style={{ height: 32, width: "auto" }} />
-          <Link to="/blog" className="vv-btn-ghost">Flower Blog</Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Link to="/blog" className="vv-btn-ghost">{t("common.blog")}</Link>
+            <LanguageSwitcher />
+          </div>
         </div>
       </header>
 
@@ -363,50 +374,50 @@ export default function Home() {
             <img src="/logo-transparent.png" alt="Petals and Words" style={{ height: 40, margin: "0 auto 1rem", display: "block" }} />
 
             {/* Label */}
-            <p className="vv-label" style={{ marginBottom: "0.6rem" }}>Made for Meaningful Moments</p>
+            <p className="vv-label" style={{ marginBottom: "0.6rem" }}>{t("home.label")}</p>
 
             {/* Headline */}
             <h1 className="vv-display" style={{ fontSize: "clamp(1.9rem, 7vw, 2.6rem)", marginBottom: "1rem" }}>
-              Send flowers{" "}
-              <em className="vv-shimmer">she'll never forget</em>
+              {t("home.headline")}{" "}
+              <em className="vv-shimmer">{t("home.headlineEmphasis")}</em>
             </h1>
 
             {/* Sub copy */}
             <p className="vv-body" style={{ maxWidth: 320, margin: "0 auto 1.5rem", fontSize: "0.92rem" }}>
-              A digital bouquet with your words, delivered in seconds — for family, friends, or anyone you care about.
+              {t("home.subCopy")}
             </p>
 
             {/* Occasion chips */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center", marginBottom: "1.75rem" }}>
-              {occasions.map(label => (
-                <button key={label} className="petal-chip" onClick={() => navigate("/create")}>{label}</button>
+              {occasions.map(o => (
+                <button key={o.key} className="petal-chip" onClick={() => navigate("/create")}>{o.label}</button>
               ))}
             </div>
 
             {/* Offer badge */}
             <div style={{ marginBottom: "1.5rem" }}>
               <span style={{ display: "inline-block", background: "#f5f3ef", borderRadius: "9999px", padding: "0.5rem 1.2rem", fontSize: "0.8rem", fontWeight: 600, color: "#4f4445" }}>
-                ✨ No login · Ready in 60 seconds
+                {t("common.noLoginBadge")}
               </span>
             </div>
 
             {/* CTAs */}
             <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem", width: "100%", maxWidth: 320, margin: "0 auto" }}>
               <button className="vv-btn-primary" onClick={() => navigate("/create")}>
-                Create Bouquet
+                {t("common.createBouquet")}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </button>
 
               <button className="vv-btn-cake" onClick={() => navigate("/create-cake")}>
-                <span className="vv-tag-new">NEW</span>
-                🎂 Bake a Cake
+                <span className="vv-tag-new">{t("common.new")}</span>
+                {t("home.bakeCake")}
               </button>
             </div>
 
             <p style={{ marginTop: "1rem", fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#9e8f90" }}>
-              Instant share via WhatsApp or Link
+              {t("common.instantShare")}
             </p>
           </div>
         </section>
@@ -414,12 +425,12 @@ export default function Home() {
         {/* ── HOW IT WORKS ── */}
         <section className="vv-f2" style={{ marginTop: "1.5rem" }}>
           <div className="vv-card-low" style={{ padding: "1.5rem 1.25rem" }}>
-            <p className="vv-label" style={{ marginBottom: "1.25rem" }}>How it works</p>
+            <p className="vv-label" style={{ marginBottom: "1.25rem" }}>{t("home.howItWorks")}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
               {[
-                { n: "1", emoji: "🌸", title: "Pick your flowers", desc: "Choose stems and arrange them into a bouquet they'll love." },
-                { n: "2", emoji: "✍️", title: "Write from the heart", desc: "Add a personal note — or pick from our curated message ideas." },
-                { n: "3", emoji: "🔗", title: "Share instantly", desc: "Get a unique link. Send over WhatsApp in seconds." },
+                { n: "1", emoji: "🌸", title: t("home.step1Title"), desc: t("home.step1Desc") },
+                { n: "2", emoji: "✍️", title: t("home.step2Title"), desc: t("home.step2Desc") },
+                { n: "3", emoji: "🔗", title: t("home.step3Title"), desc: t("home.step3Desc") },
               ].map(s => (
                 <div key={s.n} style={{ display: "flex", alignItems: "flex-start", gap: "0.9rem", background: "#ffffff", borderRadius: "1.25rem", padding: "0.9rem 1rem" }}>
                   <div className="step-circle">{s.n}</div>
@@ -436,7 +447,7 @@ export default function Home() {
         {/* ── TESTIMONIALS ── */}
         <section className="vv-f3" style={{ marginTop: "1.5rem" }}>
           <div className="vv-card" style={{ padding: "1.5rem 1.25rem" }}>
-            <p className="vv-label" style={{ marginBottom: "1rem" }}>What people say</p>
+            <p className="vv-label" style={{ marginBottom: "1rem" }}>{t("home.testimonials")}</p>
             <div
               style={{
                 background: "#f5f3ef", borderRadius: "1.25rem", padding: "1.25rem",
@@ -444,7 +455,7 @@ export default function Home() {
                 transform: isSliding ? "translateX(-12px)" : "translateX(0)",
                 transition: "opacity 0.2s, transform 0.2s",
               }}>
-              <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8a96e", marginBottom: "0.5rem" }}>⭐ 5 out of 5</p>
+              <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8a96e", marginBottom: "0.5rem" }}>{t("home.rating")}</p>
               <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.05rem", fontStyle: "italic", lineHeight: 1.65, color: "#3E2723" }}>
                 "{testimonials[activeIdx].quote}"
               </p>
@@ -470,12 +481,12 @@ export default function Home() {
         {/* ── DARK MESSAGE CARD ── */}
         <section className="vv-f4" style={{ marginTop: "1.5rem" }}>
           <div style={{ borderRadius: "2rem", overflow: "hidden", background: "linear-gradient(135deg, #3E2723 0%, #5c3a34 55%, #7b5455 100%)", padding: "2rem 1.5rem", textAlign: "center", position: "relative" }}>
-            <p className="vv-label" style={{ color: "#ecbaba", marginBottom: "0.6rem" }}>Thoughtful Gifts Made Easy</p>
+            <p className="vv-label" style={{ color: "#ecbaba", marginBottom: "0.6rem" }}>{t("home.darkLabel")}</p>
             <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.5rem", fontStyle: "italic", fontWeight: 400, color: "#fbf9f5", lineHeight: 1.35, marginBottom: "0.75rem" }}>
-              They deserve more than a text.
+              {t("home.darkHeadline")}
             </p>
             <p style={{ fontSize: "0.85rem", color: "rgba(251,249,245,0.8)", lineHeight: 1.65, maxWidth: 300, margin: "0 auto 1.5rem" }}>
-              Make someone in your life feel truly seen. A bouquet and your words — a gift they'll screenshot and save.
+              {t("home.darkBody")}
             </p>
             <button
               onClick={() => navigate("/create")}
@@ -483,7 +494,7 @@ export default function Home() {
               onMouseEnter={e => e.currentTarget.style.background = "rgba(255,217,216,0.28)"}
               onMouseLeave={e => e.currentTarget.style.background = "rgba(255,217,216,0.15)"}
             >
-              Make a bouquet now →
+              {t("home.darkCta")}
             </button>
           </div>
         </section>
@@ -491,7 +502,7 @@ export default function Home() {
         {/* ── EXPLORE / BLOG ── */}
         <section className="vv-f5" style={{ marginTop: "1.5rem" }}>
           <div className="vv-card-low" style={{ padding: "1.25rem" }}>
-            <p className="vv-label" style={{ marginBottom: "0.75rem" }}>Explore more</p>
+            <p className="vv-label" style={{ marginBottom: "0.75rem" }}>{t("home.explore")}</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.25rem" }}>
               {[
                 { to: "/virtual-bouquet-maker", label: "🌐 Virtual Bouquet Maker" },
@@ -507,7 +518,7 @@ export default function Home() {
                 </Link>
               ))}
             </div>
-            <p className="vv-label" style={{ marginBottom: "0.75rem" }}>From the blog</p>
+            <p className="vv-label" style={{ marginBottom: "0.75rem" }}>{t("home.fromBlog")}</p>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
               {featuredPosts.map(post => (
                 <Link key={post.slug} to={`/blog/${post.slug}`}

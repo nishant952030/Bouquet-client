@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { track } from "@vercel/analytics";
 import CanvasBoard from "../components/CanvasBoard";
 import FlowerPicker from "../components/FlowerPicker";
@@ -340,6 +342,7 @@ function countWords(t) { const n = t.trim(); return n ? n.split(/\s+/).length : 
 
 export default function Create() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const wdActive = false;
 
   /* core state */
@@ -510,8 +513,14 @@ export default function Create() {
             <div className="flex ticker-inner whitespace-nowrap select-none">
               {[0, 1].map((gi) => (
                 <span key={gi} className="flex shrink-0 items-center gap-8 px-6 text-[11px] font-medium" style={{ color: "rgba(253,217,216,0.9)" }}>
-                  {["Happy Women's Day  March 8", "Send a bouquet she'll treasure", "Today-only special offer",
-                    "For Mom  Sister  Best Friend  Her", "Celebrate every woman in your life", "She deserves more than a text"].map((txt, i) => (
+                  {[
+                    t("create.ticker1", "Happy Women's Day  March 8"),
+                    t("create.ticker2", "Send a bouquet she'll treasure"),
+                    t("create.ticker3", "Today-only special offer"),
+                    t("create.ticker4", "For Mom  Sister  Best Friend  Her"),
+                    t("create.ticker5", "Celebrate every woman in your life"),
+                    t("create.ticker6", "She deserves more than a text"),
+                  ].map((txt, i) => (
                     <span key={i} className="flex items-center gap-8">{txt}<span style={{ color: "rgba(255,180,170,0.5)" }}>✿</span></span>
                   ))}
                 </span>
@@ -532,7 +541,8 @@ export default function Create() {
                 <div className="prog-fill" style={{ width: `${progress}%` }} />
               </div>
             </div>
-            <Link to="/" className="vv-btn-ghost">← Home</Link>
+            <Link to="/" className="vv-btn-ghost">{t("common.home")}</Link>
+            <LanguageSwitcher />
           </div>
         </div>
       </header>
@@ -547,12 +557,12 @@ export default function Create() {
               <DoodleWreathRight className="absolute right-0 top-0 h-full w-10 opacity-35" />
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", position: "relative" }}>
                 <div>
-                  <p className="vv-label" style={{ color: "#ecbaba" }}>March 8 · Women's Day</p>
-                  <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.2rem", fontWeight: 400, color: "#fbf9f5", lineHeight: 1.3, marginTop: "0.2rem" }}>Happy Women's Day 🌸</p>
-                  <p style={{ fontSize: "0.75rem", color: "rgba(251,249,245,0.7)", marginTop: "0.2rem" }}>This offer disappears at midnight</p>
+                  <p className="vv-label" style={{ color: "#ecbaba" }}>{t("create.wdLabel", "March 8 · Women's Day")}</p>
+                  <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.2rem", fontWeight: 400, color: "#fbf9f5", lineHeight: 1.3, marginTop: "0.2rem" }}>{t("create.wdHappy", "Happy Women's Day 🌸")}</p>
+                  <p style={{ fontSize: "0.75rem", color: "rgba(251,249,245,0.7)", marginTop: "0.2rem" }}>{t("create.wdOffer", "This offer disappears at midnight")}</p>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem", flexShrink: 0 }}>
-                  <p className="vv-label" style={{ color: "#ecbaba" }}>Ends in</p>
+                  <p className="vv-label" style={{ color: "#ecbaba" }}>{t("create.wdEndsIn", "Ends in")}</p>
                   <MidnightCountdown />
                 </div>
               </div>
@@ -564,19 +574,19 @@ export default function Create() {
         <div className="fs2" style={{ marginBottom: "1rem", textAlign: "center" }}>
           {wdActive ? (
             <>
-              <p className="vv-label" style={{ marginBottom: "0.4rem" }}>Women's Day Bouquet Builder</p>
+              <p className="vv-label" style={{ marginBottom: "0.4rem" }}>{t("create.wdBuilderLabel", "Women's Day Bouquet Builder")}</p>
               <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "clamp(1.7rem, 6vw, 2.2rem)", fontWeight: 400, lineHeight: 1.2, margin: 0 }}>
-                Build a bouquet <em className="wd-shimmer">she'll treasure forever</em>
+                {t("create.wdBuilderHeadline", "Build a bouquet")} <em className="wd-shimmer">{t("create.wdBuilderHeadlineEm", "she'll treasure forever")}</em>
               </h1>
               <p style={{ fontSize: "0.82rem", color: "#6b5e5f", lineHeight: 1.6, marginTop: "0.5rem" }}>
-                Pick flowers · write her words · share in 60 seconds
+                {t("create.wdBuilderSub", "Pick flowers · write her words · share in 60 seconds")}
               </p>
             </>
           ) : (
             <>
-              <p className="vv-label" style={{ marginBottom: "0.4rem" }}>Bouquet Builder</p>
+              <p className="vv-label" style={{ marginBottom: "0.4rem" }}>{t("create.label")}</p>
               <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "clamp(1.7rem, 6vw, 2.2rem)", fontWeight: 400, lineHeight: 1.2, margin: 0 }}>
-                Create something <em style={{ fontStyle: "italic", color: "#7b5455" }}>beautiful</em>
+                {t("create.headline")} <em style={{ fontStyle: "italic", color: "#7b5455" }}>{t("create.headlineEmphasis")}</em>
               </h1>
             </>
           )}
@@ -590,15 +600,15 @@ export default function Create() {
           <div className="fs3" style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem", overflowX: "auto", scrollbarWidth: "none", paddingBottom: "0.25rem" }}>
             {WD_OCCASIONS.map((item) => (
               <button key={item.label} type="button"
-                onClick={() => setNote((n) => n || `Happy Women's Day! ${item.emoji}`)}
+                onClick={() => setNote((n) => n || t("create.wdDefaultNote", "Happy Women's Day! {{emoji}}", { emoji: item.emoji }))}
                 style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: "0.5rem", background: "#ffffff", borderRadius: "0.875rem", border: "1.5px solid #ede8e9", padding: "0.5rem 0.75rem", cursor: "pointer", transition: "all 0.15s" }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = "#7b5455"; e.currentTarget.style.background = "#ffd9d8"; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "#ede8e9"; e.currentTarget.style.background = "#ffffff"; }}
               >
                 <span style={{ fontSize: "1.1rem", lineHeight: 1 }}>{item.emoji}</span>
                 <div style={{ textAlign: "left" }}>
-                  <p style={{ fontSize: "0.78rem", fontWeight: 600, color: "#3E2723", lineHeight: 1 }}>{item.label}</p>
-                  <p style={{ fontSize: "0.68rem", color: "#9e8f90", lineHeight: 1.3, marginTop: "0.1rem" }}>{item.desc}</p>
+                  <p style={{ fontSize: "0.78rem", fontWeight: 600, color: "#3E2723", lineHeight: 1 }}>{t(`create.occasion_${item.label}`, item.label)}</p>
+                  <p style={{ fontSize: "0.68rem", color: "#9e8f90", lineHeight: 1.3, marginTop: "0.1rem" }}>{t(`create.occasion_desc_${item.label}`, item.desc)}</p>
                 </div>
               </button>
             ))}
@@ -618,13 +628,13 @@ export default function Create() {
           {/* Canvas header row */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.875rem", paddingTop: wdActive ? "0.5rem" : 0 }}>
             <div>
-              <p className="vv-label">{wdActive ? "Her bouquet" : "Your canvas"}</p>
+              <p className="vv-label">{wdActive ? t("create.wdHerBouquet", "Her bouquet") : t("create.yourCanvas")}</p>
               <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1rem", fontWeight: 400, color: "#3E2723", lineHeight: 1.3, marginTop: "0.15rem" }}>
-                {wdActive ? "Arrange with love" : "Arrange your bouquet"}
+                {wdActive ? t("create.wdArrange", "Arrange with love") : t("create.arrangeBouquet")}
               </p>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <button type="button" className="magic-btn" onClick={generateMagicBouquet}>✨ Auto Generate</button>
+              <button type="button" className="magic-btn" onClick={generateMagicBouquet}>{t("create.autoGenerate")}</button>
               <span className="count-pill" style={{ background: "#ffd9d8", color: "#7b5455" }}>🌸 {flowerCount}</span>
               <span className="count-pill" style={{ background: "#fef9ec", color: "#b45309" }}>✍️ {wordCount}w</span>
             </div>
@@ -635,7 +645,7 @@ export default function Create() {
             <div style={{ display: "grid", gridTemplateColumns: "156px 1fr 156px", gap: "0.75rem" }}>
               {/* Left: flower types */}
               <aside className="vv-card-low" style={{ padding: "0.75rem" }}>
-                <p className="vv-label" style={{ marginBottom: "0.5rem" }}>Flower type</p>
+                <p className="vv-label" style={{ marginBottom: "0.5rem" }}>{t("create.flowerType")}</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
                   {desktopFlowerGroups.map((group) => (
                     <button key={group.id} type="button"
@@ -655,7 +665,7 @@ export default function Create() {
 
               {/* Right: flowers for type */}
               <aside className="vv-card-low" style={{ padding: "0.75rem" }}>
-                <p className="vv-label" style={{ marginBottom: "0.5rem" }}>Flowers</p>
+                <p className="vv-label" style={{ marginBottom: "0.5rem" }}>{t("create.flowers")}</p>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem", maxHeight: 360, overflowY: "auto" }}>
                   {desktopFlowersForType.map((flower) => (
                     <button key={flower.id} type="button"
@@ -679,8 +689,8 @@ export default function Create() {
           <div className="fs4" style={{ marginBottom: "1rem" }}>
             <div style={{ display: "flex", gap: "0.5rem", background: "#f5f3ef", borderRadius: "1.25rem", padding: "0.4rem" }}>
               {[
-                { id: "flowers", label: "🌸 Flowers", sub: "Pick stems" },
-                { id: "note", label: "✍️ Note", sub: "Write message" },
+                { id: "flowers", label: t("create.tabFlowers"), sub: t("create.tabFlowersSub") },
+                { id: "note", label: t("create.tabNote"), sub: t("create.tabNoteSub") },
               ].map((tab) => (
                 <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
                   className={`cr-tab-${activeTab === tab.id ? "on" : "off"}`}
@@ -702,18 +712,18 @@ export default function Create() {
             {/* Bouquet presets */}
             <div className="vv-card" style={{ padding: "1rem" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-                <p className="vv-label">{wdActive ? "Women's Day styles" : "Bouquet presets"}</p>
+                <p className="vv-label">{wdActive ? "Women's Day styles" : t("create.bouquetPresets")}</p>
                 {bouquetSuggestions.length > 4 && (
                   <button type="button" className="vv-btn-ghost" onClick={() => setShowMoreBouquets(v => !v)}>
-                    {showMoreBouquets ? "Less" : "See all"}
+                    {showMoreBouquets ? t("create.less") : t("create.seeAll")}
                   </button>
                 )}
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
                 {visibleBouquets.map((s) => (
                   <button key={s.id} type="button" className="preset-card" onClick={() => applyBouquet(s)}>
-                    <p style={{ fontSize: "0.82rem", fontWeight: 700, color: "#3E2723", lineHeight: 1.3 }}>{s.title}</p>
-                    <p style={{ fontSize: "0.72rem", color: "#6b5e5f", lineHeight: 1.4, marginTop: "0.2rem" }}>{s.description}</p>
+                    <p style={{ fontSize: "0.82rem", fontWeight: 700, color: "#3E2723", lineHeight: 1.3 }}>{t(`create.presetTitle_${s.id}`, s.title)}</p>
+                    <p style={{ fontSize: "0.72rem", color: "#6b5e5f", lineHeight: 1.4, marginTop: "0.2rem" }}>{t(`create.presetDesc_${s.id}`, s.description)}</p>
                   </button>
                 ))}
               </div>
@@ -728,12 +738,12 @@ export default function Create() {
 
             <div className="vv-card" style={{ padding: "1rem" }}>
               <label htmlFor="senderNameInput" className="vv-label" style={{ display: "block", marginBottom: "0.4rem" }}>
-                Who is it from?
+                {t("create.whoIsItFrom")}
               </label>
               <input
                 id="senderNameInput"
                 type="text"
-                placeholder="Your Name (Optional)"
+                placeholder={t("create.namePlaceholder")}
                 value={senderName}
                 onChange={(e) => setSenderName(e.target.value)}
                 style={{
@@ -751,17 +761,20 @@ export default function Create() {
             {/* WD note suggestions */}
             {wdActive && (
               <div className="vv-card" style={{ padding: "1rem" }}>
-                <p className="vv-label" style={{ marginBottom: "0.25rem" }}>Women's Day messages</p>
-                <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginBottom: "0.75rem" }}>Tap to use · edit freely</p>
+                <p className="vv-label" style={{ marginBottom: "0.25rem" }}>{t("create.wdMessagesLabel", "Women's Day messages")}</p>
+                <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginBottom: "0.75rem" }}>{t("create.wdMessagesSub", "Tap to use · edit freely")}</p>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                  {WD_NOTE_SUGGESTIONS.map((s) => (
-                    <button key={s} type="button"
-                      className={`w-full text-left px-3 py-3 rounded-xl border transition-all active:scale-[.98] ${note === s ? "note-chip-on" : "note-chip-off"}`}
-                      onClick={() => setNote(s)}
-                      style={{ fontFamily: "'Noto Serif', serif", fontSize: "0.88rem", color: "#3E2723", lineHeight: 1.65, cursor: "pointer" }}>
-                      {s}
-                    </button>
-                  ))}
+                  {WD_NOTE_SUGGESTIONS.map((s) => {
+                    const translatedNote = t(`create.wdNote_${s.replace(/\s+/g, '').substring(0, 10)}`, s);
+                    return (
+                      <button key={s} type="button"
+                        className={`w-full text-left px-3 py-3 rounded-xl border transition-all active:scale-[.98] ${note === translatedNote ? "note-chip-on" : "note-chip-off"}`}
+                        onClick={() => setNote(translatedNote)}
+                        style={{ fontFamily: "'Noto Serif', serif", fontSize: "0.88rem", color: "#3E2723", lineHeight: 1.65, cursor: "pointer" }}>
+                        {translatedNote}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -770,22 +783,25 @@ export default function Create() {
             {!wdActive && (
               <div className="vv-card" style={{ padding: "1rem" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-                  <p className="vv-label">Note ideas</p>
+                  <p className="vv-label">{t("create.noteIdeas")}</p>
                   {noteSuggestions.length > 4 && (
                     <button type="button" className="vv-btn-ghost" onClick={() => setShowMoreNotes(v => !v)}>
-                      {showMoreNotes ? "Less" : "See all"}
+                      {showMoreNotes ? t("create.less") : t("create.seeAll")}
                     </button>
                   )}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                  {visibleNotes.map((s) => (
-                    <button key={s} type="button"
-                      className={note === s ? "note-chip-on" : "note-chip-off"}
-                      onClick={() => setNote(s)}
-                      style={{ width: "100%", textAlign: "left", padding: "0.65rem 0.875rem", borderRadius: "0.875rem", border: "1.5px solid", fontFamily: "'Noto Serif', serif", fontSize: "0.9rem", color: "#3E2723", lineHeight: 1.6, cursor: "pointer", transition: "all 0.15s" }}>
-                      {s}
-                    </button>
-                  ))}
+                  {visibleNotes.map((s) => {
+                    const translatedNote = t(`create.noteIdea_${s.replace(/\s+/g, '').substring(0, 10)}`, s);
+                    return (
+                      <button key={s} type="button"
+                        className={note === translatedNote ? "note-chip-on" : "note-chip-off"}
+                        onClick={() => setNote(translatedNote)}
+                        style={{ width: "100%", textAlign: "left", padding: "0.65rem 0.875rem", borderRadius: "0.875rem", border: "1.5px solid", fontFamily: "'Noto Serif', serif", fontSize: "0.9rem", color: "#3E2723", lineHeight: 1.6, cursor: "pointer", transition: "all 0.15s" }}>
+                        {translatedNote}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -799,7 +815,7 @@ export default function Create() {
               <DoodleLeaf className="absolute -right-1 bottom-0 h-14 w-12 rotate-12 opacity-20" />
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
                 <div>
-                  <p className="vv-label" style={{ color: "#ecbaba" }}>Offer disappears at midnight</p>
+                  <p className="vv-label" style={{ color: "#ecbaba" }}>{t("create.wdOfferMid", "Offer disappears at midnight")}</p>
                   <p style={{ fontSize: "0.82rem", color: "#fbf9f5", marginTop: "0.2rem" }}>
                     {/* Pricing removed */}
                   </p>
@@ -826,19 +842,19 @@ export default function Create() {
           >
             {hasBouquetContent ? (
               <>
-                Share Bouquet 🎉
+                {t("create.goToShare")}
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </>
             ) : (
-              "Add flowers or a note to continue"
+              t("create.addContent", "Add flowers or a note to continue")
             )}
           </button>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", marginTop: "0.6rem", fontSize: "0.7rem", color: "#9e8f90", letterSpacing: "0.08em" }}>
-            <span>✨ 100% Free</span><span>|</span>
-            <span>Instant link</span><span>|</span>
-            <span>No login needed</span>
+            <span>✨ {t("create.free100", "100% Free")}</span><span>|</span>
+            <span>{t("create.instantLink", "Instant link")}</span><span>|</span>
+            <span>{t("create.noLoginNeeded", "No login needed")}</span>
           </div>
         </div>
       </div>

@@ -1,4 +1,6 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { Link, useNavigate } from "react-router-dom";
 import { track } from "@vercel/analytics";
 import { trackEvent } from "../../lib/analytics";
@@ -48,6 +50,7 @@ function createTopping(position, type, index = 0) {
 
 export default function CakeConfigurator() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
   const [occasion, setOccasion] = useState("birthday");
@@ -157,7 +160,7 @@ export default function CakeConfigurator() {
     const trimmedName = name.trim();
 
     if (!trimmedName) {
-      setError("Add the recipient's name first.");
+      setError(t("cakeControls.errorNameFirst", "Add the recipient's name first."));
       return;
     }
 
@@ -196,7 +199,10 @@ export default function CakeConfigurator() {
           <Link to="/">
             <img src="/logo-transparent.png" alt="Petals and Words" />
           </Link>
-          <Link className="cake3d-home" to="/">Back Home</Link>
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginLeft: "auto" }}>
+            <LanguageSwitcher />
+            <Link className="cake3d-home" to="/">{t("common.backHome", "Back Home")}</Link>
+          </div>
         </nav>
 
         <div className="cake3d-layout">
