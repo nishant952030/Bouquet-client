@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Create from "./pages/Create.jsx";
 import Payment from "./pages/Payment.jsx";
@@ -11,11 +12,24 @@ import CreateCake from "./pages/CreateCake.jsx";
 import ViewCake from "./pages/ViewCake.jsx";
 import PaymentCake from "./pages/PaymentCake.jsx";
 import useDirection from "./hooks/useDirection.js";
+import { trackEvent } from "./lib/analytics.js";
+
+function PageTracker() {
+  const location = useLocation();
+  useEffect(() => {
+    trackEvent("page_view", {
+      page: location.pathname,
+      path: location.pathname + location.search,
+    });
+  }, [location]);
+  return null;
+}
 
 export default function App() {
-  useDirection(); // Syncs <html dir> and <html lang> with active language
+  useDirection();
   return (
     <BrowserRouter>
+      <PageTracker />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/create-cake" element={<CreateCake />} />
