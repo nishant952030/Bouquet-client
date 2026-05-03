@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
+
 import Home from "./pages/Home.jsx";
 import Create from "./pages/Create.jsx";
 import Payment from "./pages/Payment.jsx";
@@ -11,33 +12,45 @@ import HugCard from "./pages/HugCard.jsx";
 import CreateCake from "./pages/CreateCake.jsx";
 import ViewCake from "./pages/ViewCake.jsx";
 import PaymentCake from "./pages/PaymentCake.jsx";
-import useDirection from "./hooks/useDirection.js";
-import { trackEvent } from "./lib/analytics.js";
 
+import useDirection from "./hooks/useDirection.js";
+
+// ✅ IMPORT ANALYTICS
+import { initGoogleAnalytics, trackPageView } from "./lib/analytics.js";
+
+// ✅ PAGE TRACKER
 function PageTracker() {
   const location = useLocation();
+
   useEffect(() => {
-    trackEvent("page_view", {
-      page: location.pathname,
-      path: location.pathname + location.search,
-    });
+    trackPageView(location.pathname + location.search);
   }, [location]);
+
   return null;
 }
 
 export default function App() {
   useDirection();
+
+  // ✅ INIT GA ONCE
+  useEffect(() => {
+    initGoogleAnalytics();
+  }, []);
+
   return (
     <BrowserRouter>
       <PageTracker />
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/create-cake" element={<CreateCake />} />
         <Route path="/payment-cake" element={<PaymentCake />} />
         <Route path="/cake/:id" element={<ViewCake />} />
         <Route path="/cake" element={<ViewCake />} />
+
         <Route path="/hug-card" element={<HugCard />} />
         <Route path="/mothers-day-card" element={<HugCard />} />
+
         <Route path="/virtual-bouquet-maker" element={<KeywordLanding />} />
         <Route path="/virtual-bouquet-maker-online-free" element={<KeywordLanding />} />
         <Route path="/virtual-bouquet" element={<KeywordLanding />} />
@@ -53,13 +66,18 @@ export default function App() {
         <Route path="/digital-bouquet-maker-uk" element={<KeywordLanding />} />
         <Route path="/digital-bouquet-maker-canada" element={<KeywordLanding />} />
         <Route path="/digital-bouquet-maker-australia" element={<KeywordLanding />} />
+
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
+
         <Route path="/create" element={<Create />} />
         <Route path="/creaete" element={<Navigate to="/create" replace />} />
+
         <Route path="/payment" element={<Payment />} />
+
         <Route path="/view/:id/*" element={<ViewBouquet />} />
         <Route path="/view/:id" element={<ViewBouquet />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
