@@ -693,6 +693,25 @@ export default function Payment() {
           </div>
         )}
 
+        {/* -- Cross Promotion -- */}
+        {tipDone && (
+          <div className="au au-5 vv-card" style={{ padding: "1.25rem", marginBottom: "1rem", textAlign: "center", background: "linear-gradient(135deg, #fff 0%, #fef5f5 100%)", border: "1px solid #ffd9d8" }}>
+            <h3 style={{ margin: "0 0 0.5rem 0", color: "#7b5455", fontFamily: "'Noto Serif', serif", fontSize: "1.1rem" }}>
+              Also celebrating a birthday? 🎂
+            </h3>
+            <p style={{ fontSize: "0.82rem", color: "#6b5e5f", marginBottom: "1rem" }}>
+              Send them a custom 3D Virtual Cake with a special message.
+            </p>
+            <Link to="/create-cake" style={{
+              display: "inline-block", background: "linear-gradient(135deg, #d94a78 0%, #f0a23f 180%)", color: "#fff",
+              padding: "0.6rem 1.25rem", borderRadius: "99px", textDecoration: "none",
+              fontWeight: 600, fontSize: "0.85rem", boxShadow: "0 4px 12px rgba(217, 74, 120, 0.2)"
+            }}>
+              Build a Cake
+            </Link>
+          </div>
+        )}
+
         {/* -- Back to create -- */}
         <div className="au au-5" style={{ textAlign: "center", paddingTop: "0.5rem" }}>
           <Link to="/create" style={{ fontSize: "0.78rem", color: "#9e8f90", textDecoration: "underline", textUnderlineOffset: "3px" }}>

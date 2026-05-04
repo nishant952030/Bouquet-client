@@ -6,6 +6,7 @@ import Create from "./pages/Create.jsx";
 import Payment from "./pages/Payment.jsx";
 import ViewBouquet from "./pages/ViewBouquet.jsx";
 import KeywordLanding from "./pages/KeywordLanding.jsx";
+import CakeKeywordLanding from "./pages/CakeKeywordLanding.jsx";
 import Blog from "./pages/Blog.jsx";
 import BlogPost from "./pages/BlogPost.jsx";
 import HugCard from "./pages/HugCard.jsx";
@@ -47,6 +48,11 @@ export default function App() {
         <Route path="/payment-cake" element={<PaymentCake />} />
         <Route path="/cake/:id" element={<ViewCake />} />
         <Route path="/cake" element={<ViewCake />} />
+
+        {/* Localized Cake SEO Routes */}
+        <Route path="/tl/virtual-cake-anniversary" element={<CakeKeywordLanding />} />
+        <Route path="/es/pastel-de-cumpleanos-virtual" element={<CakeKeywordLanding />} />
+        <Route path="/bn/virtual-janmadin-cake" element={<CakeKeywordLanding />} />
 
         <Route path="/hug-card" element={<HugCard />} />
         <Route path="/mothers-day-card" element={<HugCard />} />

@@ -641,6 +641,25 @@ export default function PaymentCake() {
           </div>
         )}
 
+        {/* -- Cross Promotion -- */}
+        {tipDone && (
+          <div className="au au-5 vv-card" style={{ padding: "1.25rem", marginBottom: "1rem", textAlign: "center", background: "linear-gradient(135deg, #fff 0%, #fef5f5 100%)", border: "1px solid #ffd9d8" }}>
+            <h3 style={{ margin: "0 0 0.5rem 0", color: "#e91e63", fontFamily: "'Noto Serif', serif", fontSize: "1.1rem" }}>
+              Also want to send some flowers? 💐
+            </h3>
+            <p style={{ fontSize: "0.82rem", color: "#6b5e5f", marginBottom: "1rem" }}>
+              Build a custom flower bouquet to match their special day.
+            </p>
+            <Link to="/create" style={{
+              display: "inline-block", background: "linear-gradient(135deg, #7b5455 0%, #ffd9d8 180%)", color: "#fff",
+              padding: "0.6rem 1.25rem", borderRadius: "99px", textDecoration: "none",
+              fontWeight: 600, fontSize: "0.85rem", boxShadow: "0 4px 12px rgba(123, 84, 85, 0.2)"
+            }}>
+              Make a Bouquet
+            </Link>
+          </div>
+        )}
+
         <div className="au au-5" style={{ textAlign: "center", paddingTop: "0.5rem" }}>
           <Link to="/create-cake" style={{ fontSize: "0.78rem", color: "#9e8f90", textDecoration: "underline", textUnderlineOffset: "3px" }}>
             {t("paymentCake.createAnotherCake", "Create another cake")}

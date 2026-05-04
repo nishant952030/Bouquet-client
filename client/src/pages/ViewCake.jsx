@@ -101,7 +101,9 @@ const CSS = `
   }
 
   .viral-btn {
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: #e91e63;
     color: #fff;
     padding: 0.8rem 1.5rem;
@@ -110,6 +112,9 @@ const CSS = `
     text-decoration: none;
     font-size: 0.9rem;
     transition: transform 0.2s, background 0.2s;
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
   }
 
   .viral-btn:hover {
@@ -401,9 +406,14 @@ export default function ViewCake() {
           <div className="note-card">
             <p className="note-text">{note}</p>
             <div className="viral-cta">
-              <Link to="/create-cake" className="viral-btn">
-                {t("viewCake.sendCake", "Send a cake to someone else 🎂")}
-              </Link>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "center" }}>
+                <Link to="/create-cake?ref=cake_receiver" className="viral-btn">
+                  {t("viewCake.sendCake", "Send a cake to someone else 🎂")}
+                </Link>
+                <Link to="/create?ref=cake_receiver" className="viral-btn" style={{ background: "linear-gradient(135deg, #7b5455 0%, #ffd9d8 180%)" }}>
+                  {t("viewBouquet.makeBouquet", "Make a flower bouquet 💐")}
+                </Link>
+              </div>
               <Link to="/" className="made-with-link">
                 {t("common.madeWith", "Made with Petals & Words")}
               </Link>

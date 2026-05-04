@@ -318,9 +318,10 @@ export default function ViewBouquet() {
       description: "Open and read a heartfelt digital flower bouquet with a personal note crafted just for you.",
       keywords: seoKeywords.view,
       path: id ? `/view/${id}` : "/view",
+      image: shared?.stems?.[0]?.src || "/logo-transparent.png",
       robots: "noindex,nofollow",
     });
-  }, [id]);
+  }, [id, shared]);
 
   useEffect(() => {
     let cancelled = false;
@@ -466,9 +467,14 @@ export default function ViewBouquet() {
 
         {/* ── Viral CTA ── */}
         <div className="vb-cta-section envelope-reveal er-5">
-          <Link to="/create" className="vb-cta-btn">
-            {t("viewBouquet.makeBouquet", "Make a bouquet for someone 💐")}
-          </Link>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "center" }}>
+            <Link to="/create?ref=bouquet_receiver" className="vb-cta-btn" style={{ width: "100%", maxWidth: "280px" }}>
+              {t("viewBouquet.makeBouquet", "Make a bouquet for someone 💐")}
+            </Link>
+            <Link to="/create-cake?ref=bouquet_receiver" className="vb-cta-btn" style={{ width: "100%", maxWidth: "280px", background: "linear-gradient(135deg, #d94a78 0%, #f0a23f 180%)" }}>
+              {t("viewBouquet.makeCake", "Send a 3D Birthday Cake 🎂")}
+            </Link>
+          </div>
           <p className="vb-cta-sub">
             {t("viewBouquet.itsFree", "It's free, fun, and makes people smile ✨")}
           </p>

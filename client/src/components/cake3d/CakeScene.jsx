@@ -20,7 +20,7 @@ export default function CakeScene({
 }) {
   return (
     <Canvas
-      camera={{ position: [0, 2.45, 5.2], fov: 42 }}
+      camera={{ position: [0, 3.2, 7.5], fov: 45 }}
       dpr={[1, 1.7]}
       shadows
       gl={{ antialias: true, alpha: true }}
@@ -65,7 +65,7 @@ export default function CakeScene({
         dampingFactor={0.08}
         target={[0, 0.48, 0]}
         minDistance={3.8}
-        maxDistance={6.4}
+        maxDistance={9.5}
         minPolarAngle={Math.PI / 4.2}
         maxPolarAngle={Math.PI / 2.15}
         minAzimuthAngle={-Math.PI / 3}
