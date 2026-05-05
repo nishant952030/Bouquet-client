@@ -149,4 +149,20 @@ export const seoKeywords = {
     "receive digital flowers",
     "digital bouquet gift",
   ],
+  mothersDay: [
+    "free digital mothers day card",
+    "create mothers day card online",
+    "personalized mothers day card free",
+    "send mothers day card online",
+    "digital mothers day card maker",
+    "mothers day card generator",
+    "virtual mothers day card free",
+    "custom mothers day card online",
+    "happy mothers day card digital",
+    "online card for mom",
+    "mothers day digital gift",
+    "mothers day ecard free",
+    "best free digital mothers day card",
+    "share mothers day card whatsapp"
+  ],
 };

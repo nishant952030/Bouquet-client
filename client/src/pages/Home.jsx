@@ -410,8 +410,12 @@ export default function Home() {
                 </svg>
               </button>
 
+              <button className="vv-btn-cake" onClick={() => navigate("/create-mothers-day-card")} style={{ background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)", borderColor: "#fbcfe8", color: "#9d174d" }}>
+                <span className="vv-tag-new" style={{ background: "#ec4899", color: "#fff" }}>{t("common.new")}</span>
+                {t("home.createCard", "💌 Send a Card")}
+              </button>
+
               <button className="vv-btn-cake" onClick={() => navigate("/create-cake")}>
-                <span className="vv-tag-new">{t("common.new")}</span>
                 {t("home.bakeCake")}
               </button>
             </div>
@@ -419,6 +423,60 @@ export default function Home() {
             <p style={{ marginTop: "1rem", fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#9e8f90" }}>
               {t("common.instantShare")}
             </p>
+          </div>
+        </section>
+
+        {/* ── MOTHER'S DAY BANNER ── */}
+        <section className="vv-f2" style={{ marginTop: "1.5rem" }}>
+          <div
+            onClick={() => navigate("/create-mothers-day-card")}
+            style={{
+              cursor: "pointer",
+              borderRadius: "2rem",
+              overflow: "hidden",
+              background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 30%, #fbcfe8 60%, #f9a8d4 100%)",
+              padding: "1.5rem 1.25rem",
+              textAlign: "center",
+              position: "relative",
+              boxShadow: "0 10px 40px rgba(236, 72, 153, 0.15), 0 2px 8px rgba(236, 72, 153, 0.08)",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 16px 48px rgba(236, 72, 153, 0.22)"; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 10px 40px rgba(236, 72, 153, 0.15)"; }}
+          >
+            {/* Floating emoji deco */}
+            <span className="vv-float-1" style={{ position: "absolute", top: 10, left: 16, fontSize: "1.3rem", opacity: 0.5, pointerEvents: "none" }}>🌷</span>
+            <span className="vv-float-2" style={{ position: "absolute", top: 8, right: 18, fontSize: "1.1rem", opacity: 0.4, pointerEvents: "none" }}>💐</span>
+            <span className="vv-float-3" style={{ position: "absolute", bottom: 10, left: "40%", fontSize: "1rem", opacity: 0.35, pointerEvents: "none" }}>🌸</span>
+
+            <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.6rem", fontWeight: 600, color: "#9d174d", lineHeight: 1.25, marginBottom: "0.4rem" }}>
+              {t("home.mothersDayBanner")}
+            </p>
+            <p style={{ fontSize: "0.85rem", color: "#831843", lineHeight: 1.5, marginBottom: "1rem", maxWidth: 280, margin: "0 auto 1rem" }}>
+              {t("md.letterMessage", "Thank you for your endless love, your warm hugs, and for always believing in me.")}
+            </p>
+            <button
+              className="offer-glow"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
+                color: "#fff",
+                fontFamily: "'Manrope', sans-serif",
+                fontSize: "0.88rem",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                border: "none",
+                borderRadius: "9999px",
+                padding: "0.7rem 1.8rem",
+                cursor: "pointer",
+                boxShadow: "0 8px 24px rgba(236, 72, 153, 0.35)",
+              }}
+              onClick={e => { e.stopPropagation(); navigate("/create-mothers-day-card"); }}
+            >
+              {t("home.mothersDayCta")}
+            </button>
           </div>
         </section>
 
@@ -505,6 +563,9 @@ export default function Home() {
             <p className="vv-label" style={{ marginBottom: "0.75rem" }}>{t("home.explore")}</p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.25rem" }}>
               {[
+                { to: "/create-mothers-day-card", label: "💌 Create Mother's Day Card" },
+                { to: "/free-digital-mothers-day-card", label: "🌸 Free Digital Mother's Day Card" },
+                { to: "/best-virtual-mothers-day-card", label: "✨ Best Virtual Mother's Day Card" },
                 { to: "/virtual-bouquet-maker", label: "🌐 Virtual Bouquet Maker" },
                 { to: "/digital-bouquet-maker", label: "💻 Digital Bouquet Maker" },
                 { to: "/online-bouquet-maker", label: "🌸 Online Bouquet Maker" },

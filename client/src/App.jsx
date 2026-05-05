@@ -10,6 +10,10 @@ import CakeKeywordLanding from "./pages/CakeKeywordLanding.jsx";
 import Blog from "./pages/Blog.jsx";
 import BlogPost from "./pages/BlogPost.jsx";
 import HugCard from "./pages/HugCard.jsx";
+import MothersDayCard from "./pages/MothersDayCard.jsx";
+import CreateMothersDayCard from "./pages/CreateMothersDayCard.jsx";
+import PaymentCardMD from "./pages/PaymentCardMD.jsx";
+import MothersDayKeywordLanding from "./pages/MothersDayKeywordLanding.jsx";
 import CreateCake from "./pages/CreateCake.jsx";
 import ViewCake from "./pages/ViewCake.jsx";
 import PaymentCake from "./pages/PaymentCake.jsx";
@@ -54,8 +58,15 @@ export default function App() {
         <Route path="/es/pastel-de-cumpleanos-virtual" element={<CakeKeywordLanding />} />
         <Route path="/bn/virtual-janmadin-cake" element={<CakeKeywordLanding />} />
 
+        {/* Localized Mother's Day SEO Routes */}
+        <Route path="/free-digital-mothers-day-card" element={<MothersDayKeywordLanding />} />
+        <Route path="/best-virtual-mothers-day-card" element={<MothersDayKeywordLanding />} />
+
         <Route path="/hug-card" element={<HugCard />} />
-        <Route path="/mothers-day-card" element={<HugCard />} />
+        <Route path="/create-mothers-day-card" element={<CreateMothersDayCard />} />
+        <Route path="/payment-card-md" element={<PaymentCardMD />} />
+        <Route path="/mothers-day-card" element={<MothersDayCard />} />
+        <Route path="/mothers-day" element={<MothersDayCard />} />
 
         <Route path="/virtual-bouquet-maker" element={<KeywordLanding />} />
         <Route path="/virtual-bouquet-maker-online-free" element={<KeywordLanding />} />
