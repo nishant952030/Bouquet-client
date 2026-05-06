@@ -323,5 +323,11 @@
   "md.replay": "↻ Open again",
   "md.shareText": "Happy Mother's Day! 💐 Open this card for a surprise ✨",
   "home.mothersDayBanner": "🌷 Mother's Day is here!",
-  "home.mothersDayCta": "Send Mom a Card 💌"
+  "home.mothersDayCta": "Send Mom a Card 💌",
+  "feedback.title": "Give Feedback",
+  "feedback.question": "How was your experience?",
+  "feedback.placeholder": "Any suggestions or issues? We'd love to hear from you!",
+  "feedback.submit": "Send Feedback",
+  "feedback.thankYou": "Thank you for your feedback! ❤️",
+  "feedback.sending": "Sending..."
 }

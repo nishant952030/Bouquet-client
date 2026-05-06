@@ -23,6 +23,8 @@ import useDirection from "./hooks/useDirection.js";
 // ✅ IMPORT ANALYTICS
 import { initGoogleAnalytics, trackPageView } from "./lib/analytics.js";
 
+import FeedbackWidget from "./components/FeedbackWidget.jsx";
+
 // ✅ PAGE TRACKER
 function PageTracker() {
   const location = useLocation();
@@ -97,6 +99,8 @@ export default function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
+      <FeedbackWidget />
     </BrowserRouter>
   );
 }
