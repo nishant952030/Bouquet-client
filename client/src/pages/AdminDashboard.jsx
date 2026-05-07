@@ -4,6 +4,7 @@ import { db, isFirebaseConfigured } from "../lib/firebase";
 import { 
   BarChart3, Users, Globe, Smartphone, ArrowRight, Lock, KeyRound, Clock, Activity, CreditCard
 } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -17,11 +18,14 @@ export default function AdminDashboard() {
     todayUnique: 0,
     totalViews: 0,
     totalUnique: 0,
+    bounceRate: 0,
+    avgSessionViews: 0,
     paymentsCount: 0,
     devices: {},
     countries: {},
     referrers: {},
-    topPages: {}
+    topPages: {},
+    chartData: []
   });
 
   const [dateRange, setDateRange] = useState("today"); // today, 7d, 30d, all
@@ -93,6 +97,9 @@ export default function AdminDashboard() {
       const countriesMap = {};
       const referrersMap = {};
       const pagesMap = {};
+      const dailyViewsMap = {};
+      const dailyUniqueMap = {};
+      const sessionsMap = {};
       
       const todayString = now.toISOString().split("T")[0];
 
@@ -114,6 +121,16 @@ export default function AdminDashboard() {
         countriesMap[data.country] = (countriesMap[data.country] || 0) + 1;
         referrersMap[data.referrer] = (referrersMap[data.referrer] || 0) + 1;
         pagesMap[data.path] = (pagesMap[data.path] || 0) + 1;
+        
+        if (data.sessionId) {
+          sessionsMap[data.sessionId] = (sessionsMap[data.sessionId] || 0) + 1;
+        }
+
+        if (data.date) {
+          dailyViewsMap[data.date] = (dailyViewsMap[data.date] || 0) + 1;
+          if (!dailyUniqueMap[data.date]) dailyUniqueMap[data.date] = new Set();
+          dailyUniqueMap[data.date].add(data.visitorId);
+        }
       });
 
       // Fetch payment counts
@@ -127,17 +144,38 @@ export default function AdminDashboard() {
          console.warn("Could not fetch payment counts", e);
       }
 
+      // Calculate Bounce Rate and Avg Session
+      let singlePageSessions = 0;
+      const totalSessions = Object.keys(sessionsMap).length;
+      Object.values(sessionsMap).forEach(count => {
+        if (count === 1) singlePageSessions++;
+      });
+      const bounceRate = totalSessions > 0 ? Math.round((singlePageSessions / totalSessions) * 100) : 0;
+      const avgSessionViews = totalSessions > 0 ? (snapshot.size / totalSessions).toFixed(1) : 0;
+
+      // Prepare chart data
+      const chartDataArray = Object.keys(dailyViewsMap)
+        .sort()
+        .map(date => ({
+          date,
+          views: dailyViewsMap[date],
+          unique: dailyUniqueMap[date] ? dailyUniqueMap[date].size : 0
+        }));
+
       setStats({
         liveUsers: liveUsersSet.size,
         todayViews: todayViewsCount,
         todayUnique: todayUnique.size,
         totalViews: snapshot.size,
         totalUnique: uniqueVisitors.size,
+        bounceRate,
+        avgSessionViews,
         paymentsCount: totalPayments,
         devices: devicesMap,
         countries: countriesMap,
         referrers: referrersMap,
-        topPages: pagesMap
+        topPages: pagesMap,
+        chartData: chartDataArray
       });
 
     } catch (err) {
@@ -227,7 +265,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Top KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full blur-3xl" />
             <div className="flex items-center gap-3 text-neutral-400 mb-2">
@@ -263,7 +301,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl relative overflow-hidden">
+          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl relative overflow-hidden lg:col-span-2">
              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl" />
             <div className="flex items-center gap-3 text-neutral-400 mb-2">
               <CreditCard className="w-4 h-4 text-amber-400" />
@@ -274,7 +312,70 @@ export default function AdminDashboard() {
             </div>
             <p className="text-xs text-neutral-500 mt-1">Bouquets, Cakes & Cards</p>
           </div>
+          
+          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
+            <div className="flex items-center gap-3 text-neutral-400 mb-2">
+              <span className="text-sm font-medium">Bounce Rate</span>
+            </div>
+            <div className="text-4xl font-bold text-white">
+              {loading ? "..." : `${stats.bounceRate}%`}
+            </div>
+            <p className="text-xs text-neutral-500 mt-1">Single page visits</p>
+          </div>
+
+          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
+            <div className="flex items-center gap-3 text-neutral-400 mb-2">
+              <span className="text-sm font-medium">Pages/Session</span>
+            </div>
+            <div className="text-4xl font-bold text-white">
+              {loading ? "..." : stats.avgSessionViews}
+            </div>
+            <p className="text-xs text-neutral-500 mt-1">Average views</p>
+          </div>
         </div>
+
+
+
+        {/* Traffic Chart */}
+        {stats.chartData.length > 0 && (
+          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
+            <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+              <Activity className="w-5 h-5 text-neutral-400" /> Page Views Over Time
+            </h3>
+            <div className="h-72 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={stats.chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis 
+                    dataKey="date" 
+                    tickFormatter={(tick) => {
+                      const d = new Date(tick);
+                      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                    }}
+                    stroke="#525252" 
+                    fontSize={12} 
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis stroke="#525252" fontSize={12} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#171717', borderColor: '#262626', borderRadius: '8px', color: '#fff' }}
+                    itemStyle={{ color: '#f43f5e' }}
+                    labelStyle={{ color: '#a3a3a3', marginBottom: '4px' }}
+                    labelFormatter={(label) => new Date(label).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                  />
+                  <Area type="monotone" dataKey="views" name="Page Views" stroke="#f43f5e" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" />
+                  <Area type="monotone" dataKey="unique" name="Unique Visitors" stroke="#3b82f6" strokeWidth={2} fillOpacity={0} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
 
         {/* Detailed Breakdown Grids */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

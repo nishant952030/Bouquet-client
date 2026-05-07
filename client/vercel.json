@@ -46,12 +46,13 @@
       "source": "/digital-bouquet-maker",
       "destination": "/index.html"
     },
+
     {
       "source": "/online-bouquet-maker",
       "destination": "/index.html"
     },
     {
-      "source": "/(.*)",
+      "source": "/admin",
       "destination": "/index.html"
     }
   ]
