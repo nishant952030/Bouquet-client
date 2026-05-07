@@ -17,11 +17,13 @@ import MothersDayKeywordLanding from "./pages/MothersDayKeywordLanding.jsx";
 import CreateCake from "./pages/CreateCake.jsx";
 import ViewCake from "./pages/ViewCake.jsx";
 import PaymentCake from "./pages/PaymentCake.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
 
 import useDirection from "./hooks/useDirection.js";
 
 // ✅ IMPORT ANALYTICS
 import { initGoogleAnalytics, trackPageView } from "./lib/analytics.js";
+import { trackPageViewFirestore } from "./lib/tracker.js";
 
 import FeedbackWidget from "./components/FeedbackWidget.jsx";
 
@@ -31,6 +33,7 @@ function PageTracker() {
 
   useEffect(() => {
     trackPageView(location.pathname + location.search);
+    trackPageViewFirestore(location.pathname + location.search);
   }, [location]);
 
   return null;
@@ -96,6 +99,8 @@ export default function App() {
 
         <Route path="/view/:id/*" element={<ViewBouquet />} />
         <Route path="/view/:id" element={<ViewBouquet />} />
+
+        <Route path="/admin" element={<AdminDashboard />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
