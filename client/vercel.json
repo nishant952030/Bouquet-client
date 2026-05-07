@@ -49,6 +49,10 @@
     {
       "source": "/online-bouquet-maker",
       "destination": "/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
