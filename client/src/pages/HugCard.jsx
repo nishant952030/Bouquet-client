@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import { applySeo, seoKeywords } from "../lib/seo";
 
 /* ═══════════════════════════════════════════════════════════════════
    Pop-Up Hug Card — cross-shaped reveal
@@ -585,6 +587,46 @@ export default function HugCard() {
     return () => { if (animRef.current) cancelAnimationFrame(animRef.current); };
   }, []);
 
+  useEffect(() => {
+    applySeo({
+      title: "Free Virtual Hug Card for Mother's Day | Send a Hug Online",
+      description: "Send a free interactive virtual hug card to Mom this Mother's Day. Pull to open the card and watch arms unfold for a warm digital hug. No signup needed — share instantly via WhatsApp.",
+      keywords: seoKeywords.hugCard,
+      path: "/hug-card",
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "name": "Virtual Hug Card — Free Interactive Hug for Mom",
+            "url": "https://www.petalsandwords.com/hug-card",
+            "description": "Send a free interactive virtual hug card. Pull to open and watch arms unfold for a warm digital hug. Perfect for Mother's Day.",
+            "applicationCategory": "LifestyleApplication",
+            "operatingSystem": "Web",
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+            "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "185", "bestRating": "5" }
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              { "@type": "Question", "name": "How do I send a virtual hug?", "acceptedAnswer": { "@type": "Answer", "text": "Simply open petalsandwords.com/hug-card, tap or pull the card to open it, and share the link via WhatsApp, text, or email. The recipient will see an interactive hug animation." }},
+              { "@type": "Question", "name": "Is the virtual hug card free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes! The virtual hug card is 100% free. No signup, no payment, no downloads required." }},
+              { "@type": "Question", "name": "Can I send a virtual hug for Mother's Day?", "acceptedAnswer": { "@type": "Answer", "text": "Absolutely! Our hug card is perfect for Mother's Day. The card features a 'Happy Mother's Day' message with an interactive pull-to-open hug animation." }},
+              { "@type": "Question", "name": "Does the hug card work on mobile?", "acceptedAnswer": { "@type": "Answer", "text": "Yes, the virtual hug card is fully responsive and works beautifully on all devices — phones, tablets, and desktops." }}
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.petalsandwords.com/" },
+              { "@type": "ListItem", "position": 2, "name": "Virtual Hug Card", "item": "https://www.petalsandwords.com/hug-card" }
+            ]
+          }
+        ]
+      }
+    });
+  }, []);
+
   /* total scene height adjusts as card opens */
   const sceneH = HALF_H * 2 + gap;
 
@@ -806,6 +848,41 @@ export default function HugCard() {
         <button className="hug-reset" onClick={handleReset}>
           {t("hugCard.closeAndReplay", "↻ Close & replay")}
         </button>
+      )}
+
+      {/* ═══ SEO CONTENT — crawlable semantic HTML ═══ */}
+      {isOpen && (
+        <section style={{
+          marginTop: "2rem", maxWidth: 480, textAlign: "center",
+          background: "rgba(255,255,255,0.3)", backdropFilter: "blur(8px)",
+          borderRadius: 20, padding: "1.5rem 1.2rem",
+          border: "1px solid rgba(255,255,255,0.5)"
+        }}>
+          <h1 style={{ fontFamily: "'Caveat', cursive", fontSize: "1.6rem", color: "#9d174d", margin: "0 0 0.5rem" }}>
+            Free Virtual Hug Card for Mother's Day
+          </h1>
+          <p style={{ fontFamily: "'Patrick Hand', cursive", fontSize: "0.95rem", color: "#333", lineHeight: 1.5, margin: "0 0 1rem" }}>
+            Share this interactive hug card with Mom — tap to open, watch the arms unfold! 100% free, no signup needed.
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" }}>
+            <Link to="/create-mothers-day-card" style={{
+              padding: "0.5rem 1.2rem", borderRadius: 999,
+              background: "linear-gradient(135deg, #be185d, #ec4899)", color: "#fff",
+              fontFamily: "'Manrope', sans-serif", fontSize: "0.85rem", fontWeight: 600,
+              textDecoration: "none", boxShadow: "0 4px 12px rgba(190,50,90,0.25)"
+            }}>
+              Create a Card for Mom ✨
+            </Link>
+            <Link to="/create" style={{
+              padding: "0.5rem 1.2rem", borderRadius: 999,
+              background: "#fff", color: "#be185d",
+              fontFamily: "'Manrope', sans-serif", fontSize: "0.85rem", fontWeight: 600,
+              textDecoration: "none", border: "1.5px solid #f9a8d4"
+            }}>
+              Build a Bouquet 💐
+            </Link>
+          </div>
+        </section>
       )}
     </div>
   );

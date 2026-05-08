@@ -66,6 +66,9 @@ export default function App() {
         {/* Localized Mother's Day SEO Routes */}
         <Route path="/free-digital-mothers-day-card" element={<MothersDayKeywordLanding />} />
         <Route path="/best-virtual-mothers-day-card" element={<MothersDayKeywordLanding />} />
+        <Route path="/send-virtual-hug-mothers-day" element={<MothersDayKeywordLanding />} />
+        <Route path="/mothers-day-digital-gift" element={<MothersDayKeywordLanding />} />
+        <Route path="/interactive-mothers-day-card" element={<MothersDayKeywordLanding />} />
 
         <Route path="/hug-card" element={<HugCard />} />
         <Route path="/create-mothers-day-card" element={<CreateMothersDayCard />} />

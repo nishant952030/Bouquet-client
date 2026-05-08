@@ -165,4 +165,22 @@ export const seoKeywords = {
     "best free digital mothers day card",
     "share mothers day card whatsapp"
   ],
+  hugCard: [
+    "virtual hug card",
+    "send a virtual hug",
+    "free hug card online",
+    "interactive hug card",
+    "mothers day hug card",
+    "digital hug card free",
+    "send virtual hug for mothers day",
+    "pull to open hug card",
+    "animated hug card online",
+    "free digital hug for mom",
+    "virtual hug for mother",
+    "interactive greeting card free",
+    "send a hug online free",
+    "mothers day virtual hug",
+    "online hug card maker",
+    "hug card for mom free",
+  ],
 };

@@ -28,6 +28,42 @@ const MD_LANDING_CONTENT = {
       { q: "Can I customize the look of the card?", a: "Yes! You can choose from elegant textures like Blush Rose, Warm Gold, or Lavender Dream, and decorate the edges with beautiful emoji stickers." },
       { q: "Will this work on her mobile phone?", a: "Yes, the card is perfectly optimized for both mobile phones and desktop computers. It will look stunning no matter what device she uses." },
     ],
+  },
+  "/send-virtual-hug-mothers-day": {
+    title: "Send a Virtual Hug for Mother's Day",
+    seoTitle: "Send a Virtual Hug for Mother's Day | Free Interactive Hug Card",
+    description: "Send Mom a free interactive virtual hug this Mother's Day. Our pull-to-open hug card features arms that unfold for a warm digital embrace. Share instantly via WhatsApp.",
+    keywords: ["send virtual hug mothers day", "virtual hug for mom", "mothers day hug card free", "interactive hug card online", "digital hug for mother"],
+    intro: "When you can't be there in person, send a virtual hug that feels real. Our interactive pull-to-open hug card unfolds with arms reaching out for a warm embrace — the perfect surprise for Mom this Mother's Day.",
+    faq: [
+      { q: "How does the virtual hug card work?", a: "Tap or drag the card to open it. A cute stick figure with outstretched arms unfolds from the card, simulating a real paper craft hug. Hearts burst as the card opens!" },
+      { q: "Can I send this hug via WhatsApp?", a: "Yes! Simply share the link via WhatsApp, iMessage, SMS, email, or any messaging app. Mom can open it instantly on her phone." },
+      { q: "Is this different from the Mother's Day card?", a: "Yes! The hug card is a fun, interactive pull-to-open card with a hug animation. We also offer a separate elegant Mother's Day card with an envelope-reveal effect." },
+    ],
+  },
+  "/mothers-day-digital-gift": {
+    title: "Free Digital Gift for Mother's Day",
+    seoTitle: "Mother's Day Digital Gift | Free Card, Bouquet & Hug",
+    description: "Give Mom the perfect free digital gift this Mother's Day. Choose from interactive cards, virtual flower bouquets, or a pull-to-open hug card. No shipping, no cost — just love.",
+    keywords: ["mothers day digital gift free", "free online gift for mom", "digital mothers day present", "virtual gift for mother", "last minute mothers day gift"],
+    intro: "Forgot to buy a gift? No worries! Create a stunning digital gift for Mom in under 2 minutes — a personalized card, a beautiful virtual bouquet, or an interactive hug. It's free, instant, and straight from the heart.",
+    faq: [
+      { q: "What digital gifts can I create?", a: "You can create a personalized Mother's Day card with an interactive envelope reveal, a virtual flower bouquet with 50+ flowers, or a fun pull-to-open hug card — all completely free." },
+      { q: "Is this a good last-minute gift?", a: "Absolutely! Create and send a beautiful digital gift in under 2 minutes. It arrives instantly — no shipping delays, no cost. Perfect for last-minute thoughtfulness." },
+      { q: "Can I personalize the message?", a: "Yes! Every card and bouquet lets you write your own heartfelt message. You can also use our AI-powered note generator for inspiration." },
+    ],
+  },
+  "/interactive-mothers-day-card": {
+    title: "Interactive Mother's Day Card Online",
+    seoTitle: "Interactive Mother's Day Card | Free Animated Card for Mom",
+    description: "Create a free interactive Mother's Day card with an animated envelope-reveal effect. Personalize the message, choose paper textures, and share via WhatsApp. Mom will love it!",
+    keywords: ["interactive mothers day card", "animated mothers day card free", "mothers day card with animation", "digital card for mom interactive", "free animated card for mother"],
+    intro: "Make this Mother's Day unforgettable with an interactive card that comes alive! Mom taps the envelope, watches it open with a beautiful animation, and reveals your heartfelt message inside.",
+    faq: [
+      { q: "What's interactive about this card?", a: "When Mom opens the link, she sees a beautiful envelope. Tapping it triggers a smooth envelope-open animation with particle effects, revealing your personalized letter inside." },
+      { q: "Do I need to install anything?", a: "No! The card works directly in any web browser. No apps, no downloads, no signup — just open the link and enjoy." },
+      { q: "Can I add stickers and decorations?", a: "Yes! Choose from hearts, flowers, sparkles, butterflies, stars, and ribbons to decorate your card's edges." },
+    ],
   }
 };
 
@@ -131,6 +167,9 @@ export default function MothersDayKeywordLanding() {
           </Link>
           <Link to="/create-mothers-day-card" className="rounded-full border border-pink-200 bg-white px-4 py-2 text-pink-700 hover:border-pink-300">
             Build a Card
+          </Link>
+          <Link to="/hug-card" className="rounded-full border border-purple-200 bg-white px-4 py-2 text-purple-700 hover:border-purple-300">
+            Send a Hug 🤗
           </Link>
           <Link to="/create" className="rounded-full border border-rose-200 bg-white px-4 py-2 text-rose-700 hover:border-rose-300">
             Build a Bouquet
