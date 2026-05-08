@@ -14,46 +14,7 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/create",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/payment",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/view/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/create-cake",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/payment-cake",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/cake/(.*)",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/virtual-bouquet-maker",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/digital-bouquet-maker",
-      "destination": "/index.html"
-    },
-
-    {
-      "source": "/online-bouquet-maker",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/admin",
-      "destination": "/index.html"
-    }
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
