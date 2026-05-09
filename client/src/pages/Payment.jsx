@@ -569,7 +569,7 @@ export default function Payment() {
               display: "flex", flexDirection: "column", alignItems: "center", minWidth: 56,
             }}>
               <span style={{ fontSize: "1.4rem", lineHeight: 1 }}>🎁</span>
-              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#7b5455", marginTop: "0.2rem" }}>{flowerCount} {t("payment.stems")}</span>
+              <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "#7b5455", marginTop: "0.2rem" }}>{t("payment.stems", { count: flowerCount })}</span>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               {note?.trim() ? (
@@ -577,7 +577,7 @@ export default function Payment() {
                   <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "0.92rem", fontStyle: "italic", color: "#3E2723", lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                     "{note.trim().slice(0, 80)}{note.trim().length > 80 ? "..." : ""}"
                   </p>
-                  <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginTop: "0.25rem" }}>{wordCount} {t("payment.words")}</p>
+                  <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginTop: "0.25rem" }}>{t("payment.words", { count: wordCount })}</p>
                 </>
               ) : (
                 <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "0.85rem", fontStyle: "italic", color: "#9e8f90" }}>
@@ -645,7 +645,7 @@ export default function Payment() {
                     {t("payment.processingPayment", "Processing payment...")}
                   </>
                 ) : (
-                  t("payment.payToGetLink", `Pay ${currentTip.display} to get link`).replace('{amount}', currentTip.display)
+                  t("payment.payButton", "Pay {{amount}} to get link", { amount: currentTip.display })
                 )}
               </button>
             )}
