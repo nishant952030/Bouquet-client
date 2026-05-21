@@ -1,9 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { Link, useNavigate } from "react-router-dom";
 import { track } from "@vercel/analytics";
 import { trackEvent } from "../../lib/analytics";
+import { applySeo, seoKeywords, SITE_URL } from "../../lib/seo";
 import CakeControls from "./CakeControls.jsx";
 import CakeScene from "./CakeScene.jsx";
 import {
@@ -65,6 +66,31 @@ export default function CakeConfigurator() {
     creamSwirls: [],
     toppings: [],
   });
+
+  useEffect(() => {
+    applySeo({
+      title: "Free Virtual Birthday Cake Maker | Create a 3D Cake Online",
+      description:
+        "Create a free interactive 3D birthday cake online. Choose flavors, add candles and toppings, write a message, and send a virtual cake link instantly.",
+      keywords: seoKeywords.cake,
+      path: "/create-cake",
+      jsonLd: {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        name: "Petals and Words Virtual Birthday Cake Maker",
+        url: `${SITE_URL}/create-cake`,
+        description:
+          "A free online 3D cake maker for creating and sharing interactive birthday cakes with candles, toppings, and personal messages.",
+        applicationCategory: "LifestyleApplication",
+        operatingSystem: "Web",
+        offers: {
+          "@type": "Offer",
+          price: "0",
+          priceCurrency: "USD",
+        },
+      },
+    });
+  }, []);
 
   const addCandleAtPosition = useCallback((position) => {
     setCakeState((current) => {

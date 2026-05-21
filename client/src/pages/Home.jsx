@@ -307,7 +307,45 @@ export default function Home() {
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
+  const [activeGiftKey, setActiveGiftKey] = useState("mom");
   const featuredPosts = useMemo(() => blogPosts.slice(0, 3), []);
+
+  const giftFinder = useMemo(() => ({
+    mom: {
+      label: "For Mom",
+      title: "A card with a message she can keep",
+      body: "Best for Mother's Day, thank-you notes, or a soft everyday reminder that she is loved.",
+      cta: "Create card",
+      to: "/create-mothers-day-card",
+      accent: "#be185d",
+    },
+    birthday: {
+      label: "Birthday",
+      title: "A 3D cake with candles",
+      body: "Perfect when you want something playful, instant, and more memorable than a plain text message.",
+      cta: "Make cake",
+      to: "/create-cake",
+      accent: "#d97706",
+    },
+    love: {
+      label: "Love",
+      title: "A romantic digital bouquet",
+      body: "Choose flowers, write something specific, and send a bouquet link that feels personal.",
+      cta: "Build bouquet",
+      to: "/create",
+      accent: "#7b5455",
+    },
+    distance: {
+      label: "Far away",
+      title: "A virtual hug card",
+      body: "When you cannot be there in person, send a small interactive gesture that opens with warmth.",
+      cta: "Send hug",
+      to: "/hug-card",
+      accent: "#6d28d9",
+    },
+  }), []);
+
+  const activeGift = giftFinder[activeGiftKey];
 
   const occasions = [
     { key: "home.forMom", label: t("home.forMom") },
@@ -499,6 +537,60 @@ export default function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="vv-f3" style={{ marginTop: "1.5rem" }}>
+          <div className="vv-card" style={{ padding: "1.5rem 1.25rem" }}>
+            <p className="vv-label" style={{ marginBottom: "0.75rem" }}>Gift finder</p>
+            <h2 className="vv-display" style={{ fontSize: "1.55rem", marginBottom: "0.45rem" }}>
+              Pick the moment
+            </h2>
+            <p className="vv-body" style={{ fontSize: "0.86rem", marginBottom: "1rem" }}>
+              Find the right digital gift without overthinking it.
+            </p>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginBottom: "1rem" }}>
+              {Object.entries(giftFinder).map(([key, item]) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`petal-chip ${activeGiftKey === key ? "active" : ""}`}
+                  onClick={() => setActiveGiftKey(key)}
+                  style={{
+                    borderRadius: "0.9rem",
+                    minHeight: 44,
+                    color: activeGiftKey === key ? item.accent : undefined,
+                  }}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <article
+              style={{
+                background: "#f5f3ef",
+                borderRadius: "1.25rem",
+                padding: "1rem",
+                borderLeft: `4px solid ${activeGift.accent}`,
+              }}
+            >
+              <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#3E2723", marginBottom: "0.3rem" }}>
+                {activeGift.title}
+              </h3>
+              <p style={{ fontSize: "0.82rem", lineHeight: 1.6, color: "#6b5e5f", marginBottom: "0.9rem" }}>
+                {activeGift.body}
+              </p>
+              <button
+                type="button"
+                className="vv-btn-primary"
+                onClick={() => navigate(activeGift.to)}
+                style={{ minHeight: 44, fontSize: "0.78rem", background: activeGift.accent }}
+              >
+                {activeGift.cta}
+              </button>
+            </article>
           </div>
         </section>
 

@@ -1,4 +1,11 @@
-const SITE_NAME = "Petals and Words";
+export const SITE_NAME = "Petals and Words";
+export const SITE_URL = "https://www.petalsandwords.com";
+
+export function toAbsoluteUrl(path = "/") {
+  if (/^https?:\/\//i.test(path)) return path;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${SITE_URL}${normalizedPath}`;
+}
 
 function upsertMeta(selector, attrs) {
   let element = document.head.querySelector(selector);
@@ -43,14 +50,14 @@ export function applySeo({
   keywords = [],
   path = "/",
   image = "/logo-transparent.png",
-  robots = "index,follow",
+  robots = "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1",
   jsonLd,
   alternates = [],
 }) {
-  const baseUrl = window.location.origin;
-  const canonical = `${baseUrl}${path}`;
+  const canonical = toAbsoluteUrl(path);
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const keywordText = Array.isArray(keywords) ? keywords.join(", ") : "";
+  const shareImage = toAbsoluteUrl(image);
 
   document.title = fullTitle;
 
@@ -63,12 +70,12 @@ export function applySeo({
   upsertMeta('meta[property="og:title"]', { property: "og:title", content: fullTitle });
   upsertMeta('meta[property="og:description"]', { property: "og:description", content: description });
   upsertMeta('meta[property="og:url"]', { property: "og:url", content: canonical });
-  upsertMeta('meta[property="og:image"]', { property: "og:image", content: `${baseUrl}${image}` });
+  upsertMeta('meta[property="og:image"]', { property: "og:image", content: shareImage });
 
   upsertMeta('meta[name="twitter:card"]', { name: "twitter:card", content: "summary_large_image" });
   upsertMeta('meta[name="twitter:title"]', { name: "twitter:title", content: fullTitle });
   upsertMeta('meta[name="twitter:description"]', { name: "twitter:description", content: description });
-  upsertMeta('meta[name="twitter:image"]', { name: "twitter:image", content: `${baseUrl}${image}` });
+  upsertMeta('meta[name="twitter:image"]', { name: "twitter:image", content: shareImage });
 
   upsertLink('link[rel="canonical"]', { rel: "canonical", href: canonical });
   document.head.querySelectorAll('link[data-seo-alt="page"]').forEach((el) => el.remove());
@@ -78,7 +85,7 @@ export function applySeo({
       const element = document.createElement("link");
       element.setAttribute("rel", "alternate");
       element.setAttribute("hreflang", alt.hreflang);
-      element.setAttribute("href", `${baseUrl}${alt.href}`);
+      element.setAttribute("href", toAbsoluteUrl(alt.href));
       element.setAttribute("data-seo-alt", "page");
       document.head.appendChild(element);
     });
@@ -182,5 +189,17 @@ export const seoKeywords = {
     "mothers day virtual hug",
     "online hug card maker",
     "hug card for mom free",
+  ],
+  cake: [
+    "free virtual birthday cake",
+    "virtual birthday cake maker",
+    "online birthday cake maker",
+    "3d cake maker online",
+    "send virtual birthday cake",
+    "birthday cake with candles online",
+    "interactive birthday cake online",
+    "virtual cake with message",
+    "digital birthday cake gift",
+    "create birthday cake online free",
   ],
 };
