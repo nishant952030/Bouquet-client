@@ -1,5 +1,16 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    }
+  ],
   "redirects": [
     {
       "source": "/(.*)",
@@ -14,6 +25,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/((?!api/|.*\\..*).*)", "destination": "/index.html" }
   ]
 }
