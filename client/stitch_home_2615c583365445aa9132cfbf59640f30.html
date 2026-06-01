@@ -1,0 +1,163 @@
+<html lang="en"><head></head><body>```html
+
+
+
+    <meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Petals and Words | Interactive 3D Digital Flowers</title>
+<!-- BEGIN: External Scripts and Styles -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&amp;family=Montserrat:wght@300;400;600&amp;family=Dancing+Script:wght@500&amp;display=swap" rel="stylesheet"/>
+<!-- React and Three.js Dependencies -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
+<script src="https://unpkg.com/@react-three/fiber@8.12.0/dist/react-three-fiber.umd.js"></script>
+<script src="https://unpkg.com/@react-three/drei@9.57.2/dist/index-624237f3.umd.js"></script>
+<script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'petal-pink': '#fff5f6',
+                        'petal-rose': '#e48d9c',
+                        'petal-dark': '#3d3028',
+                        'petal-gold': '#d4af37',
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['Montserrat', 'sans-serif'],
+                        cursive: ['"Dancing Script"', 'cursive'],
+                    },
+                }
+            }
+        }
+    </script>
+<style>
+        body, html, #root {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #fff5f6;
+        }
+        canvas {
+            display: block;
+        }
+        .ui-layer {
+            pointer-events: none;
+        }
+        .ui-layer * {
+            pointer-events: auto;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 40px rgba(228, 141, 156, 0.15);
+        }
+    </style>
+<div id="root"></div>
+<script type="text/babel">
+        const { useState, useRef, useMemo, useEffect } = React;
+        const { Canvas, useFrame, useThree } = ReactThreeFiber;
+        const { Float, Environment, ContactShadows, PerspectiveCamera } = THREE_DREI;
+
+        // --- 3D Components ---
+
+        const Petal = ({ color, ...props }) => {
+            const mesh = useRef();
+            const [speed] = useState(() => 0.1 + Math.random() * 0.4);
+            const [factor] = useState(() => 0.5 + Math.random());
+            
+            useFrame((state) => {
+                const t = state.clock.getElapsedTime();
+                mesh.current.rotation.y += speed * 0.1;
+                mesh.current.rotation.z += speed * 0.05;
+                mesh.current.position.y += Math.sin(t * speed) * 0.002;
+            });
+
+            return (
+                <Float speed={2} rotationIntensity={1.5} floatIntensity={2}>
+                    <mesh ref={mesh} {...props}>
+                        <sphereGeometry args={[0.3, 16, 16]} scale={[1, 0.1, 0.5]} />
+                        <meshStandardMaterial 
+                            color={color} 
+                            roughness={0.2} 
+                            metalness={0.1}
+                            transparent
+                            opacity={0.8}
+                        />
+                    </mesh>
+                </Float>
+            );
+        };
+
+        const SceneBackground = () => {
+            const petals = useMemo(() => {
+                return Array.from({ length: 25 }).map((_, i) => ({
+                    position: [
+                        (Math.random() - 0.5) * 15,
+                        (Math.random() - 0.5) * 10,
+                        (Math.random() - 0.5) * 5 - 2
+                    ],
+                    rotation: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI],
+                    scale: 0.5 + Math.random() * 1.5,
+                    color: i % 2 === 0 ? '#e48d9c' : '#fbc4ab'
+                }));
+            }, []);
+
+            return (
+                <group>
+                    {petals.map((props, i) => <Petal key={i} {...props} />)}
+                    <ContactShadows position={[0, -4, 0]} opacity={0.3} scale={20} blur={2} far={4.5} />
+                </group>
+            );
+        };
+
+        const MainApp = () => {
+            return (
+                <div className="relative w-full h-full">
+                    {/* 3D Canvas */}
+                    <div className="absolute inset-0 z-0">
+                        <Canvas shadows>
+                            <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={45} />
+                            <ambientLight intensity={0.6} />
+                            <pointLight position={[10, 10, 10]} intensity={0.5} color="#fff5f6" />
+                            <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
+                            <SceneBackground />
+                            <Environment preset="soft" />
+                        </Canvas>
+                    </div>
+
+                    {/* UI Overlay */}
+                    <div className="ui-layer absolute inset-0 z-10 flex flex-col items-center overflow-y-auto pt-10 pb-10 px-4">
+                        
+                        {/* Top Banner */}
+                        <div className="w-full max-w-xl mb-12 animate-fade-in-up">
+                            <div className="rounded-3xl p-6 text-center text-white relative overflow-hidden shadow-lg" style={{ background: 'linear-gradient(135deg, #a65d5d 0%, #7c4343 100%)' }}>
+                                <div className="absolute left-2 top-2 opacity-20">
+                                    <svg fill="currentColor" height="40" viewBox="0 0 24 24" width="40"><path d="M12,2C15.31,2 18,4.69 18,8C18,12.19 12,19 12,19C12,19 6,12.19 6,8C6,4.69 8.69,2 12,2Z"></path></svg>
+                                </div>
+                                <p className="uppercase tracking-widest text-[10px] font-bold mb-1 opacity-90">Send Love Today</p>
+                                <h2 className="font-serif text-xl md:text-2xl mb-1">Share a Beautiful Bouquet</h2>
+                                <p className="text-xs font-light opacity-80">Make someone feel special with flowers and words</p>
+                            </div>
+                        </div>
+
+                        {/* Hero Section Card */}
+                        <main className="w-full flex items-center justify-center">
+                            <div className="glass-card max-w-2xl w-full rounded-[3rem] p-10 md:p-16 text-center relative overflow-hidden">
+                                
+                                {/* Logo Area */}
+                                <div className="mb-8 flex flex-col items-center">
+                                    <div className="mb-4 text-petal-rose opacity-60">
+                                        <svg fill="none" height="30" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 60 30" width="60"><path d="M30 15c-5-10-15-10-20-5 5 5 15 5 20 5m0 0c5-10 15-10 20-5-5 5-15 5-20 5" strokeLinecap="round"></path></svg>
+                                    </div>
+                                    <div className="mb-4 opacity-30">
+                                        <svg fill="none" height="10" stroke="#e48d9c" strokeWidth="1" viewBox="0 0 100 10" width="100"><path d="M0 5 Q 12.5 0, 25 5 T 50 5 T 75 5 T 100 5"></path></svg>
+                                    </div>
+                                    <img alt="Petals and Words Logo" className="w-64 h-auto mx-auto mb-2" src="data:image/png;base64,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/r+7078mP7/vP/Z+8/9//+G3/D++fD+875/eP/84Xf957D7x/fD/+vj++Xv8/7y//X+8Pr8+vD6/99/3P3/9fX7/uH39fvP8/X7z/H9+v3+9P7z///v+P///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x//r/9/z1/fT99f7z/Pf98P/3///v+H///7/h9/3/8f/x</script></body></html>

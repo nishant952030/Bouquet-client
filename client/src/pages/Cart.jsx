@@ -26,6 +26,7 @@ import {
   loadGiftCart,
   normalizeCurrency,
   removeGiftCartItem,
+  updateGiftCartItemTier,
 } from "../lib/giftCart";
 import { loadRazorpayScript } from "../lib/razorpay";
 import { applySeo } from "../lib/seo";
@@ -90,6 +91,13 @@ const CSS = `
   .cart-add-product-label{font-size:.82rem;font-weight:800;color:#312722;line-height:1.2}
   .cart-add-product-desc{font-size:.7rem;color:#8a7670;line-height:1.35}
   .cart-add-product-plus{width:20px;height:20px;border-radius:50%;background:#7b5455;color:#fff;display:grid;place-items:center;margin-left:auto;margin-top:.25rem;align-self:flex-end;flex:none}
+  /* Tier selector */
+  .tier-selector { display: flex; gap: 4px; background: #f5f3ef; padding: 4px; border-radius: 8px; margin-top: 12px; }
+  .tier-btn { flex: 1; border: none; background: transparent; padding: 8px 4px; font-size: 0.75rem; font-weight: 600; color: #7b6b64; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .tier-btn:hover { background: rgba(123, 84, 85, 0.08); }
+  .tier-btn.active { background: #fff; color: #7b5455; box-shadow: 0 2px 8px rgba(123, 84, 85, 0.15); }
+  .tier-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tier-price { font-size: 0.8rem; font-weight: 800; }
   /* Fixed payment bar */
   .cart-pay-bar{position:fixed;inset:auto 0 0;z-index:40;background:rgba(251,249,245,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(97,75,61,.1);padding:.75rem 1rem 1.1rem;display:none}
   .cart-pay-bar-inner{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:.85rem}
@@ -440,12 +448,32 @@ export default function Cart() {
                 return (
                   <article className="cart-item" key={item.cartItemId}>
                     <div className="cart-icon"><Gift size={20} /></div>
-                    <div>
+                    <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
                       <h2>Gift {index + 1}: {getGiftItemTitle(item)}</h2>
                       <p>{getGiftItemSubtitle(item)}</p>
                       <p>{meta?.label}</p>
+                      
+                      <div className="tier-selector">
+                        {meta?.priceTiers?.map((tier) => {
+                          const tierPriceMinor = tier.priceMinor[currency === "INR" ? "INR" : "USD"];
+                          const isActive = (item.tierId || "tier2") === tier.id;
+                          return (
+                            <button 
+                              key={tier.id} 
+                              className={`tier-btn ${isActive ? "active" : ""}`}
+                              onClick={() => {
+                                setItems(updateGiftCartItemTier(item.cartItemId, tier.id));
+                              }}
+                              type="button"
+                            >
+                              <span className="tier-label">{tier.label}</span>
+                              <span className="tier-price">{formatCartMoney(tierPriceMinor, currency)}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: ".55rem" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: ".55rem", alignSelf: "flex-start" }}>
                       <span className="cart-price">{formatCartMoney(price, currency)}</span>
                       <button
                         aria-label={`Remove ${getGiftItemTitle(item)}`}

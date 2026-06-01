@@ -5,25 +5,41 @@ export const GIFT_PRODUCT_META = {
     label: "Flower Bouquet",
     shortLabel: "Bouquet",
     createPath: "/create",
-    priceMinor: { INR: 100, USD: 1 }, // TEST PRICE — restore: INR: 3900, USD: 149
+    priceTiers: [
+      { id: "tier1", label: "Basic", priceMinor: { INR: 1900, USD: 199 } },
+      { id: "tier2", label: "Standard", priceMinor: { INR: 3900, USD: 299 } },
+      { id: "tier3", label: "Premium", priceMinor: { INR: 7900, USD: 499 } }
+    ]
   },
   cake: {
     label: "3D Celebration Cake",
     shortLabel: "Cake",
     createPath: "/create-cake",
-    priceMinor: { INR: 100, USD: 1 }, // TEST PRICE — restore: INR: 1900, USD: 99
+    priceTiers: [
+      { id: "tier1", label: "Basic", priceMinor: { INR: 1900, USD: 199 } },
+      { id: "tier2", label: "Standard", priceMinor: { INR: 3900, USD: 299 } },
+      { id: "tier3", label: "Premium", priceMinor: { INR: 7900, USD: 499 } }
+    ]
   },
   mothers_day_card: {
     label: "Mother's Day Card",
     shortLabel: "Card",
     createPath: "/create-mothers-day-card",
-    priceMinor: { INR: 100, USD: 1 }, // TEST PRICE — restore: INR: 3900, USD: 149
+    priceTiers: [
+      { id: "tier1", label: "Basic", priceMinor: { INR: 1900, USD: 199 } },
+      { id: "tier2", label: "Standard", priceMinor: { INR: 3900, USD: 299 } },
+      { id: "tier3", label: "Premium", priceMinor: { INR: 7900, USD: 499 } }
+    ]
   },
   hug_card: {
     label: "Virtual Hug Card",
     shortLabel: "Hug",
     createPath: "/create-hug-card",
-    priceMinor: { INR: 0, USD: 0 },
+    priceTiers: [
+      { id: "tier1", label: "Basic", priceMinor: { INR: 1900, USD: 199 } },
+      { id: "tier2", label: "Standard", priceMinor: { INR: 3900, USD: 299 } },
+      { id: "tier3", label: "Premium", priceMinor: { INR: 7900, USD: 499 } }
+    ]
   },
 };
 
@@ -56,6 +72,7 @@ function normalizeCartItem(item) {
   return {
     cartItemId: String(item.cartItemId || createCartItemId()),
     type: item.type,
+    tierId: item.tierId || "tier2", // Default to Standard (tier2)
     payload: item.payload && typeof item.payload === "object" ? item.payload : {},
     addedAt: typeof item.addedAt === "string" ? item.addedAt : new Date().toISOString(),
   };
@@ -98,6 +115,17 @@ export function removeGiftCartItem(cartItemId) {
   return next;
 }
 
+export function updateGiftCartItemTier(cartItemId, tierId) {
+  const next = loadGiftCart().map((item) => {
+    if (item.cartItemId === cartItemId) {
+      return { ...item, tierId };
+    }
+    return item;
+  });
+  saveGiftCart(next);
+  return next;
+}
+
 export function clearGiftCart() {
   if (typeof window === "undefined") return;
   localStorage.removeItem(GIFT_CART_KEY);
@@ -111,7 +139,8 @@ export function getGiftProductMeta(type) {
 export function getGiftItemPriceMinor(item, currency) {
   const meta = getGiftProductMeta(item?.type);
   const normalizedCurrency = currency === "INR" ? "INR" : "USD";
-  return Number(meta?.priceMinor?.[normalizedCurrency] || 0);
+  const tier = meta?.priceTiers?.find((t) => t.id === item?.tierId) || meta?.priceTiers?.[1]; // Default tier2
+  return Number(tier?.priceMinor?.[normalizedCurrency] || 0);
 }
 
 export function getGiftCartTotals(items, currency) {

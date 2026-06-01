@@ -2,297 +2,62 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/LanguageSwitcher";
-import * as THREE from "three";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Float, Environment, ContactShadows, PerspectiveCamera } from "@react-three/drei";
 
 import { applySeo, seoKeywords } from "../lib/seo";
 import { blogPosts } from "../data/blogPosts";
-import { flowers } from "../data/flowerCatalog";
 
-/*  ─── DESIGN SYSTEM: Velvet & Vellum ───────────────────────────────────────
-    Primary:   #7b5455  /  Container: #ffd9d8  /  Text: #3E2723
-    Surface:   #fbf9f5  /  Container-low: #f5f3ef  /  Lowest: #ffffff
-    Fonts:     Noto Serif (headlines) + Manrope (body/labels)
-    Rule:      No 1px borders — use tonal background shifts for depth
-────────────────────────────────────────────────────────────────────────────── */
+/* --- 3D Components --- */
 
-const VV = `
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Manrope:wght@300;400;500;600;700&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; }
-
-  .vv-root {
-    font-family: 'Manrope', sans-serif;
-    background: #fbf9f5;
-    color: #3E2723;
-    min-height: 100vh;
-  }
-
-  /* Typography */
-  .vv-display {
-    font-family: 'Noto Serif', serif;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    line-height: 1.18;
-    color: #3E2723;
-  }
-  .vv-label {
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: #7b5455;
-  }
-  .vv-body {
-    font-family: 'Manrope', sans-serif;
-    line-height: 1.7;
-    color: #4f4445;
-  }
-
-  /* Surfaces (tonal, no hard borders) */
-  .surf      { background: #fbf9f5; }
-  .surf-low  { background: #f5f3ef; }
-  .surf-high { background: #eae8e4; }
-  .surf-white{ background: #ffffff; }
-
-  /* Glassmorphism header */
-  .vv-header {
-    position: sticky; top: 0; z-index: 40;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    background: rgba(251,249,245,0.82);
-    border-bottom: none;
-  }
-
-  /* Primary CTA — velvet gradient pill */
-  .vv-btn-primary {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    background: linear-gradient(135deg, #7b5455 0%, #ffd9d8 160%);
-    color: #ffffff;
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.88rem; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    border: none; border-radius: 9999px;
-    padding: 0 2rem; min-height: 52px;
-    cursor: pointer;
-    box-shadow: 0 16px 48px rgba(123,84,85,0.22);
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-  }
-  .vv-btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 20px 56px rgba(123,84,85,0.30);
-    background: linear-gradient(135deg, #613d3e 0%, #ecbaba 160%);
-  }
-  .vv-btn-primary:active { transform: scale(0.98); }
-
-  /* Ghost secondary pill */
-  .vv-btn-ghost {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: transparent;
-    color: #7b5455;
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.8rem; font-weight: 600;
-    border: 1.5px solid rgba(210,195,196,0.5);
-    border-radius: 9999px;
-    padding: 0.4rem 1.1rem;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
-    text-decoration: none;
-  }
-  .vv-btn-ghost:hover { background: #ffd9d8; border-color: #7b5455; }
-
-  /* Petal chip (occasion selector) */
-  .petal-chip {
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.78rem; font-weight: 600;
-    background: #f5f3ef;
-    color: #4f4445;
-    border-radius: 9999px;
-    padding: 0.45rem 1rem;
-    border: none; cursor: pointer;
-    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
-  }
-  .petal-chip:hover, .petal-chip.active {
-    background: #ffd9d8;
-    color: #7b5455;
-    box-shadow: 0 2px 12px rgba(123,84,85,0.14);
-  }
-
-  /* Cake CTA */
-  .vv-btn-cake {
-    position: relative;
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    background: linear-gradient(135deg, #ffffff 0%, #fdf9f1 100%);
-    color: #7b5455;
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.88rem; font-weight: 700;
-    letter-spacing: 0.05em; text-transform: uppercase;
-    border: 1.5px solid #d2c3c4;
-    border-radius: 9999px;
-    padding: 0 2rem; min-height: 52px;
-    cursor: pointer;
-    box-shadow: 0 8px 24px rgba(123,84,85,0.08);
-    transition: all 0.18s ease;
-  }
-  .vv-btn-cake:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(123,84,85,0.15);
-    border-color: #7b5455;
-    background: #fff;
-  }
-  .vv-btn-cake:active { transform: scale(0.98); }
+const Petal = ({ color, position, rotation, scale }) => {
+  const mesh = useRef();
+  const [speed] = useState(() => 0.1 + Math.random() * 0.4);
   
-  .vv-tag-new {
-    position: absolute; top: -12px; right: -5px;
-    background: linear-gradient(135deg, #e91e63 0%, #f48fb1 100%);
-    color: #ffffff;
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em;
-    padding: 0.25rem 0.6rem; border-radius: 9999px;
-    box-shadow: 0 4px 12px rgba(233,30,99,0.3);
-    transform: rotate(8deg);
-    animation: vvFloat 4s ease-in-out infinite;
-  }
+  useFrame((state) => {
+    if (!mesh.current) return;
+    const t = state.clock.getElapsedTime();
+    mesh.current.rotation.y += speed * 0.05;
+    mesh.current.rotation.z += speed * 0.02;
+  });
 
-  /* Cards — no hard borders, ambient shadow */
-  .vv-card {
-    background: #ffffff;
-    border-radius: 2rem;
-    box-shadow: 0 10px 40px rgba(27,28,26,0.06), 0 2px 8px rgba(27,28,26,0.04);
-    overflow: hidden;
-  }
-  .vv-card-low {
-    background: #f5f3ef;
-    border-radius: 1.5rem;
-  }
+  return (
+    <Float speed={2} rotationIntensity={1.5} floatIntensity={2} position={position} rotation={rotation}>
+      <mesh ref={mesh} scale={[scale, scale * 0.1, scale * 0.5]}>
+        <sphereGeometry args={[0.3, 16, 16]} />
+        <meshStandardMaterial 
+          color={color} 
+          roughness={0.2} 
+          metalness={0.1}
+          transparent
+          opacity={0.8}
+        />
+      </mesh>
+    </Float>
+  );
+};
 
-  /* Step indicator */
-  .step-circle {
-    width: 2rem; height: 2rem; border-radius: 9999px;
-    background: linear-gradient(135deg, #7b5455, #ecbaba);
-    color: #fff; font-weight: 700; font-size: 0.8rem;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
+const SceneBackground = () => {
+  const [petals] = useState(() => {
+    return Array.from({ length: 35 }).map((_, i) => ({
+      position: [
+        (Math.random() - 0.5) * 20,
+        (Math.random() - 0.5) * 15,
+        (Math.random() - 0.5) * 8 - 2
+      ],
+      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI],
+      scale: 0.5 + Math.random() * 1.5,
+      color: i % 2 === 0 ? '#e48d9c' : '#fbc4ab'
+    }));
+  });
 
-  /* Testimonial dot */
-  .t-dot { width: 6px; height: 6px; border-radius: 9999px; background: #d2c3c4; transition: all 0.3s; }
-  .t-dot.active { width: 1.4rem; background: #7b5455; }
-
-  /* Shimmer badge */
-  @keyframes vvShimmer {
-    0%   { background-position: -200% center; }
-    100% { background-position: 200% center; }
-  }
-  .vv-shimmer {
-    background: linear-gradient(90deg, #7b5455 0%, #ecbaba 40%, #c8a96e 70%, #7b5455 100%);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: vvShimmer 4s linear infinite;
-  }
-
-  /* Ambient float for deco elements */
-  @keyframes vvFloat {
-    0%,100% { transform: translateY(0) rotate(0deg); }
-    50%      { transform: translateY(-10px) rotate(4deg); }
-  }
-  .vv-float-1 { animation: vvFloat 5s ease-in-out infinite; }
-  .vv-float-2 { animation: vvFloat 7s ease-in-out infinite 1.5s; }
-  .vv-float-3 { animation: vvFloat 4.5s ease-in-out infinite 0.8s; }
-
-  /* Fade-in on load */
-  @keyframes vvFadeUp {
-    from { opacity:0; transform:translateY(20px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-  .vv-f1 { animation: vvFadeUp 0.5s ease forwards; }
-  .vv-f2 { animation: vvFadeUp 0.5s ease 0.1s forwards; opacity:0; }
-  .vv-f3 { animation: vvFadeUp 0.5s ease 0.2s forwards; opacity:0; }
-  .vv-f4 { animation: vvFadeUp 0.5s ease 0.3s forwards; opacity:0; }
-  .vv-f5 { animation: vvFadeUp 0.5s ease 0.4s forwards; opacity:0; }
-
-  .offer-glow {
-    animation: offerPulse 2.4s ease-in-out infinite;
-  }
-  @keyframes offerPulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(123,84,85,0.3); }
-    50%      { box-shadow: 0 0 0 8px rgba(123,84,85,0); }
-  }
-
-  .slide-exit { opacity:0; transform:translateX(-16px); transition: opacity 0.2s, transform 0.2s; }
-  .slide-enter { opacity:1; transform:translateX(0);   transition: opacity 0.2s, transform 0.2s; }
-`;
-
-function HeroThreeBloom() {
-  const canvasRef = useRef(null);
-  useEffect(() => {
-    if (!canvasRef.current) return undefined;
-    const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    renderer.setClearColor(0x000000, 0);
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 2000);
-    camera.position.set(0, 0, 540);
-    camera.lookAt(0, 0, 0);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-    const key = new THREE.DirectionalLight(0xfff0e9, 0.7);
-    key.position.set(-120, 140, 220);
-    scene.add(key);
-    const group = new THREE.Group();
-    scene.add(group);
-    const textureLoader = new THREE.TextureLoader();
-    const assets = flowers.slice(0, 8).map(f => f.src);
-    const meshes = [];
-    let rafId = null, disposed = false;
-    const updateSize = () => {
-      if (!canvasRef.current?.parentElement) return;
-      const { clientWidth, clientHeight } = canvasRef.current.parentElement;
-      renderer.setSize(clientWidth, clientHeight, false);
-      camera.aspect = clientWidth / Math.max(1, clientHeight);
-      camera.updateProjectionMatrix();
-    };
-    const build = async () => {
-      for (let i = 0; i < assets.length; i++) {
-        if (disposed) return;
-        try {
-          const texture = await textureLoader.loadAsync(assets[i]);
-          texture.colorSpace = THREE.SRGBColorSpace;
-          const aspect = (texture.image?.width || 1) / (texture.image?.height || 1);
-          const w = 110 + Math.random() * 50;
-          const geometry = new THREE.PlaneGeometry(w, w / Math.max(0.1, aspect));
-          const material = new THREE.MeshStandardMaterial({ map: texture, transparent: true, alphaTest: 0.05, roughness: 0.95, metalness: 0, side: THREE.DoubleSide });
-          const mesh = new THREE.Mesh(geometry, material);
-          mesh.position.set((Math.random() * 2 - 1) * 140, (Math.random() * 2 - 1) * 100, -i * 24);
-          mesh.rotation.z = THREE.MathUtils.degToRad((Math.random() * 2 - 1) * 20);
-          mesh.rotation.y = THREE.MathUtils.degToRad((Math.random() * 2 - 1) * 14);
-          group.add(mesh); meshes.push(mesh);
-        } catch { /* ignore */ }
-      }
-    };
-    const animate = () => {
-      if (disposed) return;
-      const t = performance.now() * 0.001;
-      group.rotation.y = Math.sin(t * 0.4) * 0.09;
-      group.rotation.x = Math.cos(t * 0.3) * 0.04;
-      group.position.y = Math.sin(t * 0.7) * 5;
-      renderer.render(scene, camera);
-      rafId = requestAnimationFrame(animate);
-    };
-    updateSize();
-    build().then(() => { if (!disposed) animate(); });
-    window.addEventListener("resize", updateSize);
-    return () => {
-      disposed = true;
-      if (rafId) cancelAnimationFrame(rafId);
-      window.removeEventListener("resize", updateSize);
-      meshes.forEach(m => { group.remove(m); m.geometry.dispose(); m.material.map?.dispose(); m.material.dispose(); });
-      renderer.dispose();
-    };
-  }, []);
-  return <canvas ref={canvasRef} className="h-full w-full" />;
-}
+  return (
+    <group>
+      {petals.map((props, i) => <Petal key={i} {...props} />)}
+      <ContactShadows position={[0, -4, 0]} opacity={0.3} scale={20} blur={2} far={4.5} />
+    </group>
+  );
+};
 
 export default function Home() {
   const navigate = useNavigate();
@@ -302,57 +67,11 @@ export default function Home() {
     { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi", city: "Mumbai" },
     { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Priya", city: "Hyderabad" },
     { quote: "Got the share link in seconds. So quick and easy!", author: "Neha", city: "Delhi" },
-    { quote: "I sent it to my mom and she called me immediately.", author: "Shruti", city: "Pune" },
   ], []);
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
-  const [activeGiftKey, setActiveGiftKey] = useState("mom");
   const featuredPosts = useMemo(() => blogPosts.slice(0, 3), []);
-
-  const giftFinder = useMemo(() => ({
-    mom: {
-      label: "For Mom",
-      title: "A card with a message she can keep",
-      body: "Best for Mother's Day, thank-you notes, or a soft everyday reminder that she is loved.",
-      cta: "Create card",
-      to: "/create-mothers-day-card",
-      accent: "#be185d",
-    },
-    birthday: {
-      label: "Birthday",
-      title: "A 3D cake with candles",
-      body: "Perfect when you want something playful, instant, and more memorable than a plain text message.",
-      cta: "Make cake",
-      to: "/create-cake",
-      accent: "#d97706",
-    },
-    love: {
-      label: "Love",
-      title: "A romantic digital bouquet",
-      body: "Choose flowers, write something specific, and send a bouquet link that feels personal.",
-      cta: "Build bouquet",
-      to: "/create",
-      accent: "#7b5455",
-    },
-    distance: {
-      label: "Far away",
-      title: "A virtual hug card",
-      body: "When you cannot be there in person, send a small interactive gesture that opens with warmth.",
-      cta: "Send hug",
-      to: "/create-hug-card",
-      accent: "#6d28d9",
-    },
-  }), []);
-
-  const activeGift = giftFinder[activeGiftKey];
-
-  const occasions = [
-    { key: "home.forMom", label: t("home.forMom") },
-    { key: "home.forPartner", label: t("home.forPartner") },
-    { key: "home.forBestFriend", label: t("home.forBestFriend") },
-    { key: "home.forFamily", label: t("home.forFamily") },
-  ];
 
   useEffect(() => {
     applySeo({
@@ -364,7 +83,6 @@ export default function Home() {
         "@context": "https://schema.org",
         "@graph": [
           { "@type": "WebSite", name: "Petals and Words", url: window.location.origin, description: "Free online bouquet maker for creating and sharing digital flowers with personal notes." },
-          { "@type": "SoftwareApplication", name: "Petals and Words Free Bouquet Maker", applicationCategory: "LifestyleApplication", operatingSystem: "Web", offers: { "@type": "Offer", priceCurrency: "USD", price: "0" }, url: `${window.location.origin}/create` },
         ],
       },
     });
@@ -379,315 +97,218 @@ export default function Home() {
   }, [testimonials.length]);
 
   return (
-    <main className="vv-root">
-      <style>{VV}</style>
+    <div className="relative w-full h-screen overflow-hidden bg-[#fff5f6] font-sans">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@400;500;600;700&display=swap');
+        .glass-card {
+          background: rgba(255, 255, 255, 0.55);
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.7);
+          box-shadow: 0 10px 40px rgba(228, 141, 156, 0.15);
+        }
+        .ui-layer { pointer-events: none; }
+        .ui-layer * { pointer-events: auto; }
+        
+        .vv-btn-primary {
+          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+          background: linear-gradient(135deg, #a65d5d 0%, #7c4343 100%);
+          color: #ffffff;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 0.95rem; font-weight: 600;
+          letter-spacing: 0.08em; text-transform: uppercase;
+          border: none; border-radius: 9999px;
+          padding: 0 2rem; min-height: 56px;
+          cursor: pointer;
+          box-shadow: 0 12px 30px rgba(124, 67, 67, 0.25);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          width: 100%;
+        }
+        .vv-btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 16px 40px rgba(124, 67, 67, 0.35);
+        }
+        
+        .vv-btn-secondary {
+          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+          background: #ffffff;
+          color: #7c4343;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 0.95rem; font-weight: 600;
+          letter-spacing: 0.05em; text-transform: uppercase;
+          border: 1.5px solid rgba(166, 93, 93, 0.2);
+          border-radius: 9999px;
+          padding: 0 2rem; min-height: 56px;
+          cursor: pointer;
+          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+          width: 100%;
+        }
+        .vv-btn-secondary:hover {
+          transform: translateY(-2px);
+          border-color: rgba(166, 93, 93, 0.5);
+          box-shadow: 0 10px 25px rgba(166, 93, 93, 0.1);
+        }
 
-      {/* ── GLASSMORPHISM HEADER ── */}
-      <header className="vv-header">
-        <div style={{ maxWidth: 480, margin: "0 auto", padding: "0.9rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <img src="/logo-transparent.png" alt="Petals and Words" style={{ height: 32, width: "auto" }} />
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <Link to="/blog" className="vv-btn-ghost">{t("common.blog")}</Link>
+        .vv-tag-new {
+          position: absolute; top: -10px; right: 10px;
+          background: linear-gradient(135deg, #e91e63 0%, #f48fb1 100%);
+          color: #ffffff;
+          font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em;
+          padding: 0.25rem 0.6rem; border-radius: 9999px;
+          box-shadow: 0 4px 12px rgba(233,30,99,0.3);
+          transform: rotate(8deg);
+        }
+        
+        /* Shimmer badge */
+        @keyframes vvShimmer {
+          0%   { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        .vv-shimmer {
+          background: linear-gradient(90deg, #7c4343 0%, #e48d9c 40%, #c8a96e 70%, #7c4343 100%);
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          animation: vvShimmer 4s linear infinite;
+        }
+      `}</style>
+
+      {/* 3D Canvas */}
+      <div className="absolute inset-0 z-0">
+        <Canvas shadows>
+          <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={45} />
+          <ambientLight intensity={0.6} />
+          <pointLight position={[10, 10, 10]} intensity={0.5} color="#fff5f6" />
+          <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
+          <SceneBackground />
+          <Environment preset="dawn" />
+        </Canvas>
+      </div>
+
+      {/* UI Overlay */}
+      <div className="ui-layer absolute inset-0 z-10 flex flex-col items-center overflow-y-auto px-4 pb-20">
+        
+        {/* Header */}
+        <header className="w-full max-w-6xl flex items-center justify-between py-6 mb-4 md:mb-10">
+          <img src="/logo-transparent.png" alt="Petals and Words" className="h-8 md:h-10" />
+          <div className="flex items-center gap-4">
+            <Link to="/blog" className="text-[#7c4343] font-semibold text-sm tracking-wide hover:opacity-70 transition-opacity hidden md:block">{t("common.blog")}</Link>
             <LanguageSwitcher />
           </div>
-        </div>
-      </header>
+        </header>
 
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 1.25rem 6rem" }}>
+        {/* Hero Section Card */}
+        <main className="w-full flex items-center justify-center mb-16">
+          <div className="glass-card max-w-2xl w-full rounded-[3rem] p-10 md:p-16 text-center relative overflow-hidden">
+            
+            {/* Logo Area */}
+            <div className="mb-8 flex flex-col items-center">
+              <div className="mb-4 text-[#e48d9c] opacity-60">
+                <svg fill="none" height="30" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 60 30" width="60"><path d="M30 15c-5-10-15-10-20-5 5 5 15 5 20 5m0 0c5-10 15-10 20-5-5 5-15 5-20 5" strokeLinecap="round"></path></svg>
+              </div>
+              <h2 className="uppercase tracking-widest text-xs font-bold mb-2 text-[#7c4343] opacity-80">
+                {t("home.label", "Made for Meaningful Moments")}
+              </h2>
+            </div>
 
-        {/* ── HERO CARD ── */}
-        <section className="vv-card vv-f1" style={{ marginTop: "1.5rem", position: "relative", overflow: "hidden" }}>
-
-          {/* 3D Flower bloom background */}
-          <div style={{ position: "absolute", inset: 0, opacity: 0.28, pointerEvents: "none" }}>
-            <HeroThreeBloom />
-          </div>
-
-          {/* Decorative gradient overlay */}
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(251,249,245,0) 40%, rgba(251,249,245,0.85) 100%)", pointerEvents: "none" }} />
-
-          <div style={{ position: "relative", padding: "2.5rem 1.75rem 2rem", textAlign: "center" }}>
-
-            {/* Logo */}
-            <img src="/logo-transparent.png" alt="Petals and Words" style={{ height: 40, margin: "0 auto 1rem", display: "block" }} />
-
-            {/* Label */}
-            <p className="vv-label" style={{ marginBottom: "0.6rem" }}>{t("home.label")}</p>
-
-            {/* Headline */}
-            <h1 className="vv-display" style={{ fontSize: "clamp(1.9rem, 7vw, 2.6rem)", marginBottom: "1rem" }}>
-              {t("home.headline")}{" "}
-              <em className="vv-shimmer">{t("home.headlineEmphasis")}</em>
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#3d3028] mb-6 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+              Send flowers she'll <br className="hidden md:block"/>
+              <em className="vv-shimmer italic font-medium">never forget</em>
             </h1>
-
-            {/* Sub copy */}
-            <p className="vv-body" style={{ maxWidth: 320, margin: "0 auto 1.5rem", fontSize: "0.92rem" }}>
-              {t("home.subCopy")}
+            
+            <p className="text-[#5c4a40] text-sm md:text-base font-medium mb-10 max-w-md mx-auto leading-relaxed">
+              A digital bouquet with your words, delivered in seconds — for family, friends, or anyone you care about.
             </p>
-
-            {/* Occasion chips */}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center", marginBottom: "1.75rem" }}>
-              {occasions.map(o => (
-                <button key={o.key} className="petal-chip" onClick={() => navigate("/create")}>{o.label}</button>
-              ))}
-            </div>
-
-            {/* Offer badge */}
-            <div style={{ marginBottom: "1.5rem" }}>
-              <span style={{ display: "inline-block", background: "#f5f3ef", borderRadius: "9999px", padding: "0.5rem 1.2rem", fontSize: "0.8rem", fontWeight: 600, color: "#4f4445" }}>
-                {t("common.noLoginBadge")}
-              </span>
-            </div>
 
             {/* CTAs */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem", width: "100%", maxWidth: 320, margin: "0 auto" }}>
+            <div className="flex flex-col gap-4 max-w-xs mx-auto">
               <button className="vv-btn-primary" onClick={() => navigate("/create")}>
                 {t("common.createBouquet")}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
               </button>
 
-              <button className="vv-btn-cake" onClick={() => navigate("/create-mothers-day-card")} style={{ background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)", borderColor: "#fbcfe8", color: "#9d174d" }}>
-                <span className="vv-tag-new" style={{ background: "#ec4899", color: "#fff" }}>{t("common.new")}</span>
-                {t("home.createCard", "💌 Send a Card")}
-              </button>
-
-              <button className="vv-btn-cake" onClick={() => navigate("/create-cake")}>
-                {t("home.bakeCake")}
-              </button>
-            </div>
-
-            <p style={{ marginTop: "1rem", fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#9e8f90" }}>
-              {t("common.instantShare")}
-            </p>
-          </div>
-        </section>
-
-        {/* ── MOTHER'S DAY BANNER ── */}
-        <section className="vv-f2" style={{ marginTop: "1.5rem" }}>
-          <div
-            onClick={() => navigate("/create-mothers-day-card")}
-            style={{
-              cursor: "pointer",
-              borderRadius: "2rem",
-              overflow: "hidden",
-              background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 30%, #fbcfe8 60%, #f9a8d4 100%)",
-              padding: "1.5rem 1.25rem",
-              textAlign: "center",
-              position: "relative",
-              boxShadow: "0 10px 40px rgba(236, 72, 153, 0.15), 0 2px 8px rgba(236, 72, 153, 0.08)",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 16px 48px rgba(236, 72, 153, 0.22)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 10px 40px rgba(236, 72, 153, 0.15)"; }}
-          >
-            {/* Floating emoji deco */}
-            <span className="vv-float-1" style={{ position: "absolute", top: 10, left: 16, fontSize: "1.3rem", opacity: 0.5, pointerEvents: "none" }}>🌷</span>
-            <span className="vv-float-2" style={{ position: "absolute", top: 8, right: 18, fontSize: "1.1rem", opacity: 0.4, pointerEvents: "none" }}>💐</span>
-            <span className="vv-float-3" style={{ position: "absolute", bottom: 10, left: "40%", fontSize: "1rem", opacity: 0.35, pointerEvents: "none" }}>🌸</span>
-
-            <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.6rem", fontWeight: 600, color: "#9d174d", lineHeight: 1.25, marginBottom: "0.4rem" }}>
-              {t("home.mothersDayBanner")}
-            </p>
-            <p style={{ fontSize: "0.85rem", color: "#831843", lineHeight: 1.5, marginBottom: "1rem", maxWidth: 280, margin: "0 auto 1rem" }}>
-              {t("md.letterMessage", "Thank you for your endless love, your warm hugs, and for always believing in me.")}
-            </p>
-            <button
-              className="offer-glow"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                background: "linear-gradient(135deg, #ec4899 0%, #db2777 100%)",
-                color: "#fff",
-                fontFamily: "'Manrope', sans-serif",
-                fontSize: "0.88rem",
-                fontWeight: 700,
-                letterSpacing: "0.06em",
-                border: "none",
-                borderRadius: "9999px",
-                padding: "0.7rem 1.8rem",
-                cursor: "pointer",
-                boxShadow: "0 8px 24px rgba(236, 72, 153, 0.35)",
-              }}
-              onClick={e => { e.stopPropagation(); navigate("/create-mothers-day-card"); }}
-            >
-              {t("home.mothersDayCta")}
-            </button>
-          </div>
-        </section>
-
-        {/* ── HOW IT WORKS ── */}
-        <section className="vv-f2" style={{ marginTop: "1.5rem" }}>
-          <div className="vv-card-low" style={{ padding: "1.5rem 1.25rem" }}>
-            <p className="vv-label" style={{ marginBottom: "1.25rem" }}>{t("home.howItWorks")}</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
-              {[
-                { n: "1", emoji: "🌸", title: t("home.step1Title"), desc: t("home.step1Desc") },
-                { n: "2", emoji: "✍️", title: t("home.step2Title"), desc: t("home.step2Desc") },
-                { n: "3", emoji: "🔗", title: t("home.step3Title"), desc: t("home.step3Desc") },
-              ].map(s => (
-                <div key={s.n} style={{ display: "flex", alignItems: "flex-start", gap: "0.9rem", background: "#ffffff", borderRadius: "1.25rem", padding: "0.9rem 1rem" }}>
-                  <div className="step-circle">{s.n}</div>
-                  <div>
-                    <p style={{ fontWeight: 600, fontSize: "0.88rem", color: "#3E2723", marginBottom: "0.2rem" }}>{s.emoji} {s.title}</p>
-                    <p style={{ fontSize: "0.8rem", lineHeight: 1.6, color: "#6b5e5f" }}>{s.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="vv-f3" style={{ marginTop: "1.5rem" }}>
-          <div className="vv-card" style={{ padding: "1.5rem 1.25rem" }}>
-            <p className="vv-label" style={{ marginBottom: "0.75rem" }}>Gift finder</p>
-            <h2 className="vv-display" style={{ fontSize: "1.55rem", marginBottom: "0.45rem" }}>
-              Pick the moment
-            </h2>
-            <p className="vv-body" style={{ fontSize: "0.86rem", marginBottom: "1rem" }}>
-              Find the right digital gift without overthinking it.
-            </p>
-
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginBottom: "1rem" }}>
-              {Object.entries(giftFinder).map(([key, item]) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={`petal-chip ${activeGiftKey === key ? "active" : ""}`}
-                  onClick={() => setActiveGiftKey(key)}
-                  style={{
-                    borderRadius: "0.9rem",
-                    minHeight: 44,
-                    color: activeGiftKey === key ? item.accent : undefined,
-                  }}
-                >
-                  {item.label}
+              <div className="relative w-full">
+                <button className="vv-btn-secondary" onClick={() => navigate("/create-mothers-day-card")}>
+                  💌 {t("home.createCard", "Send a Card")}
                 </button>
-              ))}
-            </div>
+                <span className="vv-tag-new">{t("common.new")}</span>
+              </div>
 
-            <article
-              style={{
-                background: "#f5f3ef",
-                borderRadius: "1.25rem",
-                padding: "1rem",
-                borderLeft: `4px solid ${activeGift.accent}`,
-              }}
-            >
-              <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "#3E2723", marginBottom: "0.3rem" }}>
-                {activeGift.title}
-              </h3>
-              <p style={{ fontSize: "0.82rem", lineHeight: 1.6, color: "#6b5e5f", marginBottom: "0.9rem" }}>
-                {activeGift.body}
-              </p>
-              <button
-                type="button"
-                className="vv-btn-primary"
-                onClick={() => navigate(activeGift.to)}
-                style={{ minHeight: 44, fontSize: "0.78rem", background: activeGift.accent }}
-              >
-                {activeGift.cta}
+              <button className="vv-btn-secondary" onClick={() => navigate("/create-cake")} style={{ border: "none", background: "transparent", color: "#a65d5d", minHeight: "44px" }}>
+                🍰 {t("home.bakeCake")}
               </button>
-            </article>
+            </div>
+            
+            <p className="mt-8 text-[10px] md:text-xs tracking-widest uppercase font-semibold text-[#a65d5d] opacity-70">
+              No login • Ready in 60 seconds
+            </p>
           </div>
-        </section>
+        </main>
 
-        {/* ── TESTIMONIALS ── */}
-        <section className="vv-f3" style={{ marginTop: "1.5rem" }}>
-          <div className="vv-card" style={{ padding: "1.5rem 1.25rem" }}>
-            <p className="vv-label" style={{ marginBottom: "1rem" }}>{t("home.testimonials")}</p>
-            <div
+        {/* Below the fold content */}
+        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
+          
+          {/* Testimonials */}
+          <div className="glass-card rounded-[2rem] p-8">
+            <h3 className="uppercase tracking-widest text-xs font-bold mb-6 text-[#7c4343] opacity-80">{t("home.testimonials")}</h3>
+            <div 
               style={{
-                background: "#f5f3ef", borderRadius: "1.25rem", padding: "1.25rem",
                 opacity: isSliding ? 0 : 1,
                 transform: isSliding ? "translateX(-12px)" : "translateX(0)",
                 transition: "opacity 0.2s, transform 0.2s",
-              }}>
-              <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#c8a96e", marginBottom: "0.5rem" }}>{t("home.rating")}</p>
-              <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.05rem", fontStyle: "italic", lineHeight: 1.65, color: "#3E2723" }}>
+              }}
+            >
+              <p className="font-serif text-xl italic text-[#3d3028] mb-6 leading-relaxed" style={{ fontFamily: "'Playfair Display', serif" }}>
                 "{testimonials[activeIdx].quote}"
               </p>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginTop: "1rem" }}>
-                <div style={{ width: 32, height: 32, borderRadius: "9999px", background: "#ffd9d8", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "0.85rem", color: "#7b5455", flexShrink: 0 }}>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-[#fbc4ab] text-[#7c4343] flex items-center justify-center font-bold">
                   {testimonials[activeIdx].author[0]}
                 </div>
-                <p style={{ fontWeight: 600, fontSize: "0.82rem", color: "#4f4445" }}>
-                  {testimonials[activeIdx].author}, {testimonials[activeIdx].city}
-                </p>
+                <div>
+                  <p className="font-semibold text-[#5c4a40] text-sm">{testimonials[activeIdx].author}</p>
+                  <p className="text-xs text-[#a65d5d]">{testimonials[activeIdx].city}</p>
+                </div>
               </div>
             </div>
-            {/* Dots */}
-            <div style={{ display: "flex", gap: "0.4rem", marginTop: "0.75rem", alignItems: "center" }}>
+            <div className="flex gap-2 mt-8">
               {testimonials.map((_, i) => (
-                <span key={i} className={`t-dot ${i === activeIdx ? "active" : ""}`}
-                  style={{ cursor: "pointer" }} onClick={() => setActiveIdx(i)} />
+                <div 
+                  key={i} 
+                  onClick={() => setActiveIdx(i)}
+                  className={`h-2 rounded-full cursor-pointer transition-all ${i === activeIdx ? 'w-8 bg-[#7c4343]' : 'w-2 bg-[#e48d9c] opacity-40'}`} 
+                />
               ))}
             </div>
           </div>
-        </section>
 
-        {/* ── DARK MESSAGE CARD ── */}
-        <section className="vv-f4" style={{ marginTop: "1.5rem" }}>
-          <div style={{ borderRadius: "2rem", overflow: "hidden", background: "linear-gradient(135deg, #3E2723 0%, #5c3a34 55%, #7b5455 100%)", padding: "2rem 1.5rem", textAlign: "center", position: "relative" }}>
-            <p className="vv-label" style={{ color: "#ecbaba", marginBottom: "0.6rem" }}>{t("home.darkLabel")}</p>
-            <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.5rem", fontStyle: "italic", fontWeight: 400, color: "#fbf9f5", lineHeight: 1.35, marginBottom: "0.75rem" }}>
-              {t("home.darkHeadline")}
-            </p>
-            <p style={{ fontSize: "0.85rem", color: "rgba(251,249,245,0.8)", lineHeight: 1.65, maxWidth: 300, margin: "0 auto 1.5rem" }}>
-              {t("home.darkBody")}
-            </p>
-            <button
-              onClick={() => navigate("/create")}
-              style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,217,216,0.15)", border: "1.5px solid rgba(255,217,216,0.35)", borderRadius: "9999px", color: "#ffd9d8", fontFamily: "'Manrope', sans-serif", fontWeight: 600, fontSize: "0.85rem", letterSpacing: "0.08em", textTransform: "uppercase", padding: "0.65rem 1.6rem", cursor: "pointer", backdropFilter: "blur(8px)", transition: "background 0.18s" }}
-              onMouseEnter={e => e.currentTarget.style.background = "rgba(255,217,216,0.28)"}
-              onMouseLeave={e => e.currentTarget.style.background = "rgba(255,217,216,0.15)"}
-            >
-              {t("home.darkCta")}
-            </button>
-          </div>
-        </section>
-
-        {/* ── EXPLORE / BLOG ── */}
-        <section className="vv-f5" style={{ marginTop: "1.5rem" }}>
-          <div className="vv-card-low" style={{ padding: "1.25rem" }}>
-            <p className="vv-label" style={{ marginBottom: "0.75rem" }}>{t("home.explore")}</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.25rem" }}>
-              {[
-                { to: "/create-mothers-day-card", label: "💌 Create Mother's Day Card" },
-                { to: "/free-digital-mothers-day-card", label: "🌸 Free Digital Mother's Day Card" },
-                { to: "/best-virtual-mothers-day-card", label: "✨ Best Virtual Mother's Day Card" },
-                { to: "/virtual-bouquet-maker", label: "🌐 Virtual Bouquet Maker" },
-                { to: "/digital-bouquet-maker", label: "💻 Digital Bouquet Maker" },
-                { to: "/online-bouquet-maker", label: "🌸 Online Bouquet Maker" },
-                { to: "/virtual-bouquet-maker-online-free", label: "🆓 Virtual Maker Online Free" },
-                { to: "/digital-bouquet-maker-online-free", label: "🆓 Digital Maker Online Free" },
-                { to: "/digital-flower-bouquet-maker", label: "💐 Digital Flower Bouquet Maker" },
-                { to: "/bouquet-maker-online", label: "🌼 Bouquet Maker Online" },
-              ].map(item => (
-                <Link key={item.to} to={item.to} className="vv-btn-ghost" style={{ fontSize: "0.78rem" }}>
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-            <p className="vv-label" style={{ marginBottom: "0.75rem" }}>{t("home.fromBlog")}</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+          {/* Blog / Explore */}
+          <div className="glass-card rounded-[2rem] p-8">
+            <h3 className="uppercase tracking-widest text-xs font-bold mb-6 text-[#7c4343] opacity-80">{t("home.fromBlog")}</h3>
+            <div className="flex flex-col gap-4">
               {featuredPosts.map(post => (
-                <Link key={post.slug} to={`/blog/${post.slug}`}
-                  style={{ display: "block", background: "#ffffff", borderRadius: "1rem", padding: "0.85rem 1rem", textDecoration: "none", transition: "background 0.15s" }}
-                  onMouseEnter={e => e.currentTarget.style.background = "#ffd9d8"}
-                  onMouseLeave={e => e.currentTarget.style.background = "#ffffff"}
-                >
-                  <p style={{ fontWeight: 600, fontSize: "0.88rem", color: "#3E2723", marginBottom: "0.2rem" }}>{post.title}</p>
-                  <p style={{ fontSize: "0.78rem", color: "#6b5e5f", lineHeight: 1.5 }}>{post.description}</p>
+                <Link key={post.slug} to={`/blog/${post.slug}`} className="block group">
+                  <h4 className="font-semibold text-[#3d3028] text-sm mb-1 group-hover:text-[#7c4343] transition-colors">
+                    {post.title}
+                  </h4>
+                  <p className="text-xs text-[#5c4a40] opacity-80 line-clamp-2">
+                    {post.description}
+                  </p>
                 </Link>
               ))}
             </div>
+            
+            <div className="mt-8 pt-6 border-t border-[#e48d9c]/20">
+               <Link to="/blog" className="text-xs font-bold tracking-widest uppercase text-[#a65d5d] hover:text-[#7c4343] transition-colors flex items-center gap-2">
+                 View all articles
+                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+               </Link>
+            </div>
           </div>
-        </section>
 
+        </div>
+        
       </div>
-    </main>
+    </div>
   );
 }
