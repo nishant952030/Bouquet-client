@@ -168,7 +168,7 @@ export default function MothersDayKeywordLanding() {
           <Link to="/create-mothers-day-card" className="rounded-full border border-pink-200 bg-white px-4 py-2 text-pink-700 hover:border-pink-300">
             Build a Card
           </Link>
-          <Link to="/hug-card" className="rounded-full border border-purple-200 bg-white px-4 py-2 text-purple-700 hover:border-purple-300">
+          <Link to="/create-hug-card" className="rounded-full border border-purple-200 bg-white px-4 py-2 text-purple-700 hover:border-purple-300">
             Send a Hug 🤗
           </Link>
           <Link to="/create" className="rounded-full border border-rose-200 bg-white px-4 py-2 text-rose-700 hover:border-rose-300">

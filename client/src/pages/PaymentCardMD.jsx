@@ -117,9 +117,12 @@ export default function PaymentCardMD() {
     if (!cardData) return;
     const id = `mc_${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
     const payload = { ...cardData, type: "mothers_day_card", plan: "paid", createdAt: new Date().toISOString() };
-    try {
-      if (isFirebaseConfigured && db) await setDoc(doc(db, "cards", id), payload);
-    } catch {}
+    // Firebase save is best-effort (non-blocking)
+    if (isFirebaseConfigured && db) {
+      setDoc(doc(db, "cards", id), payload).catch((err) => {
+        console.warn("Firebase card save failed:", err.message);
+      });
+    }
     try { localStorage.setItem(`card_share_${id}`, JSON.stringify(payload)); } catch {}
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(cardData))));
     const url = `${window.location.origin}/mothers-day?card=${encoded}`;

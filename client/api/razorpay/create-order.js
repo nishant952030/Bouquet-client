@@ -1,7 +1,8 @@
 import process from "node:process";
 
-const DEFAULT_SMALL_PRICE_INR = 29;
-const DEFAULT_UNLIMITED_PRICE_INR = 59;
+// TEST PRICES — restore: DEFAULT_SMALL_PRICE_INR = 29, DEFAULT_UNLIMITED_PRICE_INR = 59
+const DEFAULT_SMALL_PRICE_INR = 1;
+const DEFAULT_UNLIMITED_PRICE_INR = 1;
 
 async function createRazorpayOrder({ amountMinor, currency, receipt, notes }) {
   const keyId = process.env.RAZORPAY_KEY_ID;

@@ -144,7 +144,7 @@ export default function Blog() {
               { to: "/virtual-bouquet-maker", label: `🌐 ${t("blog.virtualBouquetMaker", "Virtual Bouquet Maker")}` },
               { to: "/digital-bouquet-maker", label: `💻 ${t("blog.digitalBouquetMaker", "Digital Bouquet Maker")}` },
               { to: "/online-bouquet-maker", label: `🌼 ${t("blog.onlineBouquetMaker", "Online Bouquet Maker")}` },
-              { to: "/hug-card", label: `🤗 ${t("blog.hugCard", "Hug Card")}` },
+              { to: "/create-hug-card", label: `🤗 ${t("blog.hugCard", "Hug Card")}` },
             ].map(item => (
               <Link
                 key={item.to}

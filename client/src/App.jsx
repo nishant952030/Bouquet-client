@@ -10,6 +10,7 @@ import CakeKeywordLanding from "./pages/CakeKeywordLanding.jsx";
 import Blog from "./pages/Blog.jsx";
 import BlogPost from "./pages/BlogPost.jsx";
 import HugCard from "./pages/HugCard.jsx";
+import CreateHugCard from "./pages/CreateHugCard.jsx";
 import MothersDayCard from "./pages/MothersDayCard.jsx";
 import CreateMothersDayCard from "./pages/CreateMothersDayCard.jsx";
 import PaymentCardMD from "./pages/PaymentCardMD.jsx";
@@ -18,6 +19,8 @@ import CreateCake from "./pages/CreateCake.jsx";
 import ViewCake from "./pages/ViewCake.jsx";
 import PaymentCake from "./pages/PaymentCake.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
+import Cart from "./pages/Cart.jsx";
+import GiftBundle from "./pages/GiftBundle.jsx";
 
 import useDirection from "./hooks/useDirection.js";
 
@@ -71,6 +74,7 @@ export default function App() {
         <Route path="/interactive-mothers-day-card" element={<MothersDayKeywordLanding />} />
 
         <Route path="/hug-card" element={<HugCard />} />
+        <Route path="/create-hug-card" element={<CreateHugCard />} />
         <Route path="/create-mothers-day-card" element={<CreateMothersDayCard />} />
         <Route path="/payment-card-md" element={<PaymentCardMD />} />
         <Route path="/mothers-day-card" element={<MothersDayCard />} />
@@ -99,6 +103,8 @@ export default function App() {
         <Route path="/creaete" element={<Navigate to="/create" replace />} />
 
         <Route path="/payment" element={<Payment />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/gift/:id" element={<GiftBundle />} />
 
         <Route path="/view/:id/*" element={<ViewBouquet />} />
         <Route path="/view/:id" element={<ViewBouquet />} />

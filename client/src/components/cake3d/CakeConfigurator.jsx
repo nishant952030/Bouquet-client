@@ -4,6 +4,7 @@ import LanguageSwitcher from "../../components/LanguageSwitcher";
 import { Link, useNavigate } from "react-router-dom";
 import { track } from "@vercel/analytics";
 import { trackEvent } from "../../lib/analytics";
+import { addGiftCartItem } from "../../lib/giftCart";
 import { applySeo, seoKeywords, SITE_URL } from "../../lib/seo";
 import CakeControls from "./CakeControls.jsx";
 import CakeScene from "./CakeScene.jsx";
@@ -181,16 +182,15 @@ export default function CakeConfigurator() {
     setCakeState((current) => ({ ...current, toppings: [] }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const buildCakePayload = () => {
     const trimmedName = name.trim();
 
     if (!trimmedName) {
       setError(t("cakeControls.errorNameFirst", "Add the recipient's name first."));
-      return;
+      return null;
     }
 
-    const payload = {
+    return {
       name: trimmedName,
       occasion,
       flavor: cakeState.flavor,
@@ -201,6 +201,12 @@ export default function CakeConfigurator() {
       creamSwirls: cakeState.creamSwirls,
       toppings: cakeState.toppings,
     };
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const payload = buildCakePayload();
+    if (!payload) return;
 
     track("cake_create_complete", {
       flavor: payload.flavor,
@@ -216,6 +222,26 @@ export default function CakeConfigurator() {
     });
 
     navigate("/payment-cake", { state: payload });
+  };
+
+  const addCakeToCart = () => {
+    const payload = buildCakePayload();
+    if (!payload) return;
+
+    addGiftCartItem("cake", payload);
+    track("gift_cart_add", {
+      type: "cake",
+      flavor: payload.flavor,
+      candles: payload.candles.length,
+      occasion,
+    });
+    trackEvent("gift_cart_add", {
+      type: "cake",
+      flavor: payload.flavor,
+      candles: payload.candles.length,
+      occasion,
+    });
+    navigate("/cart");
   };
 
   return (
@@ -275,6 +301,7 @@ export default function CakeConfigurator() {
               }}
               onNoteChange={setNote}
               onOccasionChange={setOccasion}
+              onAddToCart={addCakeToCart}
               onSelectedToppingChange={(type) => {
                 setSelectedTopping(type);
                 setActiveTool("topping");

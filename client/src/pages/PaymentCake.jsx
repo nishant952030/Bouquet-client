@@ -7,7 +7,7 @@ import { trackEvent } from "../lib/analytics";
 import { doc, setDoc } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "../lib/firebase";
 import { loadRazorpayScript } from "../lib/razorpay";
-import { applySeo, seoKeywords } from "../lib/seo";
+import { applySeo } from "../lib/seo";
 
 const TIP_PRESETS_INR = [
   { labelKey: "payment.tipBasic", fallback: "Basic", amount: 9, display: "Rs 9" },
@@ -215,6 +215,7 @@ export default function PaymentCake() {
   const { t } = useTranslation();
 
   const name = location.state?.name || "";
+  const occasion = location.state?.occasion || "birthday";
   const flavor = location.state?.flavor || "chocolate";
   const age = location.state?.age || 3;
   const note = location.state?.note || "";
@@ -278,6 +279,7 @@ export default function PaymentCake() {
     const payload = {
       v: 2,
       name,
+      occasion,
       flavor,
       tiers: Number(tiers) || 1,
       candleCount: parseInt(age) || Math.max(candles.length, 1),
@@ -288,12 +290,11 @@ export default function PaymentCake() {
       createdAt: new Date().toISOString(),
     };
 
-    try {
-      if (isFirebaseConfigured && db) {
-        await setDoc(doc(db, "cakes", id), payload);
-      }
-    } catch (err) {
-      console.warn("Firebase cake save failed, using local fallback only:", err.message);
+    // Firebase save is best-effort (non-blocking)
+    if (isFirebaseConfigured && db) {
+      setDoc(doc(db, "cakes", id), payload).catch((err) => {
+        console.warn("Firebase cake save failed, using local fallback only:", err.message);
+      });
     }
 
     try {
@@ -308,7 +309,7 @@ export default function PaymentCake() {
     setIsSaving(false);
     trackEv("cake_shared_paid", { provider });
     return true;
-  }, [hasCakeData, shareUrl, name, flavor, tiers, age, note, candles, creamSwirls, toppings]);
+  }, [hasCakeData, shareUrl, name, occasion, flavor, tiers, age, note, candles, creamSwirls, toppings]);
 
   const copyLink = async () => {
     if (!shareUrl) return;

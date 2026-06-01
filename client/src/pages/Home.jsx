@@ -340,7 +340,7 @@ export default function Home() {
       title: "A virtual hug card",
       body: "When you cannot be there in person, send a small interactive gesture that opens with warmth.",
       cta: "Send hug",
-      to: "/hug-card",
+      to: "/create-hug-card",
       accent: "#6d28d9",
     },
   }), []);

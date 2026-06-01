@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { ShoppingCart } from "lucide-react";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { track } from "@vercel/analytics";
 import CanvasBoard from "../components/CanvasBoard";
@@ -12,6 +13,7 @@ import { trackEvent } from "../lib/analytics";
 
 import { applySeo, seoKeywords } from "../lib/seo";
 import { loadCheckoutDraft, saveCheckoutDraft } from "../lib/checkoutStorage";
+import { addGiftCartItem } from "../lib/giftCart";
 import {
   DoodleFlower,
   DoodleHeart,
@@ -118,6 +120,13 @@ const CSS = `
     text-decoration: none;
   }
   .vv-btn-ghost:hover { background: #ffd9d8; border-color: #7b5455; }
+  .vv-cart-cta {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+    margin-top: 0.55rem;
+    background: #fff;
+  }
 
   /* VV card with ambient shadow */
   .vv-card {
@@ -487,9 +496,17 @@ export default function Create() {
     navigate("/payment", { state: { flowerCount, stems, note, senderName } });
   };
 
+  const addBouquetToCart = () => {
+    if (!hasBouquetContent) return;
+    saveCheckoutDraft({ stems, note, senderName });
+    addGiftCartItem("bouquet", { stems, note, senderName });
+    track("gift_cart_add", { type: "bouquet", flowerCount, wordCount });
+    trackEvent("gift_cart_add", { type: "bouquet", flowerCount, wordCount });
+    navigate("/cart");
+  };
 
   return (
-    <main className="cr-root" style={{ paddingBottom: "6.5rem", position: "relative", overflowX: "hidden" }}>
+    <main className="cr-root" style={{ paddingBottom: "8.75rem", position: "relative", overflowX: "hidden" }}>
       <style>{CSS}</style>
 
       {/* WD floating bg doodles */}
@@ -850,6 +867,15 @@ export default function Create() {
             ) : (
               t("create.addContent", "Add flowers or a note to continue")
             )}
+          </button>
+          <button
+            type="button"
+            onClick={addBouquetToCart}
+            disabled={!hasBouquetContent}
+            className="vv-btn-ghost vv-cart-cta"
+          >
+            <ShoppingCart size={16} />
+            Add bouquet to cart
           </button>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", marginTop: "0.6rem", fontSize: "0.7rem", color: "#9e8f90", letterSpacing: "0.08em" }}>
             <span>✨ {t("create.free100", "100% Free")}</span><span>|</span>

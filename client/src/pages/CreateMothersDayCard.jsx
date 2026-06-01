@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { ShoppingCart } from "lucide-react";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { applySeo, seoKeywords } from "../lib/seo";
 import { trackEvent } from "../lib/analytics";
+import { addGiftCartItem } from "../lib/giftCart";
 
 /* ── Paper textures (CSS only) ── */
 const PAPERS = [
@@ -95,6 +97,7 @@ const CSS = `
 
   .cmc-ghost{display:inline-flex;align-items:center;gap:5px;background:none;color:#be185d;font-size:0.78rem;font-weight:600;border:1.5px solid rgba(190,50,90,0.25);border-radius:999px;padding:0.3rem 0.8rem;cursor:pointer;text-decoration:none;transition:all 0.15s}
   .cmc-ghost:hover{background:#fdf2f8;border-color:#ec4899}
+  .cmc-cart-cta{width:100%;min-height:44px;justify-content:center;margin-top:0.55rem;background:#fff}
 
   @media(max-width:380px){
     .cmc-papers{grid-template-columns:repeat(2,1fr)}
@@ -149,12 +152,23 @@ export default function CreateMothersDayCard() {
     setDecos(prev => prev.includes(id) ? prev.filter(d => d !== id) : [...prev, id]);
   };
 
+  const buildCardData = () => (
+    { to: toName.trim() || "Mom", msg: message, from: fromName.trim(), paper, decos }
+  );
+
   const handlePreview = () => {
-    const cardData = { to: toName.trim() || "Mom", msg: message, from: fromName.trim(), paper, decos };
+    const cardData = buildCardData();
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(cardData))));
     // Save to localStorage for payment page
     localStorage.setItem("pw_pending_md_card", JSON.stringify(cardData));
     navigate("/payment-card-md", { state: { cardData, encoded } });
+  };
+
+  const addCardToCart = () => {
+    const cardData = buildCardData();
+    addGiftCartItem("mothers_day_card", cardData);
+    trackEvent("gift_cart_add", { type: "mothers_day_card", paper });
+    navigate("/cart");
   };
 
   return (
@@ -261,6 +275,10 @@ export default function CreateMothersDayCard() {
         {/* CTA */}
         <button type="button" className="cmc-cta" onClick={handlePreview} disabled={!message.trim()}>
           {t("md.previewBtn", "Preview & Share ✨")}
+        </button>
+        <button type="button" className="cmc-ghost cmc-cart-cta" onClick={addCardToCart} disabled={!message.trim()}>
+          <ShoppingCart size={16} />
+          Add card to cart
         </button>
       </div>
     </main>

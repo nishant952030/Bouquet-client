@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { ShoppingCart } from "lucide-react";
 import {
   FLAVORS,
   MAX_CANDLES,
@@ -43,6 +44,7 @@ export default function CakeControls({
   onNameChange,
   onNoteChange,
   onOccasionChange,
+  onAddToCart,
   onSelectedToppingChange,
   onSubmit,
 }) {
@@ -235,6 +237,10 @@ export default function CakeControls({
 
       <button className="cake3d-submit" type="submit">
         {t("cakeControls.bakeCake", "Bake cake")}
+      </button>
+      <button className="cake3d-cart-submit" type="button" onClick={onAddToCart}>
+        <ShoppingCart size={16} />
+        Add cake to cart
       </button>
     </form>
   );

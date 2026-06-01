@@ -253,6 +253,24 @@
   box-shadow: 0 18px 38px rgba(217, 74, 120, 0.25);
 }
 
+.cake3d-cart-submit {
+  min-height: 48px;
+  border: 1px solid rgba(217, 74, 120, 0.22);
+  border-radius: 999px;
+  background: #fffdf9;
+  color: #9a3f61;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
 .cake3d-error {
   border-radius: 13px;
   background: #fff0f0;
@@ -372,5 +390,10 @@
   .cake3d-submit {
     min-height: 46px;
     font-size: 0.8rem;
+  }
+
+  .cake3d-cart-submit {
+    min-height: 42px;
+    font-size: 0.76rem;
   }
 }

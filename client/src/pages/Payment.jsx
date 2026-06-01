@@ -304,11 +304,11 @@ export default function Payment() {
       createdAt: new Date().toISOString(),
     };
 
-    // Firebase save is best-effort
-    try {
-      if (isFirebaseConfigured && db) await setDoc(doc(db, "bouquets", id), payload);
-    } catch (err) {
-      console.warn("Firebase save failed (non-fatal):", err.message);
+    // Firebase save is best-effort (non-blocking)
+    if (isFirebaseConfigured && db) {
+      setDoc(doc(db, "bouquets", id), payload).catch((err) => {
+        console.warn("Firebase save failed (non-fatal):", err.message);
+      });
     }
 
     // Always save locally and generate the share link

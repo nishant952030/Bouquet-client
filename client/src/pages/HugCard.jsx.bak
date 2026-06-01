@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { ShoppingCart, Edit2 } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { applySeo, seoKeywords } from "../lib/seo";
 import { trackEvent } from "../lib/analytics";
@@ -491,24 +491,6 @@ function lerp(a, b, t) {
 export default function HugCard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const searchParams = new URLSearchParams(location.search);
-  const dataParam = searchParams.get("data");
-
-  const customData = useMemo(() => {
-    if (!dataParam) return null;
-    try {
-      return JSON.parse(decodeURIComponent(escape(atob(dataParam))));
-    } catch {
-      return null;
-    }
-  }, [dataParam]);
-
-  const line1 = customData?.line1 || t("hugCard.frontTitleLine1", "Happy");
-  const line2 = customData?.line2 || t("hugCard.frontTitleLine2", "Mother's");
-  const line3 = customData?.line3 || t("hugCard.frontTitleLine3", "Day!");
-
   const [progress, setProgress] = useState(0); // 0=closed, 1=open
   const [isOpen, setIsOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -741,7 +723,7 @@ export default function HugCard() {
           <div className="card-top-inner">
             <span className="front-hearts">❤️ ❤️ ❤️</span>
             <div className="front-title">
-              {line1}<br />{line2}<br />{line3}
+              {t("hugCard.frontTitleLine1", "Happy")}<br />{t("hugCard.frontTitleLine2", "Mother's")}<br />{t("hugCard.frontTitleLine3", "Day!")}
             </div>
             <div className="front-open" style={{ opacity: progress < 0.3 ? 1 : 0, transition: "opacity 0.3s" }}>
               <span>{t("hugCard.pullUpToOpen", "Pull up to open")}</span>
@@ -859,35 +841,20 @@ export default function HugCard() {
           }}
         >
           <div className="card-bottom-content">
-            {customData?.msg ? (
-              <p className="msg-love" style={{
-                opacity: lerp(0, 1, Math.max((progress - 0.3) / 0.4, 0)),
-                transform: `translateY(${lerp(15, 0, Math.max((progress - 0.3) / 0.4, 0))}px)`,
-                transition: isDragging ? "none" : "all 0.3s ease",
-                whiteSpace: "pre-wrap",
-                lineHeight: 1.2,
-                fontSize: "1.7rem"
-              }}>
-                {customData.msg}
-              </p>
-            ) : (
-              <>
-                <p className="msg-love" style={{
-                  opacity: lerp(0, 1, Math.max((progress - 0.3) / 0.4, 0)),
-                  transform: `translateY(${lerp(15, 0, Math.max((progress - 0.3) / 0.4, 0))}px)`,
-                  transition: isDragging ? "none" : "all 0.3s ease",
-                }}>
-                  {t("hugCard.iLoveYou", "I love you")}
-                </p>
-                <p className="msg-thiiis" style={{
-                  opacity: lerp(0, 1, Math.max((progress - 0.45) / 0.35, 0)),
-                  transform: `translateY(${lerp(12, 0, Math.max((progress - 0.45) / 0.35, 0))}px)`,
-                  transition: isDragging ? "none" : "all 0.3s ease 0.05s",
-                }}>
-                  <em>{t("hugCard.thiiis", "thiiiiiiis")}</em> {t("hugCard.much", "much")}
-                </p>
-              </>
-            )}
+            <p className="msg-love" style={{
+              opacity: lerp(0, 1, Math.max((progress - 0.3) / 0.4, 0)),
+              transform: `translateY(${lerp(15, 0, Math.max((progress - 0.3) / 0.4, 0))}px)`,
+              transition: isDragging ? "none" : "all 0.3s ease",
+            }}>
+              {t("hugCard.iLoveYou", "I love you")}
+            </p>
+            <p className="msg-thiiis" style={{
+              opacity: lerp(0, 1, Math.max((progress - 0.45) / 0.35, 0)),
+              transform: `translateY(${lerp(12, 0, Math.max((progress - 0.45) / 0.35, 0))}px)`,
+              transition: isDragging ? "none" : "all 0.3s ease 0.05s",
+            }}>
+              <em>{t("hugCard.thiiis", "thiiiiiiis")}</em> {t("hugCard.much", "much")}
+            </p>
             <span className="heart-big" style={{
               display: "inline-block",
               opacity: lerp(0, 1, Math.max((progress - 0.6) / 0.3, 0)),
@@ -910,22 +877,10 @@ export default function HugCard() {
           {t("hugCard.closeAndReplay", "↻ Close & replay")}
         </button>
       )}
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", justifyContent: "center" }}>
-        {dataParam ? (
-          <Link to="/create-hug-card" className="hug-cart" style={{ textDecoration: "none" }}>
-            <Edit2 size={16} /> Create your own ✨
-          </Link>
-        ) : (
-          <>
-            <Link to="/create-hug-card" className="hug-cart" style={{ textDecoration: "none", background: "#be185d", color: "#fff", borderColor: "#be185d" }}>
-              <Edit2 size={16} /> Customize Card
-            </Link>
-            <button className="hug-cart" type="button" onClick={addHugToCart}>
-              <ShoppingCart size={16} /> Add to cart
-            </button>
-          </>
-        )}
-      </div>
+      <button className="hug-cart" type="button" onClick={addHugToCart}>
+        <ShoppingCart size={16} />
+        Add hug card to cart
+      </button>
 
       {/* ═══ SEO CONTENT — crawlable semantic HTML ═══ */}
       {isOpen && (
