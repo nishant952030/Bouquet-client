@@ -69,6 +69,7 @@ export default function CreateHugCard() {
   const [message, setMessage] = useState(PRESETS[0]);
   const [toName, setToName] = useState("");
   const [fromName, setFromName] = useState("");
+  const [added, setAdded] = useState(false);
 
   useEffect(() => {
     applySeo({
@@ -94,7 +95,8 @@ export default function CreateHugCard() {
     const cardData = buildCardData();
     addGiftCartItem("hug_card", { title: "Virtual Hug Card", payload: cardData });
     trackEvent("gift_cart_add", { type: "hug_card_custom" });
-    navigate("/cart");
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
   };
 
   return (
@@ -178,11 +180,17 @@ export default function CreateHugCard() {
         <button type="button" className="chc-cta" onClick={handlePreview} disabled={!message.trim() || !line1.trim()}>
           Preview & Share ✨
         </button>
-        <button type="button" className="chc-ghost chc-cart-cta" onClick={addCardToCart} disabled={!message.trim() || !line1.trim()}>
-          <ShoppingCart size={16} />
-          Add card to cart
-        </button>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
+          <button type="button" className="chc-ghost chc-cart-cta" onClick={addCardToCart} disabled={!message.trim() || !line1.trim()} style={{ width: "100%", margin: 0 }}>
+            <ShoppingCart size={16} />
+            {added ? "Added!" : "Add to cart"}
+          </button>
+          <button type="button" className="chc-ghost chc-cart-cta" onClick={() => navigate("/cart")} style={{ width: "100%", margin: 0 }}>
+            View cart
+          </button>
+        </div>
       </div>
     </main>
   );
 }
+

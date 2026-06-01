@@ -11,9 +11,9 @@ import Blog from "./pages/Blog.jsx";
 import BlogPost from "./pages/BlogPost.jsx";
 import HugCard from "./pages/HugCard.jsx";
 import CreateHugCard from "./pages/CreateHugCard.jsx";
-import MothersDayCard from "./pages/MothersDayCard.jsx";
-import CreateMothersDayCard from "./pages/CreateMothersDayCard.jsx";
-import PaymentCardMD from "./pages/PaymentCardMD.jsx";
+import GreetingCard from "./pages/GreetingCard.jsx";
+import CreateGreetingCard from "./pages/CreateGreetingCard.jsx";
+import PaymentGreetingCard from "./pages/PaymentGreetingCard.jsx";
 import MothersDayKeywordLanding from "./pages/MothersDayKeywordLanding.jsx";
 import CreateCake from "./pages/CreateCake.jsx";
 import ViewCake from "./pages/ViewCake.jsx";
@@ -29,6 +29,7 @@ import { initGoogleAnalytics, trackPageView } from "./lib/analytics.js";
 import { trackPageViewFirestore } from "./lib/tracker.js";
 
 import FeedbackWidget from "./components/FeedbackWidget.jsx";
+import FloatingCart from "./components/FloatingCart.jsx";
 
 // ✅ PAGE TRACKER
 function PageTracker() {
@@ -75,10 +76,13 @@ export default function App() {
 
         <Route path="/hug-card" element={<HugCard />} />
         <Route path="/create-hug-card" element={<CreateHugCard />} />
-        <Route path="/create-mothers-day-card" element={<CreateMothersDayCard />} />
-        <Route path="/payment-card-md" element={<PaymentCardMD />} />
-        <Route path="/mothers-day-card" element={<MothersDayCard />} />
-        <Route path="/mothers-day" element={<MothersDayCard />} />
+        <Route path="/create-greeting-card" element={<CreateGreetingCard />} />
+        <Route path="/create-mothers-day-card" element={<CreateGreetingCard />} />
+        <Route path="/payment-greeting-card" element={<PaymentGreetingCard />} />
+        <Route path="/payment-card-md" element={<PaymentGreetingCard />} />
+        <Route path="/greeting-card" element={<GreetingCard />} />
+        <Route path="/mothers-day-card" element={<GreetingCard />} />
+        <Route path="/mothers-day" element={<GreetingCard />} />
 
         <Route path="/virtual-bouquet-maker" element={<KeywordLanding />} />
         <Route path="/virtual-bouquet-maker-online-free" element={<KeywordLanding />} />
@@ -114,6 +118,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
+      <FloatingCart />
       <FeedbackWidget />
     </BrowserRouter>
   );

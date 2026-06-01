@@ -512,6 +512,7 @@ export default function HugCard() {
   const [progress, setProgress] = useState(0); // 0=closed, 1=open
   const [isOpen, setIsOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [added, setAdded] = useState(false);
   const [hearts, setHearts] = useState([]);
   const animRef = useRef(null);
   const dragging = useRef(false);
@@ -626,7 +627,8 @@ export default function HugCard() {
   const addHugToCart = () => {
     addGiftCartItem("hug_card", { title: "Virtual Hug Card" });
     trackEvent("gift_cart_add", { type: "hug_card" });
-    navigate("/cart");
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
   };
 
   useEffect(() => {
@@ -921,7 +923,10 @@ export default function HugCard() {
               <Edit2 size={16} /> Customize Card
             </Link>
             <button className="hug-cart" type="button" onClick={addHugToCart}>
-              <ShoppingCart size={16} /> Add to cart
+              <ShoppingCart size={16} /> {added ? "Added!" : "Add to cart"}
+            </button>
+            <button className="hug-cart" type="button" onClick={() => navigate("/cart")}>
+              View cart
             </button>
           </>
         )}
@@ -964,3 +969,4 @@ export default function HugCard() {
     </div>
   );
 }
+

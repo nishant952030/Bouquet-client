@@ -5,7 +5,7 @@ import { applySeo, seoKeywords } from "../lib/seo";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   Mother's Day Card — Centered Envelope → Card Reveal
+   Greeting Card — Centered Envelope → Card Reveal
    - Supports customized content via ?card= base64 param
    - Larger premium card, dynamic CSS backgrounds, sticker decorations
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -303,7 +303,7 @@ function generatePetals(count = 14) {
   }));
 }
 
-export default function MothersDayCard() {
+export default function GreetingCard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -323,24 +323,25 @@ export default function MothersDayCard() {
   const hasOpened = useRef(false);
 
   // Content fallbacks
-  const cTo = cardData?.to || t("md.letterTo", "To the most wonderful Mom");
-  const cMsg = cardData?.msg || t("md.letterMessage", "Thank you for your endless love, your warm hugs, and for always believing in me.\nYou are my sunshine. ☀️");
-  const cFrom = cardData?.from || t("md.letterFrom", "With all my love");
+  const cTo = cardData?.to || t("card.letterTo", "For you");
+  const cTitle = cardData?.title || t("card.title", "Hello!");
+  const cMsg = cardData?.msg || t("card.letterMessage", "Wishing you a wonderful day filled with joy and happiness! ✨");
+  const cFrom = cardData?.from || t("card.letterFrom", "With love");
   const cPaper = PAPERS[cardData?.paper] || PAPERS.blush;
   const cDecos = cardData?.decos || [];
 
   useEffect(() => {
     applySeo({
-      title: "Happy Mother's Day Card | Create & Send a Digital Card Free",
-      description: "Open a beautiful interactive Mother's Day card. Tap the envelope to reveal a heartfelt message. Create your own personalized digital card for mom free.",
-      keywords: seoKeywords.mothersDay,
-      path: "/mothers-day",
+      title: "Interactive Greeting Card | Create & Send Free",
+      description: "Open a beautiful interactive greeting card. Tap the envelope to reveal a heartfelt message. Create your own personalized digital card free.",
+      keywords: ["greeting card", "ecard", "digital card"],
+      path: "/greeting-card",
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "Mother's Day Digital Card Maker",
+        "name": "Digital Greeting Card Maker",
         "url": window.location.href,
-        "description": "Create and send personalized, interactive digital Mother's Day cards for free.",
+        "description": "Create and send personalized, interactive digital greeting cards for free.",
         "applicationCategory": "LifestyleApplication",
         "offers": {
           "@type": "Offer",
@@ -387,9 +388,9 @@ export default function MothersDayCard() {
 
   const handleShare = () => {
     const url = window.location.href;
-    const text = "Happy Mother's Day! 💐 Open this card for a surprise ✨";
+    const text = "Open this card for a surprise ✨";
     if (navigator.share) {
-      navigator.share({ title: "Mother's Day Card", text, url }).catch(() => {});
+      navigator.share({ title: "Greeting Card", text, url }).catch(() => {});
     } else {
       window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`, "_blank");
     }
@@ -423,10 +424,10 @@ export default function MothersDayCard() {
             <div className="env-v-left" />
             <div className="env-v-right" />
             <div className="env-seal">💌</div>
-            <span className="env-label">{cardData ? `for ${cardData.to || "Mom"}` : t("md.forYou", "for you, Mom")}</span>
+            <span className="env-label">{cardData && cardData.to ? `for ${cardData.to}` : t("card.forYou", "for you")}</span>
           </div>
         </div>
-        <div className="tap-hint"><span>💝</span> {t("md.tapToOpen", "Tap to open")}</div>
+        <div className="tap-hint"><span>💝</span> {t("card.tapToOpen", "Tap to open")}</div>
       </div>
 
       {/* ═══ OPEN CARD ═══ */}
@@ -444,7 +445,7 @@ export default function MothersDayCard() {
 
           <p className="card-to">{cTo}</p>
           <span className="card-flower">🌷</span>
-          <h1 className="card-title">{t("md.happyMothersDay", "Happy\nMother's Day")}</h1>
+          <h1 className="card-title">{cTitle}</h1>
           <div className="card-line" />
           <p className="card-msg">{cMsg}</p>
           <span className="card-heart">❤️</span>
@@ -454,7 +455,7 @@ export default function MothersDayCard() {
         <div className={`md-actions ${showActions ? "visible" : ""}`}>
           {cardData ? (
             <>
-              <button className="md-btn md-btn-share" onClick={() => navigate("/create-mothers-day-card")}>
+              <button className="md-btn md-btn-share" onClick={() => navigate("/create-greeting-card")}>
                 Create your own card ✨
               </button>
               <button className="md-btn md-btn-create" onClick={() => navigate("/create")}>
@@ -464,15 +465,15 @@ export default function MothersDayCard() {
           ) : (
             <>
               <button className="md-btn md-btn-share" onClick={handleShare}>
-                {t("md.shareCard", "Share this card 💌")}
+                {t("card.shareCard", "Share this card 💌")}
               </button>
-              <button className="md-btn md-btn-create" onClick={() => navigate("/create-mothers-day-card")}>
+              <button className="md-btn md-btn-create" onClick={() => navigate("/create-greeting-card")}>
                 Personalize it ✨
               </button>
             </>
           )}
           <button className="md-btn md-btn-reset" onClick={handleReset}>
-            {t("md.replay", "↻ Open again")}
+            {t("card.replay", "↻ Open again")}
           </button>
         </div>
       </div>

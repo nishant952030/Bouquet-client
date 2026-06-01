@@ -29,12 +29,12 @@ const DECOS = [
 
 /* ── Message presets ── */
 const PRESETS = [
-  "Thank you for your endless love, your warm hugs, and for always believing in me. You are my sunshine. ☀️",
-  "You gave me roots to grow and wings to fly. Everything I am is because of you. 💛",
-  "No words can express how much you mean to me. You are the strongest, kindest person I know. 🌷",
-  "For every sacrifice you made silently, for every prayer you whispered for me — thank you, Mom. 🤲",
-  "Home is wherever you are. Thank you for making every moment warm and full of love. 🏡",
-  "I may not say it enough, but you are my hero. Happy Mother's Day to the best mom ever. 🦸‍♀️",
+  "Wishing you a day filled with happiness and a year filled with joy. 🌟",
+  "Thank you for being such an amazing person. I appreciate you more than words can say. 💛",
+  "Sending you smiles for every moment of your special day. Have a wonderful time! 🌷",
+  "Just a little note to say you are on my mind and in my heart today. 💌",
+  "Cheers to you! Hoping all your dreams come true today and always. 🥂",
+  "You mean the world to me. Thank you for everything you do! ✨",
 ];
 
 const CSS = `
@@ -112,11 +112,12 @@ const DECO_POSITIONS = [
   { top: "45%", left: "2%" }, { top: "40%", right: "3%" },
 ];
 
-export default function CreateMothersDayCard() {
+export default function CreateGreetingCard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [toName, setToName] = useState("Mom");
+  const [toName, setToName] = useState("");
+  const [title, setTitle] = useState("Happy Birthday!");
   const [message, setMessage] = useState(PRESETS[0]);
   const [fromName, setFromName] = useState("");
   const [paper, setPaper] = useState("blush");
@@ -127,16 +128,16 @@ export default function CreateMothersDayCard() {
 
   useEffect(() => {
     applySeo({
-      title: "Create a Mother's Day Card | Personalize & Share Free",
-      description: "Create a personalized, interactive Mother's Day card with custom messages, paper textures, and decorations. Share it with mom instantly via link or WhatsApp!",
-      keywords: seoKeywords.mothersDay,
-      path: "/create-mothers-day-card",
+      title: "Create a Greeting Card | Personalize & Share Free",
+      description: "Create a personalized, interactive greeting card for any occasion with custom messages, paper textures, and decorations. Share it instantly via link or WhatsApp!",
+      keywords: ["greeting card", "digital card maker", "ecard creator"],
+      path: "/create-greeting-card",
       jsonLd: {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "Mother's Day Digital Card Maker",
+        "name": "Digital Greeting Card Maker",
         "url": window.location.href,
-        "description": "Create and send personalized, interactive digital Mother's Day cards for free.",
+        "description": "Create and send personalized, interactive digital greeting cards for free.",
         "applicationCategory": "LifestyleApplication",
         "offers": {
           "@type": "Offer",
@@ -145,7 +146,7 @@ export default function CreateMothersDayCard() {
         }
       }
     });
-    trackEvent("md_card_create_start");
+    trackEvent("card_create_start");
   }, []);
 
   const toggleDeco = (id) => {
@@ -153,22 +154,23 @@ export default function CreateMothersDayCard() {
   };
 
   const buildCardData = () => (
-    { to: toName.trim() || "Mom", msg: message, from: fromName.trim(), paper, decos }
+    { to: toName.trim(), title: title.trim(), msg: message, from: fromName.trim(), paper, decos }
   );
 
   const handlePreview = () => {
     const cardData = buildCardData();
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(cardData))));
     // Save to localStorage for payment page
-    localStorage.setItem("pw_pending_md_card", JSON.stringify(cardData));
-    navigate("/payment-card-md", { state: { cardData, encoded } });
+    localStorage.setItem("pw_pending_greeting_card", JSON.stringify(cardData));
+    navigate("/payment-greeting-card", { state: { cardData, encoded } });
   };
 
   const addCardToCart = () => {
     const cardData = buildCardData();
-    addGiftCartItem("mothers_day_card", cardData);
-    trackEvent("gift_cart_add", { type: "mothers_day_card", paper });
-    navigate("/cart");
+    addGiftCartItem("greeting_card", cardData);
+    trackEvent("gift_cart_add", { type: "greeting_card", paper });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
   };
 
   return (
@@ -192,10 +194,10 @@ export default function CreateMothersDayCard() {
         <div style={{ textAlign: "center", marginBottom: "1.25rem" }}>
           <p style={{ fontSize: "2rem", marginBottom: "0.3rem" }}>💌</p>
           <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.6rem", fontWeight: 700, color: "#9d174d", lineHeight: 1.2, margin: 0 }}>
-            {t("md.createTitle", "Create a Card for Mom")}
+            {t("card.createTitle", "Create a Greeting Card")}
           </h1>
           <p style={{ fontSize: "0.82rem", color: "#be185d", marginTop: "0.4rem", opacity: 0.7 }}>
-            {t("md.createSub", "Personalize your message, pick a style, and share the love")}
+            {t("card.createSub", "Personalize your message, pick a style, and share the love")}
           </p>
         </div>
 
@@ -208,9 +210,9 @@ export default function CreateMothersDayCard() {
               {activeDecos.map((d, i) => (
                 <span key={d.id} className="cmc-prev-deco" style={DECO_POSITIONS[i] || {}}>{d.emoji}</span>
               ))}
-              <p className="cmc-prev-to">To {toName || "Mom"}</p>
+              {toName && <p className="cmc-prev-to">To {toName}</p>}
               <span className="cmc-prev-flower">🌷</span>
-              <h2 className="cmc-prev-title">Happy Mother's Day</h2>
+              <h2 className="cmc-prev-title">{title || "Hello!"}</h2>
               <div className="cmc-prev-line" />
               <p className="cmc-prev-msg">{(message || "Your message here...").slice(0, 80)}{message.length > 80 ? "..." : ""}</p>
               <span className="cmc-prev-heart">❤️</span>
@@ -221,14 +223,20 @@ export default function CreateMothersDayCard() {
 
         {/* To field */}
         <div className="cmc-card">
-          <label className="cmc-label" htmlFor="md-to">💝 To</label>
-          <input id="md-to" className="cmc-input" value={toName} onChange={e => setToName(e.target.value)} placeholder="Mom" maxLength={40} />
+          <label className="cmc-label" htmlFor="card-to">💝 To</label>
+          <input id="card-to" className="cmc-input" value={toName} onChange={e => setToName(e.target.value)} placeholder="Recipient's name" maxLength={40} />
+        </div>
+
+        {/* Title field */}
+        <div className="cmc-card">
+          <label className="cmc-label" htmlFor="card-title">🎉 Occasion / Title</label>
+          <input id="card-title" className="cmc-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="Happy Birthday, Congratulations, etc." maxLength={40} />
         </div>
 
         {/* Message */}
         <div className="cmc-card">
-          <label className="cmc-label" htmlFor="md-msg">✍️ Your Message</label>
-          <textarea id="md-msg" className="cmc-textarea" value={message} onChange={e => setMessage(e.target.value)} placeholder="Write something from the heart..." maxLength={500} rows={4} />
+          <label className="cmc-label" htmlFor="card-msg">✍️ Your Message</label>
+          <textarea id="card-msg" className="cmc-textarea" value={message} onChange={e => setMessage(e.target.value)} placeholder="Write something from the heart..." maxLength={500} rows={4} />
           <p style={{ fontSize: "0.7rem", color: "#be185d", opacity: 0.5, marginTop: "0.3rem", textAlign: "right" }}>{message.length}/500</p>
           <span className="cmc-label" style={{ marginTop: "0.5rem" }}>💡 Or pick a message</span>
           <div className="cmc-presets">
@@ -242,8 +250,8 @@ export default function CreateMothersDayCard() {
 
         {/* From field */}
         <div className="cmc-card">
-          <label className="cmc-label" htmlFor="md-from">💌 From</label>
-          <input id="md-from" className="cmc-input" value={fromName} onChange={e => setFromName(e.target.value)} placeholder="With love, your name" maxLength={40} />
+          <label className="cmc-label" htmlFor="card-from">💌 From</label>
+          <input id="card-from" className="cmc-input" value={fromName} onChange={e => setFromName(e.target.value)} placeholder="With love, your name" maxLength={40} />
         </div>
 
         {/* Paper texture */}
@@ -274,13 +282,19 @@ export default function CreateMothersDayCard() {
 
         {/* CTA */}
         <button type="button" className="cmc-cta" onClick={handlePreview} disabled={!message.trim()}>
-          {t("md.previewBtn", "Preview & Share ✨")}
+          {t("card.previewBtn", "Preview & Share ✨")}
         </button>
-        <button type="button" className="cmc-ghost cmc-cart-cta" onClick={addCardToCart} disabled={!message.trim()}>
-          <ShoppingCart size={16} />
-          Add card to cart
-        </button>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
+          <button type="button" className="cmc-ghost cmc-cart-cta" onClick={addCardToCart} disabled={!message.trim()} style={{ width: "100%", margin: 0 }}>
+            <ShoppingCart size={16} />
+            {added ? "Added!" : "Add to cart"}
+          </button>
+          <button type="button" className="cmc-ghost cmc-cart-cta" onClick={() => navigate("/cart")} style={{ width: "100%", margin: 0 }}>
+            View cart
+          </button>
+        </div>
       </div>
     </main>
   );
 }
+

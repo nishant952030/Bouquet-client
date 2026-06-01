@@ -60,6 +60,7 @@ export default function CakeConfigurator() {
   const [activeTool, setActiveTool] = useState("candle");
   const [selectedTopping, setSelectedTopping] = useState("cherry");
   const [autoRotate, setAutoRotate] = useState(true);
+  const [added, setAdded] = useState(false);
   const [cakeState, setCakeState] = useState({
     flavor: "chocolate",
     tiers: 1,
@@ -241,7 +242,8 @@ export default function CakeConfigurator() {
       candles: payload.candles.length,
       occasion,
     });
-    navigate("/cart");
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
   };
 
   return (
@@ -302,6 +304,7 @@ export default function CakeConfigurator() {
               onNoteChange={setNote}
               onOccasionChange={setOccasion}
               onAddToCart={addCakeToCart}
+              addedToCart={added}
               onSelectedToppingChange={(type) => {
                 setSelectedTopping(type);
                 setActiveTool("topping");
@@ -315,3 +318,4 @@ export default function CakeConfigurator() {
     </main>
   );
 }
+

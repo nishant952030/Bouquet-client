@@ -72,13 +72,13 @@ const CSS = `
   .pmc-fu-3{animation-delay:0.25s;opacity:0}
 `;
 
-export default function PaymentCardMD() {
+export default function PaymentGreetingCard() {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
 
   const cardData = location.state?.cardData || (() => {
-    try { return JSON.parse(localStorage.getItem("pw_pending_md_card")); } catch { return null; }
+    try { return JSON.parse(localStorage.getItem("pw_pending_greeting_card")); } catch { return null; }
   })();
 
   const [countryCode, setCountryCode] = useState(getCountry);
@@ -96,7 +96,7 @@ export default function PaymentCardMD() {
   const tip = tips[selectedTip];
 
   useEffect(() => {
-    applySeo({ title: "Complete Payment | Mother's Day Card", path: "/payment-card-md", robots: "noindex,nofollow" });
+    applySeo({ title: "Complete Payment | Greeting Card", path: "/payment-greeting-card", robots: "noindex,nofollow" });
   }, []);
 
   useEffect(() => {
@@ -116,7 +116,7 @@ export default function PaymentCardMD() {
   const generateLink = useCallback(async () => {
     if (!cardData) return;
     const id = `mc_${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
-    const payload = { ...cardData, type: "mothers_day_card", plan: "paid", createdAt: new Date().toISOString() };
+    const payload = { ...cardData, type: "greeting_card", plan: "paid", createdAt: new Date().toISOString() };
     // Firebase save is best-effort (non-blocking)
     if (isFirebaseConfigured && db) {
       setDoc(doc(db, "cards", id), payload).catch((err) => {
@@ -125,9 +125,9 @@ export default function PaymentCardMD() {
     }
     try { localStorage.setItem(`card_share_${id}`, JSON.stringify(payload)); } catch {}
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(cardData))));
-    const url = `${window.location.origin}/mothers-day?card=${encoded}`;
+    const url = `${window.location.origin}/greeting-card?card=${encoded}`;
     setShareUrl(url);
-    trackEvent("md_card_shared", { paper: cardData.paper });
+    trackEvent("card_shared", { paper: cardData.paper });
   }, [cardData]);
 
   const startPayment = async () => {
@@ -141,14 +141,14 @@ export default function PaymentCardMD() {
       const amountMinor = Math.round(tip.amount * 100);
       const orderRes = await fetch(apiUrl("/api/razorpay/create-order"), {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId: "md_card", amountMinor, currency, receipt: `mc_${Date.now()}`, notes: { type: "mothers_day_card" } }),
+        body: JSON.stringify({ planId: "greeting_card", amountMinor, currency, receipt: `mc_${Date.now()}`, notes: { type: "greeting_card" } }),
       });
       const orderData = await readApi(orderRes);
       if (!orderRes.ok || !orderData?.orderId) throw new Error(orderData?.error || `HTTP ${orderRes.status}`);
 
       const rz = new window.Razorpay({
         key: razorpayKey, order_id: orderData.orderId, currency: orderData.currency || currency,
-        name: "Petals and Words", description: "Mother's Day Card", theme: { color: "#be185d" },
+        name: "Petals and Words", description: "Greeting Card", theme: { color: "#be185d" },
         modal: { ondismiss: () => { setPaying(false); setErrMsg("Payment cancelled."); } },
         handler: async (resp) => {
           try {
@@ -158,8 +158,8 @@ export default function PaymentCardMD() {
           setPaid(true);
           await generateLink();
           setPaying(false);
-          localStorage.removeItem("pw_pending_md_card");
-          trackEvent("md_card_payment_success", { amount: tip.amount });
+          localStorage.removeItem("pw_pending_greeting_card");
+          trackEvent("card_payment_success", { amount: tip.amount });
         },
       });
       rz.on("payment.failed", () => { setPaying(false); setErrMsg("Payment failed. Please try again."); });
@@ -175,7 +175,7 @@ export default function PaymentCardMD() {
           <p style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>💌</p>
           <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.3rem", fontWeight: 600, marginBottom: "0.5rem" }}>No card found</h1>
           <p style={{ fontSize: "0.85rem", color: "#6b5e5f", marginBottom: "1rem" }}>Create your card first!</p>
-          <Link to="/create-mothers-day-card" className="pmc-ghost">Create Card 💌</Link>
+          <Link to="/create-greeting-card" className="pmc-ghost">Create Card 💌</Link>
         </div>
       </main>
     );
@@ -207,7 +207,7 @@ export default function PaymentCardMD() {
               <h1 style={{ fontFamily: "'Playfair Display',serif", fontSize: "1.5rem", fontWeight: 600, marginBottom: "0.3rem" }}>
                 Your card is <em style={{ color: "#be185d" }}>live!</em>
               </h1>
-              <p style={{ fontSize: "0.82rem", color: "#6b5e5f" }}>Share the link below with Mom 💕</p>
+              <p style={{ fontSize: "0.82rem", color: "#6b5e5f" }}>Share the link below with your loved one 💕</p>
             </div>
             <div className="pmc-card pmc-fu pmc-fu-2">
               <span className="pmc-label">Your share link</span>
@@ -222,7 +222,7 @@ export default function PaymentCardMD() {
               </div>
             </div>
             <div style={{ textAlign: "center", marginTop: "0.5rem" }}>
-              <Link to="/create-mothers-day-card" style={{ fontSize: "0.78rem", color: "#9d174d", textDecoration: "underline" }}>Create another card</Link>
+              <Link to="/create-greeting-card" style={{ fontSize: "0.78rem", color: "#9d174d", textDecoration: "underline" }}>Create another card</Link>
             </div>
           </>
         ) : (
@@ -246,7 +246,7 @@ export default function PaymentCardMD() {
                 <p style={{ fontFamily: "'Playfair Display',serif", fontSize: "0.88rem", fontStyle: "italic", color: "#3E2723", lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                   "{cardData.msg?.slice(0, 80)}{(cardData.msg?.length || 0) > 80 ? "..." : ""}"
                 </p>
-                <p style={{ fontSize: "0.68rem", color: "#9e8f90", marginTop: "0.2rem" }}>To: {cardData.to || "Mom"}</p>
+                <p style={{ fontSize: "0.68rem", color: "#9e8f90", marginTop: "0.2rem" }}>To: {cardData.to || "Recipient"}</p>
               </div>
             </div>
 
@@ -287,7 +287,7 @@ export default function PaymentCardMD() {
             </div>
 
             <div style={{ textAlign: "center", marginTop: "0.25rem" }}>
-              <Link to="/create-mothers-day-card" style={{ fontSize: "0.78rem", color: "#9d174d", textDecoration: "underline" }}>← Back to editor</Link>
+              <Link to="/create-greeting-card" style={{ fontSize: "0.78rem", color: "#9d174d", textDecoration: "underline" }}>← Back to editor</Link>
             </div>
           </>
         )}

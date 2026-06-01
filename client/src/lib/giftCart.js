@@ -21,10 +21,10 @@ export const GIFT_PRODUCT_META = {
       { id: "tier3", label: "Premium", priceMinor: { INR: 7900, USD: 499 } }
     ]
   },
-  mothers_day_card: {
-    label: "Mother's Day Card",
+  greeting_card: {
+    label: "Greeting Card",
     shortLabel: "Card",
-    createPath: "/create-mothers-day-card",
+    createPath: "/create-greeting-card",
     priceTiers: [
       { id: "tier1", label: "Basic", priceMinor: { INR: 1900, USD: 199 } },
       { id: "tier2", label: "Standard", priceMinor: { INR: 3900, USD: 299 } },
@@ -145,10 +145,16 @@ export function getGiftItemPriceMinor(item, currency) {
 
 export function getGiftCartTotals(items, currency) {
   const normalized = Array.isArray(items) ? items : [];
-  const totalMinor = normalized.reduce(
+  let totalMinor = normalized.reduce(
     (sum, item) => sum + getGiftItemPriceMinor(item, currency),
     0,
   );
+  
+  // HARDCODED TO 1 RS FOR TESTING
+  if (normalized.length > 0) {
+    totalMinor = 100;
+  }
+
   return {
     itemCount: normalized.length,
     totalMinor,
@@ -176,10 +182,10 @@ export function getGiftItemTitle(item) {
         ? `${occasion} cake for ${payload.name.trim()}`
         : `${occasion} cake`;
     }
-    case "mothers_day_card":
+    case "greeting_card":
       return payload.to?.trim()
-        ? `Mother's Day card for ${payload.to.trim()}`
-        : "Mother's Day card";
+        ? `Card for ${payload.to.trim()}`
+        : "Greeting card";
     case "hug_card":
       return "Virtual hug card";
     default:
@@ -203,6 +209,7 @@ export function getGiftItemSubtitle(item) {
       const candles = Array.isArray(payload.candles) ? payload.candles.length : Number(payload.age || 0);
       return `${candles || 1} candle${candles === 1 ? "" : "s"}${toppings ? `, ${toppings} topping${toppings === 1 ? "" : "s"}` : ""}`;
     }
+    case "greeting_card":
     case "mothers_day_card":
       return payload.from?.trim() ? `From ${payload.from.trim()}` : "Personal message card";
     case "hug_card":
@@ -211,3 +218,4 @@ export function getGiftItemSubtitle(item) {
       return "Digital gift";
   }
 }
+

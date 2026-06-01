@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { ShoppingCart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   FLAVORS,
   MAX_CANDLES,
@@ -45,10 +46,12 @@ export default function CakeControls({
   onNoteChange,
   onOccasionChange,
   onAddToCart,
+  addedToCart,
   onSelectedToppingChange,
   onSubmit,
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const candleCount = cakeState.candles.length;
   const creamCount = cakeState.creamSwirls.length;
   const toppingCount = cakeState.toppings.length;
@@ -238,10 +241,16 @@ export default function CakeControls({
       <button className="cake3d-submit" type="submit">
         {t("cakeControls.bakeCake", "Bake cake")}
       </button>
-      <button className="cake3d-cart-submit" type="button" onClick={onAddToCart}>
-        <ShoppingCart size={16} />
-        Add cake to cart
-      </button>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
+        <button className="cake3d-cart-submit" type="button" onClick={onAddToCart} style={{ width: "100%", margin: 0 }}>
+          <ShoppingCart size={16} />
+          {addedToCart ? "Added!" : "Add to cart"}
+        </button>
+        <button className="cake3d-cart-submit" type="button" onClick={() => navigate("/cart")} style={{ width: "100%", margin: 0 }}>
+          View cart
+        </button>
+      </div>
     </form>
   );
 }
+

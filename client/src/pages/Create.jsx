@@ -368,6 +368,7 @@ export default function Create() {
     return window.matchMedia("(min-width: 1024px)").matches;
   });
   const hasTracked = useRef(false);
+  const [added, setAdded] = useState(false);
 
   const flowerCount = stems.length;
   const wordCount = countWords(note);
@@ -502,7 +503,8 @@ export default function Create() {
     addGiftCartItem("bouquet", { stems, note, senderName });
     track("gift_cart_add", { type: "bouquet", flowerCount, wordCount });
     trackEvent("gift_cart_add", { type: "bouquet", flowerCount, wordCount });
-    navigate("/cart");
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
   };
 
   return (
@@ -868,15 +870,26 @@ export default function Create() {
               t("create.addContent", "Add flowers or a note to continue")
             )}
           </button>
-          <button
-            type="button"
-            onClick={addBouquetToCart}
-            disabled={!hasBouquetContent}
-            className="vv-btn-ghost vv-cart-cta"
-          >
-            <ShoppingCart size={16} />
-            Add bouquet to cart
-          </button>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
+            <button
+              type="button"
+              onClick={addBouquetToCart}
+              disabled={!hasBouquetContent}
+              className="vv-btn-ghost vv-cart-cta"
+              style={{ width: "100%", margin: 0 }}
+            >
+              <ShoppingCart size={16} />
+              {added ? "Added!" : "Add to cart"}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/cart")}
+              className="vv-btn-ghost vv-cart-cta"
+              style={{ width: "100%", margin: 0 }}
+            >
+              View cart
+            </button>
+          </div>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", marginTop: "0.6rem", fontSize: "0.7rem", color: "#9e8f90", letterSpacing: "0.08em" }}>
             <span>✨ {t("create.free100", "100% Free")}</span><span>|</span>
             <span>{t("create.instantLink", "Instant link")}</span><span>|</span>
@@ -888,3 +901,4 @@ export default function Create() {
     </main>
   );
 }
+

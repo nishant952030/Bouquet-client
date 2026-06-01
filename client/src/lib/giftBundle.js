@@ -105,11 +105,12 @@ async function persistCake(item, createdAt) {
   };
 }
 
-async function persistMothersDayCard(item, createdAt) {
+async function persistGreetingCard(item, createdAt) {
   const payload = item.payload || {};
-  const id = createShareId("mc");
+  const id = createShareId("gc");
   const cardData = {
-    to: typeof payload.to === "string" && payload.to.trim() ? payload.to.trim() : "Mom",
+    to: typeof payload.to === "string" ? payload.to.trim() : "",
+    title: typeof payload.title === "string" ? payload.title.trim() : "",
     msg: typeof payload.msg === "string" ? payload.msg : "",
     from: typeof payload.from === "string" ? payload.from.trim() : "",
     paper: typeof payload.paper === "string" ? payload.paper : "blush",
@@ -117,7 +118,7 @@ async function persistMothersDayCard(item, createdAt) {
   };
   const sharePayload = {
     ...cardData,
-    type: "mothers_day_card",
+    type: "greeting_card",
     plan: "bundle_paid",
     createdAt,
   };
@@ -130,7 +131,7 @@ async function persistMothersDayCard(item, createdAt) {
     type: item.type,
     title: getGiftItemTitle(item),
     subtitle: getGiftItemSubtitle(item),
-    url: `${origin()}/mothers-day?card=${encodeURIComponent(encodeCardData(cardData))}`,
+    url: `${origin()}/greeting-card?card=${encodeURIComponent(encodeCardData(cardData))}`,
   };
 }
 
@@ -159,8 +160,9 @@ async function persistGiftItem(item, createdAt) {
       return persistBouquet(item, createdAt);
     case "cake":
       return persistCake(item, createdAt);
-    case "mothers_day_card":
-      return persistMothersDayCard(item, createdAt);
+    case "greeting_card":
+    case "mothers_day_card": // Legacy
+      return persistGreetingCard(item, createdAt);
     case "hug_card":
       return persistHugCard(item, createdAt);
     default:

@@ -228,7 +228,7 @@ export default function Home() {
               </button>
 
               <div className="relative w-full">
-                <button className="vv-btn-secondary" onClick={() => navigate("/create-mothers-day-card")}>
+                <button className="vv-btn-secondary" onClick={() => navigate("/create-greeting-card")}>
                   💌 {t("home.createCard", "Send a Card")}
                 </button>
                 <span className="vv-tag-new">{t("common.new")}</span>

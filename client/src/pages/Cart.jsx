@@ -430,7 +430,7 @@ export default function Cart() {
               {Object.entries({
                 bouquet: "/create",
                 cake: "/create-cake",
-                mothers_day_card: "/create-mothers-day-card",
+                greeting_card: "/create-greeting-card",
                 hug_card: "/create-hug-card",
               }).map(([type, path]) => (
                 <Link className="cart-btn cart-btn-soft" to={path} key={type}>
@@ -498,7 +498,7 @@ export default function Cart() {
                 {[
                   { type: "bouquet", path: "/create", icon: "💐", desc: "Flower arrangement with note" },
                   { type: "cake", path: "/create-cake", icon: "🎂", desc: "3D virtual birthday cake" },
-                  { type: "mothers_day_card", path: "/create-mothers-day-card", icon: "💌", desc: "Personalised envelope card" },
+                  { type: "greeting_card", path: "/create-greeting-card", icon: "💌", desc: "Personalised envelope card" },
                   { type: "hug_card", path: "/create-hug-card", icon: "🤗", desc: "Interactive pull-to-open hug" },
                 ].map(({ type, path, icon, desc }) => (
                   <Link key={type} to={path} className="cart-add-product">
