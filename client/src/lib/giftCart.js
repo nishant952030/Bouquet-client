@@ -149,11 +149,7 @@ export function getGiftCartTotals(items, currency) {
     (sum, item) => sum + getGiftItemPriceMinor(item, currency),
     0,
   );
-  
-  // HARDCODED TO 1 RS FOR TESTING
-  if (normalized.length > 0) {
-    totalMinor = 100;
-  }
+
 
   return {
     itemCount: normalized.length,

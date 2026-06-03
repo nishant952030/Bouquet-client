@@ -122,6 +122,7 @@ export default function CreateGreetingCard() {
   const [fromName, setFromName] = useState("");
   const [paper, setPaper] = useState("blush");
   const [decos, setDecos] = useState(["hearts"]);
+  const [added, setAdded] = useState(false);
 
   const selectedPaper = PAPERS.find(p => p.id === paper) || PAPERS[0];
   const activeDecos = DECOS.filter(d => decos.includes(d.id));
@@ -297,4 +298,5 @@ export default function CreateGreetingCard() {
     </main>
   );
 }
+
 

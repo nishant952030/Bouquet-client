@@ -403,13 +403,11 @@ export default function Payment() {
             const verifyData = await readApi(verifyRes);
             if (!verifyRes.ok || !verifyData?.ok) throw new Error("Verification failed");
             setTipDone(true);
-            setTipProvider("razorpay");
-            setTipMsg("");
+                        setTipMsg("");
             trackEv("tip_success", { provider: "razorpay", amount: currentTip.amount });
           } catch {
             setTipDone(true);
-            setTipProvider("razorpay");
-            setTipMsg("Thank you! Your payment was received.");
+                        setTipMsg("Thank you! Your payment was received.");
             trackEv("tip_success", { provider: "razorpay", amount: currentTip.amount });
           }
           generateShareLink().then(() => setIsTipping(false));
@@ -723,6 +721,7 @@ export default function Payment() {
     </main>
   );
 }
+
 
 
 

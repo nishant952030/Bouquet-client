@@ -125,7 +125,7 @@ export default function PaymentGreetingCard() {
     }
     try { localStorage.setItem(`card_share_${id}`, JSON.stringify(payload)); } catch {}
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(cardData))));
-    const url = `${window.location.origin}/greeting-card?card=${encoded}`;
+    const url = `${window.location.origin}/greeting-card?card=${encodeURIComponent(encoded)}`;
     setShareUrl(url);
     trackEvent("card_shared", { paper: cardData.paper });
   }, [cardData]);

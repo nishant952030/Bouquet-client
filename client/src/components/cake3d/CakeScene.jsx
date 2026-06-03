@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import { ContactShadows, Environment, OrbitControls } from "@react-three/drei";
 import Cake from "./Cake.jsx";
@@ -58,7 +59,9 @@ export default function CakeScene({
       />
 
       <ContactShadows position={[0, -0.12, 0]} opacity={0.28} scale={7} blur={2.6} far={3} />
-      <Environment preset="studio" />
+      <Suspense fallback={null}>
+        <Environment preset="studio" />
+      </Suspense>
       <OrbitControls
         enablePan={false}
         enableDamping

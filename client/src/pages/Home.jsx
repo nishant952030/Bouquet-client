@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -182,7 +182,9 @@ export default function Home() {
           <pointLight position={[10, 10, 10]} intensity={0.5} color="#fff5f6" />
           <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
           <SceneBackground />
-          <Environment preset="dawn" />
+          <Suspense fallback={null}>
+            <Environment preset="dawn" />
+          </Suspense>
         </Canvas>
       </div>
 

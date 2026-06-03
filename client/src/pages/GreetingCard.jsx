@@ -310,16 +310,22 @@ export default function GreetingCard() {
 
   // Decode custom card data if present
   const cardData = useMemo(() => {
-    const p = searchParams.get("card");
+    const p = searchParams.get("card") || searchParams.get("data");
     if (!p) return null;
-    try { return JSON.parse(decodeURIComponent(escape(atob(p)))); } catch { return null; }
+    try {
+      const normalized = p.replace(/ /g, "+");
+      return JSON.parse(decodeURIComponent(escape(atob(normalized))));
+    } catch (e) {
+      console.error("Failed to decode card parameter:", e);
+      return null;
+    }
   }, [searchParams]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [particles, setParticles] = useState([]);
   const [sparkles, setSparkles] = useState([]);
   const [showActions, setShowActions] = useState(false);
-  const petals = useRef(generatePetals());
+  const [petals] = useState(() => generatePetals());
   const hasOpened = useRef(false);
 
   // Content fallbacks
@@ -404,7 +410,7 @@ export default function GreetingCard() {
         <LanguageSwitcher />
       </div>
 
-      {petals.current.map((p) => (
+      {petals.map((p) => (
         <span key={p.id} className="md-petal" style={{ left: `${p.left}%`, top: "-30px", fontSize: `${p.scale * 1.3}rem`, "--dur": `${p.dur}s`, "--delay": `${p.delay}s`, "--drift": `${p.drift}px`, "--rot": `${p.rot}deg`, "--s": p.scale }}>{p.emoji}</span>
       ))}
 
@@ -480,3 +486,5 @@ export default function GreetingCard() {
     </div>
   );
 }
+
+

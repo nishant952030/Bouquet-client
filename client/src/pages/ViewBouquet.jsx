@@ -261,43 +261,47 @@ const CSS = `
 
 /* ── Floating decoration generator ── */
 function FloatingDecorations() {
-  const elements = [];
-  const hearts = ["💕", "💗", "💖", "🩷", "🤍"];
-  const petals = ["🌸", "🌺", "🌷", "🪻", "🌹"];
-  const sparkles = ["✨", "⭐", "💫"];
+  const [elements] = useState(() => {
+    const arr = [];
+    const hearts = ["💕", "💗", "💖", "🩷", "🤍"];
+    const petals = ["🌸", "🌺", "🌷", "🪻", "🌹"];
+    const sparkles = ["✨", "⭐", "💫"];
 
-  for (let i = 0; i < 6; i++) {
-    elements.push(
-      <span key={`h${i}`} className="float-heart" style={{
-        left: `${8 + Math.random() * 84}%`,
-        bottom: `-${20 + Math.random() * 40}px`,
-        animationDuration: `${8 + Math.random() * 6}s`,
-        animationDelay: `${Math.random() * 8}s`,
-        fontSize: `${0.7 + Math.random() * 0.6}rem`,
-      }}>{hearts[i % hearts.length]}</span>
-    );
-  }
-  for (let i = 0; i < 5; i++) {
-    elements.push(
-      <span key={`p${i}`} className="float-petal" style={{
-        left: `${5 + Math.random() * 90}%`,
-        bottom: `-${10 + Math.random() * 30}px`,
-        animationDuration: `${10 + Math.random() * 8}s`,
-        animationDelay: `${Math.random() * 10}s`,
-        fontSize: `${0.6 + Math.random() * 0.5}rem`,
-      }}>{petals[i % petals.length]}</span>
-    );
-  }
-  for (let i = 0; i < 4; i++) {
-    elements.push(
-      <span key={`s${i}`} className="float-sparkle" style={{
-        left: `${10 + Math.random() * 80}%`,
-        top: `${10 + Math.random() * 80}%`,
-        animationDuration: `${3 + Math.random() * 3}s`,
-        animationDelay: `${Math.random() * 4}s`,
-      }}>{sparkles[i % sparkles.length]}</span>
-    );
-  }
+    for (let i = 0; i < 6; i++) {
+      arr.push(
+        <span key={`h${i}`} className="float-heart" style={{
+          left: `${8 + Math.random() * 84}%`,
+          bottom: `-${20 + Math.random() * 40}px`,
+          animationDuration: `${8 + Math.random() * 6}s`,
+          animationDelay: `${Math.random() * 8}s`,
+          fontSize: `${0.7 + Math.random() * 0.6}rem`,
+        }}>{hearts[i % hearts.length]}</span>
+      );
+    }
+    for (let i = 0; i < 5; i++) {
+      arr.push(
+        <span key={`p${i}`} className="float-petal" style={{
+          left: `${5 + Math.random() * 90}%`,
+          bottom: `-${10 + Math.random() * 30}px`,
+          animationDuration: `${10 + Math.random() * 8}s`,
+          animationDelay: `${Math.random() * 10}s`,
+          fontSize: `${0.6 + Math.random() * 0.5}rem`,
+        }}>{petals[i % petals.length]}</span>
+      );
+    }
+    for (let i = 0; i < 4; i++) {
+      arr.push(
+        <span key={`s${i}`} className="float-sparkle" style={{
+          left: `${10 + Math.random() * 80}%`,
+          top: `${10 + Math.random() * 80}%`,
+          animationDuration: `${3 + Math.random() * 3}s`,
+          animationDelay: `${Math.random() * 4}s`,
+        }}>{sparkles[i % sparkles.length]}</span>
+      );
+    }
+    return arr;
+  });
+
   return <>{elements}</>;
 }
 
@@ -489,3 +493,4 @@ export default function ViewBouquet() {
     </main>
   );
 }
+

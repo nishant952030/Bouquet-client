@@ -307,5 +307,16 @@
   "create.noteIdea_Youdeserve": "También mereces flores en días ordinarios — no solo en los que vale la pena celebrar.",
   "create.noteIdea_IfIcouldI": "Si pudiera, llenaría cada habitación a la que entras con flores exactamente como estas.",
   "create.noteIdea_Sendingthi": "Te envío esto porque viniste a mi mente, y esa es razón suficiente.",
-  "create.noteIdea_Forthepers": "Para la persona que nunca pide nada — aquí hay algo solo para ti."
+  "create.noteIdea_Forthepers": "Para la persona que nunca pide nada — aquí hay algo solo para ti.",
+  "card.letterTo": "Para ti",
+  "card.title": "¡Hola!",
+  "card.letterMessage": "¡Te deseo un día maravilloso lleno de alegría y felicidad! ✨",
+  "card.letterFrom": "Con amor",
+  "card.forYou": "para ti",
+  "card.tapToOpen": "Toca para abrir",
+  "card.shareCard": "Compartir esta tarjeta 💌",
+  "card.replay": "↻ Abrir de nuevo",
+  "card.createTitle": "Crear una Tarjeta de Felicitación",
+  "card.createSub": "Personaliza tu mensaje, elige un estilo y comparte el amor",
+  "card.previewBtn": "Vista previa y compartir ✨"
 }

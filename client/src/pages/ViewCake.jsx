@@ -203,21 +203,25 @@ function getSharedCakeFromLocalStorage(id) {
 function Confetti() {
   const colors = ["#f44336", "#e91e63", "#9c27b0", "#3f51b5", "#2196f3", "#00bcd4", "#4caf50", "#ffeb3b", "#ff9800"];
 
-  return Array.from({ length: 50 }, (_, index) => (
-    <div
-      className="confetti-piece"
-      key={index}
-      style={{
-        left: `${Math.random() * 100}vw`,
-        backgroundColor: colors[Math.floor(Math.random() * colors.length)],
-        "--dur": `${2 + Math.random() * 3}s`,
-        "--delay": `${Math.random()}s`,
-        borderRadius: Math.random() > 0.5 ? "50%" : "0",
-        width: `${5 + Math.random() * 8}px`,
-        height: `${5 + Math.random() * 15}px`,
-      }}
-    />
-  ));
+  const [pieces] = useState(() => 
+    Array.from({ length: 50 }, (_, index) => (
+      <div
+        className="confetti-piece"
+        key={index}
+        style={{
+          left: `${Math.random() * 100}vw`,
+          backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+          "--dur": `${2 + Math.random() * 3}s`,
+          "--delay": `${Math.random()}s`,
+          borderRadius: Math.random() > 0.5 ? "50%" : "0",
+          width: `${5 + Math.random() * 8}px`,
+          height: `${5 + Math.random() * 15}px`,
+        }}
+      />
+    ))
+  );
+
+  return <>{pieces}</>;
 }
 
 export default function ViewCake() {
