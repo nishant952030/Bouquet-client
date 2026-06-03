@@ -238,17 +238,20 @@ export default function CakeControls({
 
       {error && <div className="cake3d-error">{error}</div>}
 
-      <button className="cake3d-submit" type="submit">
-        {t("cakeControls.bakeCake", "Bake cake")}
-      </button>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
-        <button className="cake3d-cart-submit" type="button" onClick={onAddToCart} style={{ width: "100%", margin: 0 }}>
-          <ShoppingCart size={16} />
-          {addedToCart ? "Added!" : "Add to cart"}
+      {/* Sticky bottom CTAs */}
+      <div style={{ position: "sticky", bottom: 0, background: "rgba(255,255,255,0.97)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", padding: "0.75rem 0 0.25rem", marginTop: "0.5rem", borderTop: "1px solid rgba(210,195,196,0.3)" }}>
+        <button className="cake3d-submit" type="submit">
+          {t("cakeControls.bakeCake", "Bake cake")}
         </button>
-        <button className="cake3d-cart-submit" type="button" onClick={() => navigate("/cart")} style={{ width: "100%", margin: 0 }}>
-          View cart
-        </button>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
+          <button className="cake3d-cart-submit" type="button" onClick={onAddToCart} style={{ width: "100%", margin: 0 }}>
+            <ShoppingCart size={16} />
+            {addedToCart ? "Added!" : "Add to cart"}
+          </button>
+          <button className="cake3d-cart-submit" type="button" onClick={() => navigate("/cart")} style={{ width: "100%", margin: 0 }}>
+            View cart
+          </button>
+        </div>
       </div>
     </form>
   );

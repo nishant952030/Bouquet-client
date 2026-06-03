@@ -10,14 +10,14 @@ import { loadRazorpayScript } from "../lib/razorpay";
 import { applySeo } from "../lib/seo";
 
 const TIP_PRESETS_INR = [
-  { labelKey: "payment.tipBasic", fallback: "Basic", amount: 9, display: "Rs 9" },
-  { labelKey: "payment.tipPopular", fallback: "Popular", amount: 19, display: "Rs 19" },
-  { labelKey: "payment.tipSupporter", fallback: "Supporter", amount: 29, display: "Rs 29" },
+  { labelKey: "payment.tipBasic", fallback: "Basic", amount: 29, display: "Rs 29" },
+  { labelKey: "payment.tipPopular", fallback: "Please", amount: 59, display: "Rs 59" },
+  { labelKey: "payment.tipSupporter", fallback: "Please Please", amount: 69, display: "Rs 69" },
 ];
 const TIP_PRESETS_USD = [
-  { labelKey: "payment.tipBasic", fallback: "Basic", amount: 0.49, display: "$0.49" },
-  { labelKey: "payment.tipPopular", fallback: "Popular", amount: 0.99, display: "$0.99" },
-  { labelKey: "payment.tipSupporter", fallback: "Supporter", amount: 1.49, display: "$1.49" },
+  { labelKey: "payment.tipBasic", fallback: "Basic", amount: 1.99, display: "$1.99" },
+  { labelKey: "payment.tipPopular", fallback: "Please", amount: 2.99, display: "$2.99" },
+  { labelKey: "payment.tipSupporter", fallback: "Please Please", amount: 3.99, display: "$3.99" },
 ];
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 const BYPASS_CAKE_PAYMENT_FOR_TESTING = false;

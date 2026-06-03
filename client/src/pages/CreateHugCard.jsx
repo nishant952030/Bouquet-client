@@ -57,6 +57,7 @@ const CSS = `
   .chc-ghost{display:inline-flex;align-items:center;gap:5px;background:none;color:#be185d;font-size:0.78rem;font-weight:600;border:1.5px solid rgba(190,50,90,0.25);border-radius:999px;padding:0.3rem 0.8rem;cursor:pointer;text-decoration:none;transition:all 0.15s}
   .chc-ghost:hover{background:#fdf2f8;border-color:#ec4899}
   .chc-cart-cta{width:100%;min-height:44px;justify-content:center;margin-top:0.55rem;background:#fff}
+  .chc-bottom{position:fixed;inset:auto 0 0;z-index:40;background:rgba(253,242,248,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(244,114,182,0.15);padding:0.75rem 1.25rem 1.1rem}
 `;
 
 export default function CreateHugCard() {
@@ -175,19 +176,23 @@ export default function CreateHugCard() {
           <label className="chc-label" htmlFor="hc-from">💌 From (Optional)</label>
           <input id="hc-from" className="chc-input" value={fromName} onChange={e => setFromName(e.target.value)} placeholder="Your Name" maxLength={30} />
         </div>
+      </div>
 
-        {/* CTA */}
-        <button type="button" className="chc-cta" onClick={handlePreview} disabled={!message.trim() || !line1.trim()}>
-          Preview & Share ✨
-        </button>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
-          <button type="button" className="chc-ghost chc-cart-cta" onClick={addCardToCart} disabled={!message.trim() || !line1.trim()} style={{ width: "100%", margin: 0 }}>
-            <ShoppingCart size={16} />
-            {added ? "Added!" : "Add to cart"}
+      {/* Fixed bottom CTA bar */}
+      <div className="chc-bottom">
+        <div style={{ maxWidth: 560, margin: "0 auto" }}>
+          <button type="button" className="chc-cta" onClick={handlePreview} disabled={!message.trim() || !line1.trim()}>
+            Preview & Share ✨
           </button>
-          <button type="button" className="chc-ghost chc-cart-cta" onClick={() => navigate("/cart")} style={{ width: "100%", margin: 0 }}>
-            View cart
-          </button>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
+            <button type="button" className="chc-ghost chc-cart-cta" onClick={addCardToCart} disabled={!message.trim() || !line1.trim()} style={{ width: "100%", margin: 0 }}>
+              <ShoppingCart size={16} />
+              {added ? "Added!" : "Add to cart"}
+            </button>
+            <button type="button" className="chc-ghost chc-cart-cta" onClick={() => navigate("/cart")} style={{ width: "100%", margin: 0 }}>
+              View cart
+            </button>
+          </div>
         </div>
       </div>
     </main>

@@ -97,7 +97,8 @@ const CSS = `
 
   .cmc-ghost{display:inline-flex;align-items:center;gap:5px;background:none;color:#be185d;font-size:0.78rem;font-weight:600;border:1.5px solid rgba(190,50,90,0.25);border-radius:999px;padding:0.3rem 0.8rem;cursor:pointer;text-decoration:none;transition:all 0.15s}
   .cmc-ghost:hover{background:#fdf2f8;border-color:#ec4899}
-  .cmc-cart-cta{width:100%;min-height:44px;justify-content:center;margin-top:0.55rem;background:#fff}
+  .cmc-cart-cta{width:100%;min-height:44px;justify-content:center;background:#fff}
+  .cmc-bottom{position:fixed;inset:auto 0 0;z-index:40;background:rgba(253,242,248,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(244,114,182,0.15);padding:0.75rem 1.25rem 1.1rem}
 
   @media(max-width:380px){
     .cmc-papers{grid-template-columns:repeat(2,1fr)}
@@ -280,19 +281,23 @@ export default function CreateGreetingCard() {
             ))}
           </div>
         </div>
+      </div>
 
-        {/* CTA */}
-        <button type="button" className="cmc-cta" onClick={handlePreview} disabled={!message.trim()}>
-          {t("card.previewBtn", "Preview & Share ✨")}
-        </button>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
-          <button type="button" className="cmc-ghost cmc-cart-cta" onClick={addCardToCart} disabled={!message.trim()} style={{ width: "100%", margin: 0 }}>
-            <ShoppingCart size={16} />
-            {added ? "Added!" : "Add to cart"}
+      {/* Fixed bottom CTA bar */}
+      <div className="cmc-bottom">
+        <div style={{ maxWidth: 560, margin: "0 auto" }}>
+          <button type="button" className="cmc-cta" onClick={handlePreview} disabled={!message.trim()}>
+            {t("card.previewBtn", "Preview & Share ✨")}
           </button>
-          <button type="button" className="cmc-ghost cmc-cart-cta" onClick={() => navigate("/cart")} style={{ width: "100%", margin: 0 }}>
-            View cart
-          </button>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
+            <button type="button" className="cmc-ghost cmc-cart-cta" onClick={addCardToCart} disabled={!message.trim()} style={{ width: "100%", margin: 0 }}>
+              <ShoppingCart size={16} />
+              {added ? "Added!" : "Add to cart"}
+            </button>
+            <button type="button" className="cmc-ghost cmc-cart-cta" onClick={() => navigate("/cart")} style={{ width: "100%", margin: 0 }}>
+              View cart
+            </button>
+          </div>
         </div>
       </div>
     </main>

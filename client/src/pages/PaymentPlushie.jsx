@@ -28,13 +28,13 @@ function getCountry() {
 
 const TIP_INR = [
   { label: "Basic", amount: 29, display: "₹29" },
-  { label: "Popular", amount: 59, display: "₹59" },
-  { label: "Supporter", amount: 99, display: "₹99" },
+  { label: "Please", amount: 59, display: "₹59" },
+  { label: "Please Please", amount: 69, display: "₹69" },
 ];
 const TIP_USD = [
-  { label: "Basic", amount: 0.99, display: "$0.99" },
-  { label: "Popular", amount: 1.99, display: "$1.99" },
-  { label: "Supporter", amount: 3.99, display: "$3.99" },
+  { label: "Basic", amount: 1.99, display: "$1.99" },
+  { label: "Please", amount: 2.99, display: "$2.99" },
+  { label: "Please Please", amount: 3.99, display: "$3.99" },
 ];
 
 const CSS = `

@@ -147,19 +147,21 @@ export default function PlushieControls({
 
       {error && <div className="plushie3d-error">{error}</div>}
 
-      {/* ─── CTAs ─── */}
-      <button className="plushie3d-submit" type="submit">
-        {t("plushie.previewBtn", "Preview & Share ✨")}
-      </button>
-      
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-        <button className="plushie3d-cart-submit" type="button" onClick={onAddToCart}>
-          <ShoppingCart size={15} />
-          {addedToCart ? "Added!" : "Add to cart"}
+      {/* ─── Sticky bottom CTAs ─── */}
+      <div style={{ position: "sticky", bottom: 0, background: "rgba(255,255,255,0.97)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", padding: "0.75rem 0 0.25rem", marginTop: "0.5rem", borderTop: "1px solid rgba(190,24,93,0.1)" }}>
+        <button className="plushie3d-submit" type="submit">
+          {t("plushie.previewBtn", "Preview & Share ✨")}
         </button>
-        <button className="plushie3d-cart-submit" type="button" onClick={() => navigate("/cart")}>
-          View cart
-        </button>
+        
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
+          <button className="plushie3d-cart-submit" type="button" onClick={onAddToCart}>
+            <ShoppingCart size={15} />
+            {addedToCart ? "Added!" : "Add to cart"}
+          </button>
+          <button className="plushie3d-cart-submit" type="button" onClick={() => navigate("/cart")}>
+            View cart
+          </button>
+        </div>
       </div>
     </form>
   );

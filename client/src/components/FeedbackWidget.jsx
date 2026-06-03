@@ -34,8 +34,6 @@ export default function FeedbackWidget() {
     };
   }, []);
 
-  if (!hasPaid) return null;
-
   // Close modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -46,6 +44,8 @@ export default function FeedbackWidget() {
     if (isOpen) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
+
+  if (!hasPaid) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

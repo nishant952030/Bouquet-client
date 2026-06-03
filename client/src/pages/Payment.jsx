@@ -14,14 +14,14 @@ import { clearCheckoutDraft, loadCheckoutDraft } from "../lib/checkoutStorage";
 const PENDING_KEY = "pw_pending_global_checkout";
 
 const TIP_PRESETS_INR = [
-  { label: "Basic", amount: 19, display: "Rs 19" },
-  { label: "Popular", amount: 39, display: "Rs 39" },
-  { label: "Supporter", amount: 59, display: "Rs 59" },
+  { label: "Basic", amount: 29, display: "Rs 29" },
+  { label: "Please", amount: 59, display: "Rs 59" },
+  { label: "Please Please", amount: 69, display: "Rs 69" },
 ];
 const TIP_PRESETS_USD = [
-  { label: "Basic", amount: 0.99, display: "$0.99" },
-  { label: "Popular", amount: 1.49, display: "$1.49" },
-  { label: "Supporter", amount: 1.99, display: "$1.99" },
+  { label: "Basic", amount: 1.99, display: "$1.99" },
+  { label: "Please", amount: 2.99, display: "$2.99" },
+  { label: "Please Please", amount: 3.99, display: "$3.99" },
 ];
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 
