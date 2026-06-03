@@ -154,6 +154,38 @@ async function persistHugCard(item) {
   };
 }
 
+async function persistPlushie(item, createdAt) {
+  const payload = item.payload || {};
+  const id = createShareId("pl");
+  const plushieData = {
+    plushieType: typeof payload.plushieType === "string" ? payload.plushieType : "bear",
+    furColor: typeof (payload.furColor || payload.color) === "string" ? (payload.furColor || payload.color) : "brown",
+    accessory: typeof payload.accessory === "string" ? payload.accessory : "none",
+    boxStyle: typeof payload.boxStyle === "string" ? payload.boxStyle : "pink",
+    msg: typeof payload.msg === "string" ? payload.msg : "",
+    to: typeof payload.to === "string" ? payload.to.trim() : "",
+    from: typeof payload.from === "string" ? payload.from.trim() : "",
+  };
+  const sharePayload = {
+    ...plushieData,
+    type: "plushie",
+    plan: "bundle_paid",
+    createdAt,
+  };
+
+  saveFirestore("plushies", id, sharePayload);
+  saveLocal(`plushie_share_${id}`, sharePayload);
+
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(plushieData))));
+  return {
+    storageId: id,
+    type: item.type,
+    title: getGiftItemTitle(item),
+    subtitle: getGiftItemSubtitle(item),
+    url: `${origin()}/plushie/${id}?data=${encodeURIComponent(encoded)}`,
+  };
+}
+
 async function persistGiftItem(item, createdAt) {
   switch (item.type) {
     case "bouquet":
@@ -165,6 +197,8 @@ async function persistGiftItem(item, createdAt) {
       return persistGreetingCard(item, createdAt);
     case "hug_card":
       return persistHugCard(item, createdAt);
+    case "plushie":
+      return persistPlushie(item, createdAt);
     default:
       return null;
   }

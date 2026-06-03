@@ -21,6 +21,9 @@ import PaymentCake from "./pages/PaymentCake.jsx";
 import AdminDashboard from "./pages/AdminDashboard.jsx";
 import Cart from "./pages/Cart.jsx";
 import GiftBundle from "./pages/GiftBundle.jsx";
+import CreatePlushie from "./pages/CreatePlushie.jsx";
+import PaymentPlushie from "./pages/PaymentPlushie.jsx";
+import ViewPlushie from "./pages/ViewPlushie.jsx";
 
 import useDirection from "./hooks/useDirection.js";
 
@@ -61,6 +64,11 @@ export default function App() {
         <Route path="/payment-cake" element={<PaymentCake />} />
         <Route path="/cake/:id" element={<ViewCake />} />
         <Route path="/cake" element={<ViewCake />} />
+
+        <Route path="/create-plushie" element={<CreatePlushie />} />
+        <Route path="/payment-plushie" element={<PaymentPlushie />} />
+        <Route path="/plushie/:id" element={<ViewPlushie />} />
+        <Route path="/plushie" element={<ViewPlushie />} />
 
         {/* Localized Cake SEO Routes */}
         <Route path="/tl/virtual-cake-anniversary" element={<CakeKeywordLanding />} />

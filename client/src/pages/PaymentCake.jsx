@@ -384,10 +384,18 @@ export default function PaymentCake() {
             if (!verifyRes.ok || !verifyData?.ok) throw new Error("Verification failed");
             setTipDone(true);
             setTipMsg("");
+            try {
+              localStorage.setItem("pw_has_paid", "true");
+              window.dispatchEvent(new CustomEvent("pw-payment-success"));
+            } catch (e) {}
             trackEv("tip_success_cake", { provider: "razorpay", amount: currentTip.amount });
           } catch {
             setTipDone(true);
             setTipMsg("Thank you! We received your payment.");
+            try {
+              localStorage.setItem("pw_has_paid", "true");
+              window.dispatchEvent(new CustomEvent("pw-payment-success"));
+            } catch (e) {}
             trackEv("tip_success_cake", { provider: "razorpay", amount: currentTip.amount });
           }
           generateShareLink("razorpay").then(() => setIsTipping(false));

@@ -403,11 +403,19 @@ export default function Payment() {
             const verifyData = await readApi(verifyRes);
             if (!verifyRes.ok || !verifyData?.ok) throw new Error("Verification failed");
             setTipDone(true);
-                        setTipMsg("");
+            setTipMsg("");
+            try {
+              localStorage.setItem("pw_has_paid", "true");
+              window.dispatchEvent(new CustomEvent("pw-payment-success"));
+            } catch (e) {}
             trackEv("tip_success", { provider: "razorpay", amount: currentTip.amount });
           } catch {
             setTipDone(true);
-                        setTipMsg("Thank you! Your payment was received.");
+            setTipMsg("Thank you! Your payment was received.");
+            try {
+              localStorage.setItem("pw_has_paid", "true");
+              window.dispatchEvent(new CustomEvent("pw-payment-success"));
+            } catch (e) {}
             trackEv("tip_success", { provider: "razorpay", amount: currentTip.amount });
           }
           generateShareLink().then(() => setIsTipping(false));

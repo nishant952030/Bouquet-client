@@ -71,6 +71,7 @@ export default function Home() {
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
+  const [isToolsModalOpen, setIsToolsModalOpen] = useState(false);
   const featuredPosts = useMemo(() => blogPosts.slice(0, 3), []);
 
   useEffect(() => {
@@ -172,6 +173,10 @@ export default function Home() {
           background-clip: text;
           animation: vvShimmer 4s linear infinite;
         }
+        @keyframes modalFadeIn {
+          from { opacity: 0; transform: scale(0.96) translateY(12px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
       `}</style>
 
       {/* 3D Canvas */}
@@ -225,19 +230,8 @@ export default function Home() {
 
             {/* CTAs */}
             <div className="flex flex-col gap-4 max-w-xs mx-auto">
-              <button className="vv-btn-primary" onClick={() => navigate("/create")}>
-                {t("common.createBouquet")}
-              </button>
-
-              <div className="relative w-full">
-                <button className="vv-btn-secondary" onClick={() => navigate("/create-greeting-card")}>
-                  💌 {t("home.createCard", "Send a Card")}
-                </button>
-                <span className="vv-tag-new">{t("common.new")}</span>
-              </div>
-
-              <button className="vv-btn-secondary" onClick={() => navigate("/create-cake")} style={{ border: "none", background: "transparent", color: "#a65d5d", minHeight: "44px" }}>
-                🍰 {t("home.bakeCake")}
+              <button className="vv-btn-primary animate-pulse" onClick={() => setIsToolsModalOpen(true)}>
+                🎁 {t("home.toolsGifts", "Tools & Gifts")}
               </button>
             </div>
             
@@ -311,6 +305,123 @@ export default function Home() {
         </div>
         
       </div>
+
+      {/* Tools & Gifts Modal */}
+      {isToolsModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3d3028]/45 backdrop-blur-md transition-opacity duration-300"
+          onClick={() => setIsToolsModalOpen(false)}
+        >
+          <div 
+            className="relative w-full max-w-lg rounded-[2.5rem] p-8 md:p-10 text-[#3d3028] shadow-2xl animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+            style={{ 
+              animation: "modalFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+              background: "rgba(255, 255, 255, 0.9)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+              border: "1px solid rgba(255, 255, 255, 0.85)"
+            }}
+          >
+            {/* Close Button */}
+            <button 
+              className="absolute top-6 right-6 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer bg-[#fff5f6] text-[#7c4343] hover:bg-[#7c4343] hover:text-white transition-colors duration-200"
+              onClick={() => setIsToolsModalOpen(false)}
+              aria-label="Close modal"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            {/* Modal Header */}
+            <div className="text-center mb-8">
+              <span className="text-xs font-bold tracking-widest uppercase text-[#a65d5d] opacity-80 block mb-2">
+                Choose a Digital Surprise
+              </span>
+              <h2 className="text-3xl font-serif text-[#3d3028] leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                Interactive Gifts & Tools
+              </h2>
+            </div>
+
+            {/* Grid of Options */}
+            <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto pr-1">
+              {[
+                {
+                  title: t("common.createBouquet", "Create Bouquet"),
+                  desc: "Arrange beautiful 2D flower stems with a card note.",
+                  icon: "💐",
+                  path: "/create",
+                  tag: ""
+                },
+                {
+                  title: t("home.createCard", "Send a Card"),
+                  desc: "Write a letter in a beautiful customizable envelope.",
+                  icon: "💌",
+                  path: "/create-greeting-card",
+                  tag: t("common.new", "NEW")
+                },
+                {
+                  title: t("home.sendPlushie", "Send a Plushie"),
+                  desc: "Customize a furry 3D plushie inside a surprise gift box.",
+                  icon: "🧸",
+                  path: "/create-plushie",
+                  tag: ""
+                },
+                {
+                  title: t("home.bakeCake", "Bake a Cake"),
+                  desc: "Bake and decorate a 3D birthday cake with candles.",
+                  icon: "🎂",
+                  path: "/create-cake",
+                  tag: ""
+                },
+                {
+                  title: "Virtual Hug Card",
+                  desc: "Send an interactive pull-to-open warm hug card.",
+                  icon: "🤗",
+                  path: "/create-hug-card",
+                  tag: ""
+                }
+              ].map((opt) => (
+                <button
+                  key={opt.path}
+                  onClick={() => {
+                    setIsToolsModalOpen(false);
+                    navigate(opt.path);
+                  }}
+                  className="flex items-center gap-4 w-full text-left p-4 rounded-2xl border border-solid border-[#e48d9c]/20 hover:border-[#7c4343]/40 bg-white/80 hover:bg-[#fff9fa] transition-all duration-200 cursor-pointer group shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                  style={{ border: "1px solid rgba(228, 141, 156, 0.25)" }}
+                >
+                  <div className="text-3xl flex-shrink-0 bg-[#fff5f6] p-2 rounded-xl group-hover:scale-110 transition-transform duration-200">
+                    {opt.icon}
+                  </div>
+                  <div className="flex-grow min-width-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sm text-[#3d3028] group-hover:text-[#7c4343] transition-colors duration-150">
+                        {opt.title}
+                      </span>
+                      {opt.tag && (
+                        <span className="text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-[#e91e63] to-[#f48fb1] text-white">
+                          {opt.tag}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-[#705f58] line-clamp-1 mt-0.5">
+                      {opt.desc}
+                    </p>
+                  </div>
+                  <div className="text-[#a65d5d] opacity-0 group-hover:opacity-100 transition-opacity duration-150 pr-1">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

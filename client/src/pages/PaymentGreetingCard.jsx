@@ -159,6 +159,10 @@ export default function PaymentGreetingCard() {
           await generateLink();
           setPaying(false);
           localStorage.removeItem("pw_pending_greeting_card");
+          try {
+            localStorage.setItem("pw_has_paid", "true");
+            window.dispatchEvent(new CustomEvent("pw-payment-success"));
+          } catch (e) {}
           trackEvent("card_payment_success", { amount: tip.amount });
         },
       });

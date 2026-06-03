@@ -6,9 +6,9 @@ export const GIFT_PRODUCT_META = {
     shortLabel: "Bouquet",
     createPath: "/create",
     priceTiers: [
-      { id: "tier1", label: "Basic", priceMinor: { INR: 1900, USD: 199 } },
-      { id: "tier2", label: "Standard", priceMinor: { INR: 3900, USD: 299 } },
-      { id: "tier3", label: "Premium", priceMinor: { INR: 7900, USD: 499 } }
+      { id: "tier1", label: "Basic", priceMinor: { INR: 2900, USD: 199 } },
+      { id: "tier2", label: "Standard", priceMinor: { INR: 5900, USD: 299 } },
+      { id: "tier3", label: "Premium", priceMinor: { INR: 6900, USD: 399 } }
     ]
   },
   cake: {
@@ -16,9 +16,9 @@ export const GIFT_PRODUCT_META = {
     shortLabel: "Cake",
     createPath: "/create-cake",
     priceTiers: [
-      { id: "tier1", label: "Basic", priceMinor: { INR: 1900, USD: 199 } },
-      { id: "tier2", label: "Standard", priceMinor: { INR: 3900, USD: 299 } },
-      { id: "tier3", label: "Premium", priceMinor: { INR: 7900, USD: 499 } }
+      { id: "tier1", label: "Basic", priceMinor: { INR: 2900, USD: 199 } },
+      { id: "tier2", label: "Standard", priceMinor: { INR: 5900, USD: 299 } },
+      { id: "tier3", label: "Premium", priceMinor: { INR: 6900, USD: 399 } }
     ]
   },
   greeting_card: {
@@ -26,9 +26,9 @@ export const GIFT_PRODUCT_META = {
     shortLabel: "Card",
     createPath: "/create-greeting-card",
     priceTiers: [
-      { id: "tier1", label: "Basic", priceMinor: { INR: 1900, USD: 199 } },
-      { id: "tier2", label: "Standard", priceMinor: { INR: 3900, USD: 299 } },
-      { id: "tier3", label: "Premium", priceMinor: { INR: 7900, USD: 499 } }
+      { id: "tier1", label: "Basic", priceMinor: { INR: 2900, USD: 199 } },
+      { id: "tier2", label: "Standard", priceMinor: { INR: 5900, USD: 299 } },
+      { id: "tier3", label: "Premium", priceMinor: { INR: 6900, USD: 399 } }
     ]
   },
   hug_card: {
@@ -36,9 +36,19 @@ export const GIFT_PRODUCT_META = {
     shortLabel: "Hug",
     createPath: "/create-hug-card",
     priceTiers: [
-      { id: "tier1", label: "Basic", priceMinor: { INR: 1900, USD: 199 } },
-      { id: "tier2", label: "Standard", priceMinor: { INR: 3900, USD: 299 } },
-      { id: "tier3", label: "Premium", priceMinor: { INR: 7900, USD: 499 } }
+      { id: "tier1", label: "Basic", priceMinor: { INR: 2900, USD: 199 } },
+      { id: "tier2", label: "Standard", priceMinor: { INR: 5900, USD: 299 } },
+      { id: "tier3", label: "Premium", priceMinor: { INR: 6900, USD: 399 } }
+    ]
+  },
+  plushie: {
+    label: "3D Interactive Plushie",
+    shortLabel: "Plushie",
+    createPath: "/create-plushie",
+    priceTiers: [
+      { id: "tier1", label: "Basic", priceMinor: { INR: 2900, USD: 199 } },
+      { id: "tier2", label: "Standard", priceMinor: { INR: 5900, USD: 299 } },
+      { id: "tier3", label: "Premium", priceMinor: { INR: 6900, USD: 399 } }
     ]
   },
 };
@@ -184,6 +194,10 @@ export function getGiftItemTitle(item) {
         : "Greeting card";
     case "hug_card":
       return "Virtual hug card";
+    case "plushie":
+      return (payload.to || payload.toName || payload.name)?.trim()
+        ? `Plushie for ${(payload.to || payload.toName || payload.name).trim()}`
+        : "Interactive Plushie";
     default:
       return getGiftProductMeta(item?.type)?.label || "Gift";
   }
@@ -210,8 +224,13 @@ export function getGiftItemSubtitle(item) {
       return payload.from?.trim() ? `From ${payload.from.trim()}` : "Personal message card";
     case "hug_card":
       return "Pull-to-open hug animation";
+    case "plushie": {
+      const type = payload.plushieType || "bear";
+      const capitalized = type.charAt(0).toUpperCase() + type.slice(1);
+      const acc = payload.accessory && payload.accessory !== "none" ? ` with ${payload.accessory}` : "";
+      return `${capitalized} plushie${acc}`;
+    }
     default:
       return "Digital gift";
   }
 }
-

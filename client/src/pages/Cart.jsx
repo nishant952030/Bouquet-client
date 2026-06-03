@@ -237,6 +237,10 @@ export default function Cart() {
       setShareUrl(result.url);
       setPaid(true);
       clearGiftCart();
+      try {
+        localStorage.setItem("pw_has_paid", "true");
+        window.dispatchEvent(new CustomEvent("pw-payment-success"));
+      } catch (e) {}
       trackCart("gift_bundle_created", {
         itemCount: items.length,
         currency,
@@ -300,6 +304,11 @@ export default function Cart() {
           },
         },
         handler: async (response) => {
+          // Capture a stable snapshot of items/currency/amount at the time
+          // the Razorpay handler fires (not from the stale useCallback closure)
+          const itemsSnapshot = loadGiftCart();
+          const currencySnapshot = currency;
+          const amountSnapshot = totals.totalMinor;
           try {
             const verifyRes = await fetch(apiUrl("/api/razorpay/verify"), {
               method: "POST",
@@ -308,10 +317,39 @@ export default function Cart() {
             });
             await readApi(verifyRes);
           } catch {
-            // The old flows also treat verification errors as non-blocking once checkout returns.
+            // Treat verification errors as non-blocking.
           }
-          await generateBundleLink("razorpay");
-          setPaying(false);
+          // Use the fresh snapshot for bundle creation
+          setStatusMsg("");
+          setGenerating(true);
+          try {
+            const result = await createGiftBundle(itemsSnapshot, {
+              provider: "razorpay",
+              currency: currencySnapshot,
+              amountMinor: amountSnapshot,
+              itemCount: itemsSnapshot.length,
+            });
+            if (!result?.url) throw new Error("Could not create gift link.");
+            setCheckedOutItems(itemsSnapshot);
+            setShareUrl(result.url);
+            setPaid(true);
+            clearGiftCart();
+            try {
+              localStorage.setItem("pw_has_paid", "true");
+              window.dispatchEvent(new CustomEvent("pw-payment-success"));
+            } catch (e) {}
+            trackCart("gift_bundle_created", {
+              itemCount: itemsSnapshot.length,
+              currency: currencySnapshot,
+              amountMinor: amountSnapshot,
+              provider: "razorpay",
+            });
+          } catch (err) {
+            setStatusMsg(err?.message || "Could not create gift link. Please try again.");
+          } finally {
+            setGenerating(false);
+            setPaying(false);
+          }
         },
       });
 
@@ -432,6 +470,7 @@ export default function Cart() {
                 cake: "/create-cake",
                 greeting_card: "/create-greeting-card",
                 hug_card: "/create-hug-card",
+                plushie: "/create-plushie",
               }).map(([type, path]) => (
                 <Link className="cart-btn cart-btn-soft" to={path} key={type}>
                   <Plus size={16} /> {getGiftProductMeta(type)?.shortLabel}
@@ -457,6 +496,7 @@ export default function Cart() {
                         {meta?.priceTiers?.map((tier) => {
                           const tierPriceMinor = tier.priceMinor[currency === "INR" ? "INR" : "USD"];
                           const isActive = (item.tierId || "tier2") === tier.id;
+                          const tierDisplayLabel = tier.id === "tier3" ? "Please Please" : tier.id === "tier2" ? "Please" : "Basic";
                           return (
                             <button 
                               key={tier.id} 
@@ -466,7 +506,7 @@ export default function Cart() {
                               }}
                               type="button"
                             >
-                              <span className="tier-label">{tier.label}</span>
+                              <span className="tier-label">{tierDisplayLabel}</span>
                               <span className="tier-price">{formatCartMoney(tierPriceMinor, currency)}</span>
                             </button>
                           );
@@ -489,60 +529,76 @@ export default function Cart() {
               })}
             </section>
 
-            {/* Add another gift to this bundle */}
-            <div className="cart-add-panel">
-              <div className="cart-add-panel-heading">
-                <Plus size={14} /> Add another gift to this bundle
-              </div>
-              <div className="cart-add-products">
-                {[
-                  { type: "bouquet", path: "/create", icon: "💐", desc: "Flower arrangement with note" },
-                  { type: "cake", path: "/create-cake", icon: "🎂", desc: "3D virtual birthday cake" },
-                  { type: "greeting_card", path: "/create-greeting-card", icon: "💌", desc: "Personalised envelope card" },
-                  { type: "hug_card", path: "/create-hug-card", icon: "🤗", desc: "Interactive pull-to-open hug" },
-                ].map(({ type, path, icon, desc }) => (
-                  <Link key={type} to={path} className="cart-add-product">
-                    <div className="cart-add-product-icon" style={{ fontSize: "1.15rem" }}>{icon}</div>
-                    <span className="cart-add-product-label">{getGiftProductMeta(type)?.shortLabel}</span>
-                    <span className="cart-add-product-desc">{desc}</span>
-                    <span className="cart-add-product-plus"><Plus size={11} /></span>
-                  </Link>
-                ))}
+            {/* Right column: Checkout on top, Add another gift below */}
+            <div style={{ display: "flex", flexDirection: "column", gap: ".85rem", alignItems: "stretch" }}>
+              <aside className="cart-panel cart-summary" style={{ position: "sticky", top: "78px" }}>
+                <h2>Checkout</h2>
+                <div className="cart-row"><span>Products</span><strong>{totals.itemCount}</strong></div>
+                <div className="cart-row"><span>Currency</span><strong>{currency}</strong></div>
+                <div className="cart-total">
+                  <span>Total</span>
+                  <strong>{formatCartMoney(totals.totalMinor, currency)}</strong>
+                </div>
+
+                {/* Please prefix: Standard → 'Please', Premium → 'Please Please' */}
+                {(() => {
+                  const basicMinor = currency === "INR" ? 2900 : 199;
+                  const standardMinor = currency === "INR" ? 5900 : 299;
+                  const pleasePrefix = totals.totalMinor > standardMinor
+                    ? "Please Please "
+                    : totals.totalMinor > basicMinor
+                    ? "Please "
+                    : "";
+                  return (
+                    <button
+                      className="cart-btn cart-btn-primary"
+                      disabled={detectingCountry || paying || generating}
+                      onClick={startCheckout}
+                      type="button"
+                    >
+                      {paying || generating ? (
+                        <>
+                          <span className="cart-spinner" /> Processing
+                        </>
+                      ) : totals.totalMinor > 0 ? (
+                        <>
+                          {pleasePrefix}Pay {formatCartMoney(totals.totalMinor, currency)} <ArrowRight size={16} />
+                        </>
+                      ) : (
+                        <>
+                          Create bundle link <ArrowRight size={16} />
+                        </>
+                      )}
+                    </button>
+                  );
+                })()}
+
+                {statusMsg && <div className="cart-status">{statusMsg}</div>}
+              </aside>
+
+              {/* Add another gift to this bundle */}
+              <div className="cart-add-panel">
+                <div className="cart-add-panel-heading">
+                  <Plus size={14} /> Add another gift to this bundle
+                </div>
+                <div className="cart-add-products">
+                  {[
+                    { type: "bouquet", path: "/create", icon: "💐", desc: "Flower arrangement with note" },
+                    { type: "cake", path: "/create-cake", icon: "🎂", desc: "3D virtual birthday cake" },
+                    { type: "greeting_card", path: "/create-greeting-card", icon: "💌", desc: "Personalised envelope card" },
+                    { type: "hug_card", path: "/create-hug-card", icon: "🤗", desc: "Interactive pull-to-open hug" },
+                    { type: "plushie", path: "/create-plushie", icon: "🧸", desc: "3D interactive plushie" },
+                  ].map(({ type, path, icon, desc }) => (
+                    <Link key={type} to={path} className="cart-add-product">
+                      <div className="cart-add-product-icon" style={{ fontSize: "1.15rem" }}>{icon}</div>
+                      <span className="cart-add-product-label">{getGiftProductMeta(type)?.shortLabel}</span>
+                      <span className="cart-add-product-desc">{desc}</span>
+                      <span className="cart-add-product-plus"><Plus size={11} /></span>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
-
-            <aside className="cart-panel cart-summary">
-              <h2>Checkout</h2>
-              <div className="cart-row"><span>Products</span><strong>{totals.itemCount}</strong></div>
-              <div className="cart-row"><span>Currency</span><strong>{currency}</strong></div>
-              <div className="cart-total">
-                <span>Total</span>
-                <strong>{formatCartMoney(totals.totalMinor, currency)}</strong>
-              </div>
-
-              <button
-                className="cart-btn cart-btn-primary"
-                disabled={detectingCountry || paying || generating}
-                onClick={startCheckout}
-                type="button"
-              >
-                {paying || generating ? (
-                  <>
-                    <span className="cart-spinner" /> Processing
-                  </>
-                ) : totals.totalMinor > 0 ? (
-                  <>
-                    Pay {formatCartMoney(totals.totalMinor, currency)} <ArrowRight size={16} />
-                  </>
-                ) : (
-                  <>
-                    Create bundle link <ArrowRight size={16} />
-                  </>
-                )}
-              </button>
-
-              {statusMsg && <div className="cart-status">{statusMsg}</div>}
-            </aside>
           </div>
         )}
       </div>
@@ -565,7 +621,14 @@ export default function Cart() {
               {paying || generating ? (
                 <><span className="cart-spinner" /> Processing</>
               ) : totals.totalMinor > 0 ? (
-                <>Pay {formatCartMoney(totals.totalMinor, currency)} <ArrowRight size={16} /></>
+                <>
+                  {totals.totalMinor > (currency === "INR" ? 5900 : 299)
+                    ? "Please Please "
+                    : totals.totalMinor > (currency === "INR" ? 2900 : 199)
+                    ? "Please "
+                    : ""}
+                  Pay {formatCartMoney(totals.totalMinor, currency)} <ArrowRight size={16} />
+                </>
               ) : (
                 <>Create link <ArrowRight size={16} /></>
               )}

@@ -13,7 +13,28 @@ export default function FeedbackWidget() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [hasPaid, setHasPaid] = useState(() => {
+    try {
+      return localStorage.getItem("pw_has_paid") === "true";
+    } catch {
+      return false;
+    }
+  });
   const modalRef = useRef(null);
+
+  useEffect(() => {
+    const handleSuccess = () => {
+      setHasPaid(true);
+    };
+    window.addEventListener("pw-payment-success", handleSuccess);
+    window.addEventListener("storage", handleSuccess);
+    return () => {
+      window.removeEventListener("pw-payment-success", handleSuccess);
+      window.removeEventListener("storage", handleSuccess);
+    };
+  }, []);
+
+  if (!hasPaid) return null;
 
   // Close modal when clicking outside
   useEffect(() => {
