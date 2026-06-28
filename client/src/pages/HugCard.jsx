@@ -6,6 +6,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 import { applySeo, seoKeywords } from "../lib/seo";
 import { trackEvent } from "../lib/analytics";
 import { addGiftCartItem } from "../lib/giftCart";
+import MusicPlayer from "../components/MusicPlayer";
 
 /* ═══════════════════════════════════════════════════════════════════
    Pop-Up Hug Card — cross-shaped reveal
@@ -680,6 +681,7 @@ export default function HugCard() {
 
   return (
     <div className="hug-page">
+      <MusicPlayer trackId={customData?.musicTrack} />
       <div style={{ position: "absolute", top: "1rem", right: "1rem", zIndex: 100 }}>
         <LanguageSwitcher />
       </div>

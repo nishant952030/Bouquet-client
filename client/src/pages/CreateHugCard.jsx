@@ -6,6 +6,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 import { applySeo, seoKeywords } from "../lib/seo";
 import { trackEvent } from "../lib/analytics";
 import { addGiftCartItem } from "../lib/giftCart";
+import MusicSelector from "../components/MusicSelector";
 
 /* ── Message presets ── */
 const PRESETS = [
@@ -70,6 +71,7 @@ export default function CreateHugCard() {
   const [message, setMessage] = useState(PRESETS[0]);
   const [toName, setToName] = useState("");
   const [fromName, setFromName] = useState("");
+  const [musicTrack, setMusicTrack] = useState("none");
   const [added, setAdded] = useState(false);
 
   useEffect(() => {
@@ -83,7 +85,7 @@ export default function CreateHugCard() {
   }, []);
 
   const buildCardData = () => (
-    { line1: line1.trim(), line2: line2.trim(), line3: line3.trim(), msg: message.trim(), to: toName.trim(), from: fromName.trim() }
+    { line1: line1.trim(), line2: line2.trim(), line3: line3.trim(), msg: message.trim(), to: toName.trim(), from: fromName.trim(), musicTrack }
   );
 
   const handlePreview = () => {
@@ -176,6 +178,8 @@ export default function CreateHugCard() {
           <label className="chc-label" htmlFor="hc-from">💌 From (Optional)</label>
           <input id="hc-from" className="chc-input" value={fromName} onChange={e => setFromName(e.target.value)} placeholder="Your Name" maxLength={30} />
         </div>
+
+        <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} />
       </div>
 
       {/* Fixed bottom CTA bar */}

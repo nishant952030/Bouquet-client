@@ -48,5 +48,6 @@ export const DEFAULT_PLUSHIE = {
   boxStyle: "romantic",
   to: "",
   from: "",
-  msg: ""
+  msg: "",
+  musicTrack: "none"
 };

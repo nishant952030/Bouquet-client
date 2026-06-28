@@ -6,6 +6,7 @@ import { doc, getDoc, getDocFromServer } from "firebase/firestore";
 import CakeScene from "../components/cake3d/CakeScene.jsx";
 import { db, isFirebaseConfigured } from "../lib/firebase";
 import { applySeo } from "../lib/seo";
+import MusicPlayer from "../components/MusicPlayer";
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Patrick+Hand&family=Manrope:wght@400;500;600;700&display=swap');
@@ -378,6 +379,7 @@ export default function ViewCake() {
 
   return (
     <main className="vc-3d-root">
+      <MusicPlayer trackId={data.musicTrack} />
       <div style={{ position: "absolute", top: "1rem", right: "1rem", zIndex: 100 }}>
         <LanguageSwitcher />
       </div>

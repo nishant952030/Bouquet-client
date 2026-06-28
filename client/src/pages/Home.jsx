@@ -65,6 +65,8 @@ export default function Home() {
 
   const testimonials = useMemo(() => [
     { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi", city: "Mumbai" },
+    { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "Rahul", city: "Bengaluru" },
+    { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Sneha", city: "Pune" },
     { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Priya", city: "Hyderabad" },
     { quote: "Got the share link in seconds. So quick and easy!", author: "Neha", city: "Delhi" },
   ], []);
@@ -76,14 +78,14 @@ export default function Home() {
 
   useEffect(() => {
     applySeo({
-      title: "Free Online Bouquet Maker | Create & Send Digital Flowers with Note",
-      description: "Create and send a digital bouquet with a personal note in minutes. Pick flowers, write your message, and share instantly. No signup needed.",
+      title: "Free Online Bouquet Maker | Create & Send Digital Flowers with a Note",
+      description: "Send a digital bouquet for birthdays, Father's Day, anniversaries, or just because. Free, instant, no signup. The easiest way to show someone you care.",
       keywords: seoKeywords.home,
       path: "/",
       jsonLd: {
         "@context": "https://schema.org",
         "@graph": [
-          { "@type": "WebSite", name: "Petals and Words", url: window.location.origin, description: "Free online bouquet maker for creating and sharing digital flowers with personal notes." },
+          { "@type": "WebSite", name: "Petals and Words", url: window.location.origin, description: "Free online bouquet maker for creating and sharing digital flowers with personal notes for any occasion." },
         ],
       },
     });
@@ -220,12 +222,12 @@ export default function Home() {
             </div>
 
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#3d3028] mb-6 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Send flowers she'll <br className="hidden md:block"/>
-              <em className="vv-shimmer italic font-medium">never forget</em>
+              Send flowers that <br className="hidden md:block"/>
+              <em className="vv-shimmer italic font-medium">feel like you</em>
             </h1>
             
             <p className="text-[#5c4a40] text-sm md:text-base font-medium mb-10 max-w-md mx-auto leading-relaxed">
-              A digital bouquet with your words, delivered in seconds — for family, friends, or anyone you care about.
+              Birthdays, rainy days, Father's Day, anniversaries — or just because you thought of them. Free, in 60 seconds.
             </p>
 
             {/* CTAs */}
@@ -348,6 +350,13 @@ export default function Home() {
             {/* Grid of Options */}
             <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto pr-1">
               {[
+                {
+                  title: "Digital Shagun Envelope",
+                  desc: "Digitize cash gifts for weddings, Eid, and Diwali. Claim via UPI.",
+                  icon: "✉️",
+                  path: "/shagun",
+                  tag: "NEW"
+                },
                 {
                   title: t("common.createBouquet", "Create Bouquet"),
                   desc: "Arrange beautiful 2D flower stems with a card note.",

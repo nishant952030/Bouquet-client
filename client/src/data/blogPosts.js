@@ -1,5 +1,175 @@
 export const blogPosts = [
   {
+    slug: "send-flowers-to-crush-anonymously",
+    title: "How to Send Flowers to Your Crush Anonymously (And Make Them Wonder)",
+    description: "Nervous about making the first move? A digital bouquet is the most romantic and low-risk way to let someone know you're thinking of them. Here's exactly how to do it.",
+    publishedAt: "2026-06-23",
+    updatedAt: "2026-06-23",
+    readingMinutes: 5,
+    keywords: [
+      "send flowers to crush anonymously",
+      "anonymous digital bouquet",
+      "how to tell someone you like them",
+      "send flowers without revealing name",
+      "virtual flowers for crush",
+      "romantic gesture online",
+      "digital bouquet for someone you like",
+      "send flowers secretly",
+    ],
+    sections: [
+      {
+        heading: "Why sending flowers to your crush actually works",
+        paragraphs: [
+          "A surprise bouquet creates curiosity. And curiosity is more powerful than confidence when it comes to attraction. You don't need to be bold — you need to be interesting.",
+          "A physical flower delivery is expensive, logistically complicated, and exposes you immediately. A digital bouquet? It arrives in seconds, costs nothing, and you control exactly how much — or how little — you reveal.",
+          "The goal isn't to confess. The goal is to make them smile, wonder who sent it, and think about you for the rest of the day.",
+        ],
+      },
+      {
+        heading: "Step 1: Choose flowers that say something without saying everything",
+        paragraphs: [
+          "Yellow tulips: 'There's sunshine in my day when I think of you.' Warm, flirtatious, and not overwhelming.",
+          "Pink roses: classic romantic interest without being too intense. The universally understood 'I notice you.'",
+          "Mixed pastel bouquet: playful, light, and unserious — perfect if you want to keep it ambiguous and fun.",
+          "Avoid: all-red roses. It's too much for a first move. Save that for when you're no longer anonymous.",
+        ],
+      },
+      {
+        heading: "Step 2: Write a note that makes them curious, not confused",
+        paragraphs: [
+          "The best anonymous notes are short, specific, and slightly warm. They reference something only someone who actually knows them would mention.",
+          "Good: 'You have no idea how good you looked yesterday.' — specific, slightly mysterious, not creepy.",
+          "Good: 'I've been meaning to say something for a while. Maybe these flowers can start the conversation.' — open-ended and inviting.",
+          "Good: 'Someone thinks you deserve flowers today. That's all.' — simple, clean, lets their imagination do the work.",
+          "Avoid: anything too intense, too long, or that mentions physical appearance in detail. Keep it light. The mystery is the point.",
+        ],
+      },
+      {
+        heading: "Step 3: Send it at the right moment",
+        paragraphs: [
+          "Morning is best — they'll spend the whole day wondering who sent it. A bouquet that arrives at 8am is a conversation starter all day.",
+          "After something good happened to them — a win, a birthday, a hard day they mentioned. It shows you were paying attention. That's irresistible.",
+          "Not a Friday night — it gets lost in weekend noise. Tuesday morning. Wednesday afternoon. Unexpected timing multiplies impact.",
+        ],
+      },
+      {
+        heading: "What happens next",
+        paragraphs: [
+          "They'll probably ask around. Or post about it. Or quietly hope it's you and wait to see if you give anything away.",
+          "If they bring it up when you're around, that's your signal. A small smile and 'Maybe it was me' is all you need.",
+          "If they don't mention it, send another one in two weeks with a slightly warmer note. Curiosity compounds.",
+          "The best outcome: they feel genuinely seen and cared for before you've even said a word. That's the perfect foundation for whatever comes next.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "rainy-season-romantic-flowers",
+    title: "Rainy Season Romance: The Perfect Time to Send Digital Flowers",
+    description: "There's something about the monsoon and rainy season that makes people feel more. Use that. Here's how a digital bouquet in the rain hits different.",
+    publishedAt: "2026-06-18",
+    updatedAt: "2026-06-18",
+    readingMinutes: 4,
+    keywords: [
+      "rainy season romantic gift",
+      "monsoon flowers online",
+      "digital flowers for girlfriend",
+      "romantic digital gift",
+      "send flowers during monsoon",
+      "virtual bouquet for partner",
+      "romantic gift ideas June July",
+    ],
+    sections: [
+      {
+        heading: "Why the rainy season is the most romantic time to send flowers",
+        paragraphs: [
+          "Rain slows everything down. People watch from windows, listen to downpours, feel nostalgic. Emotions run closer to the surface.",
+          "A digital bouquet sent during the monsoon arrives in that emotional window — when your partner is quiet, reflective, and more likely to truly feel what you've written.",
+          "You don't need an occasion. 'It's raining and I was thinking of you' is the best reason to send flowers there is.",
+        ],
+      },
+      {
+        heading: "What to write when it's raining",
+        paragraphs: [
+          "Keep it sensory and present. Reference the moment: 'It's raining here and somehow all my thoughts led back to you.'",
+          "For a long-distance partner: 'I wonder if it's raining there too. I'd give anything to share the same grey sky right now.'",
+          "For someone you miss: 'Rainy days are harder to do alone. Sending flowers until I can send myself.'",
+          "For a new relationship: 'I don't know if you like the rain. I need to find out. Thinking of you today.'",
+        ],
+      },
+      {
+        heading: "Best flower choices for rainy season bouquets",
+        paragraphs: [
+          "Deep purple lavender: calming and nostalgic — it matches the mood of a rainy afternoon perfectly.",
+          "White gardenias or jasmine-style flowers: fresh, clean, and evocative of that petrichor feeling after rain.",
+          "Pink and blue combinations: soft, dreamy, and beautiful in the low light of a monsoon afternoon.",
+          "Avoid highly saturated, tropical-looking bouquets — they feel out of tune with the emotional register of a rainy day.",
+        ],
+      },
+      {
+        heading: "Making it a ritual",
+        paragraphs: [
+          "The first heavy monsoon rain of the season is a natural signal. Use it. 'First rain of the season. Had to send you this.'",
+          "If you and your partner have a shared memory of rain — a walk, a drive, a stuck-inside day — reference it. Grounding your message in shared experience makes it unforgettable.",
+        ],
+      },
+    ],
+  },
+  {
+    slug: "teacher-appreciation-digital-flowers",
+    title: "Teacher Appreciation Flowers: How to Say Thank You With a Digital Bouquet",
+    description: "A meaningful digital bouquet for a teacher is one of the most underrated gestures. Here's what to choose, what to write, and why it works.",
+    publishedAt: "2026-06-15",
+    updatedAt: "2026-06-15",
+    readingMinutes: 5,
+    keywords: [
+      "teacher appreciation gift online",
+      "digital flowers for teacher",
+      "thank you flowers for teacher",
+      "teachers day gift idea",
+      "send flowers to teacher online free",
+      "teacher thank you note ideas",
+      "virtual bouquet for teacher",
+    ],
+    sections: [
+      {
+        heading: "Why a digital bouquet is a great teacher gift",
+        paragraphs: [
+          "Teachers receive a lot of generic gifts. A digital bouquet with a personal note stands out precisely because it requires no purchase — just thought.",
+          "It's free, instant, and can be sent from anywhere. Students studying remotely, graduates who've moved on, or parents wanting to acknowledge a school year — a digital bouquet works in all these situations without the logistics of physical delivery.",
+          "Most importantly: teachers remember words. A specific, genuine note will stay with them longer than any mug or gift card.",
+        ],
+      },
+      {
+        heading: "What to write for a teacher",
+        paragraphs: [
+          "The best notes mention something the teacher did that the student actually remembers. Generic praise feels transactional. Specific recall feels human.",
+          "For a primary school teacher: 'You made learning feel like an adventure. I didn't realize how rare that was until I was older. Thank you.'",
+          "For a secondary school teacher: 'You pushed me when I needed it and gave me space when that was harder. You read the room in a way most adults don't bother to.'",
+          "For a college professor: 'You changed how I think, not just what I know. That's the difference between a teacher and an educator. Thank you for being the latter.'",
+          "From a parent: 'You saw things in my child that I was afraid to hope for. Thank you for nurturing them with patience and genuine care.'",
+        ],
+      },
+      {
+        heading: "Best flowers for teacher appreciation",
+        paragraphs: [
+          "Sunflowers: warm, bright, and enthusiastic — they mirror the energy good teachers bring into a classroom.",
+          "Yellow and white daisies: cheerful, innocent, and respectful without being overly formal.",
+          "Lavender: thoughtful and calm, great for a teacher known for patience and stability.",
+          "Avoid romantic palettes (all red, deep roses). Keep the arrangement warm but professional.",
+        ],
+      },
+      {
+        heading: "When to send it",
+        paragraphs: [
+          "Teacher's Day (September 5 in India, May in the US) is the obvious moment — but the most meaningful bouquets arrive outside the expected window.",
+          "End of semester, last day of school, after a particularly hard class, or when a student gets into university — these unexpected moments make the gesture feel genuinely personal rather than obligatory.",
+          "If you're a former student reaching out years later: 'I don't know if you remember me. But I remember you. I wanted to say thank you properly.' That's the kind of message a teacher carries for decades.",
+        ],
+      },
+    ],
+  },
+  {
     slug: "mothers-day-bouquet-ideas",
     title: "Mother's Day Bouquet Ideas: Digital Flowers She'll Actually Love",
     description: "Creative Mother's Day bouquet ideas with personal notes. Send a virtual bouquet that makes Mom smile, cry happy tears, and screenshot it forever.",

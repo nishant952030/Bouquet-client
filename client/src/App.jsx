@@ -25,6 +25,10 @@ import CreatePlushie from "./pages/CreatePlushie.jsx";
 import PaymentPlushie from "./pages/PaymentPlushie.jsx";
 import ViewPlushie from "./pages/ViewPlushie.jsx";
 
+import CreateShagun from "./pages/CreateShagun.jsx";
+import ShagunSuccess from "./pages/ShagunSuccess.jsx";
+import ClaimShagun from "./pages/ClaimShagun.jsx";
+
 import useDirection from "./hooks/useDirection.js";
 
 // ✅ IMPORT ANALYTICS
@@ -60,6 +64,9 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/shagun" element={<CreateShagun />} />
+        <Route path="/shagun/success/:id" element={<ShagunSuccess />} />
+        <Route path="/claim/:id" element={<ClaimShagun />} />
         <Route path="/create-cake" element={<CreateCake />} />
         <Route path="/payment-cake" element={<PaymentCake />} />
         <Route path="/cake/:id" element={<ViewCake />} />

@@ -6,6 +6,7 @@ import { doc, getDoc, getDocFromServer } from "firebase/firestore";
 import PlushieScene from "../components/plushie3d/PlushieScene.jsx";
 import { db, isFirebaseConfigured } from "../lib/firebase";
 import { applySeo } from "../lib/seo";
+import MusicPlayer from "../components/MusicPlayer";
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Patrick+Hand&family=Manrope:wght@400;500;600;700;800&display=swap');
@@ -385,6 +386,7 @@ export default function ViewPlushie() {
   return (
     <div className="vp-root">
       <style>{CSS}</style>
+      <MusicPlayer trackId={data.musicTrack} />
       
       {isOpen && <Confetti />}
 

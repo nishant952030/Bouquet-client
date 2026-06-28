@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import MusicSelector from "../MusicSelector";
 import {
   FLAVORS,
   MAX_CANDLES,
@@ -49,6 +50,8 @@ export default function CakeControls({
   addedToCart,
   onSelectedToppingChange,
   onSubmit,
+  musicTrack,
+  onMusicTrackChange,
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -235,6 +238,7 @@ export default function CakeControls({
           value={note}
         />
       </div>
+      <MusicSelector selectedTrackId={musicTrack} onChange={onMusicTrackChange} />
 
       {error && <div className="cake3d-error">{error}</div>}
 

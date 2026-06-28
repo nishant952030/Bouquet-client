@@ -56,6 +56,7 @@ export default function CakeConfigurator() {
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
   const [occasion, setOccasion] = useState("birthday");
+  const [musicTrack, setMusicTrack] = useState("none");
   const [error, setError] = useState("");
   const [activeTool, setActiveTool] = useState("candle");
   const [selectedTopping, setSelectedTopping] = useState("cherry");
@@ -201,6 +202,7 @@ export default function CakeConfigurator() {
       candles: cakeState.candles,
       creamSwirls: cakeState.creamSwirls,
       toppings: cakeState.toppings,
+      musicTrack,
     };
   };
 
@@ -301,6 +303,8 @@ export default function CakeConfigurator() {
                 setName(value);
                 setError("");
               }}
+              musicTrack={musicTrack}
+              onMusicTrackChange={setMusicTrack}
               onNoteChange={setNote}
               onOccasionChange={setOccasion}
               onAddToCart={addCakeToCart}

@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { Buffer } from "node:buffer";
 import process from "node:process";
+import { db, isConfigured } from "../_lib/firebase-server.js";
 
 function getRawBody(req) {
   if (typeof req.body === "string") return req.body;
@@ -54,16 +55,54 @@ export default async function handler(req, res) {
 
   const eventType = event?.event || "unknown";
   const paymentEntity = event?.payload?.payment?.entity;
+  const orderEntity = event?.payload?.order?.entity;
 
   // Keep processing idempotent and lightweight in webhook path.
-  // Add persistence/business logic here (DB update, notification, etc.).
   console.log("Razorpay webhook verified:", {
     eventType,
     paymentId: paymentEntity?.id,
-    orderId: paymentEntity?.order_id,
-    amount: paymentEntity?.amount,
-    status: paymentEntity?.status,
+    orderId: paymentEntity?.order_id || orderEntity?.id,
+    amount: paymentEntity?.amount || orderEntity?.amount,
+    status: paymentEntity?.status || orderEntity?.status,
   });
+
+  const notes = orderEntity?.notes || paymentEntity?.notes || {};
+
+  if (notes.shagunId && notes.type === "shagun_gift") {
+    if (!isConfigured || !db) {
+      console.error("❌ Firestore not configured in webhook.");
+      return res.status(500).json({ error: "Database configuration error" });
+    }
+
+    try {
+      const shagunId = notes.shagunId;
+      const shagunRef = db.collection("cards").doc(shagunId);
+      const docSnap = await shagunRef.get();
+
+      // If document doesn't exist or is not funded yet, write/update it.
+      if (!docSnap.exists || docSnap.data().paymentStatus !== "funded") {
+        await shagunRef.set({
+          id: shagunId,
+          senderName: notes.senderName || "Sender",
+          receiverName: notes.receiverName || "",
+          amount: Number(notes.giftAmount || 0),
+          fee: 15,
+          message: notes.message || "Best wishes!",
+          theme: notes.theme || "wedding",
+          paymentStatus: "funded",
+          status: "unclaimed",
+          razorpayOrderId: orderEntity?.id || paymentEntity?.order_id || "",
+          razorpayPaymentId: paymentEntity?.id || "",
+          createdAt: docSnap.exists ? docSnap.data().createdAt : new Date().toISOString(),
+          fundedAt: new Date().toISOString(),
+        }, { merge: true });
+        console.log(`🔥 Webhook marked shagun envelope ${shagunId} as funded.`);
+      }
+    } catch (dbErr) {
+      console.error("❌ Failed to update Firestore from webhook:", dbErr);
+      return res.status(500).json({ error: "Failed to persist payout record" });
+    }
+  }
 
   return res.status(200).json({ ok: true });
 }

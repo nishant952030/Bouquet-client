@@ -4,6 +4,7 @@ import { ArrowRight, Gift, Home, PackageOpen } from "lucide-react";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { loadGiftBundle } from "../lib/giftBundle";
 import { applySeo } from "../lib/seo";
+import MusicPlayer from "../components/MusicPlayer";
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
@@ -53,6 +54,11 @@ export default function GiftBundle() {
   });
 
   const items = useMemo(() => (Array.isArray(bundle?.items) ? bundle.items : []), [bundle]);
+  
+  const firstMusicTrack = useMemo(() => {
+    const itemWithMusic = items.find((item) => item.musicTrack && item.musicTrack !== "none");
+    return itemWithMusic ? itemWithMusic.musicTrack : "none";
+  }, [items]);
 
   useEffect(() => {
     applySeo({
@@ -119,6 +125,7 @@ export default function GiftBundle() {
 
   return (
     <main className="gb-root">
+      <MusicPlayer trackId={firstMusicTrack} />
       <style>{CSS}</style>
       <header className="gb-header">
         <div className="gb-header-inner">

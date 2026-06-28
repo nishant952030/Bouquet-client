@@ -59,6 +59,7 @@ async function persistBouquet(item, createdAt) {
     stems: Array.isArray(payload.stems) ? payload.stems : [],
     note: typeof payload.note === "string" ? payload.note : "",
     senderName: typeof payload.senderName === "string" ? payload.senderName.trim() : "",
+    musicTrack: typeof payload.musicTrack === "string" ? payload.musicTrack : "none",
     plan: "bundle_paid",
     createdAt,
   };
@@ -72,6 +73,7 @@ async function persistBouquet(item, createdAt) {
     title: getGiftItemTitle(item),
     subtitle: getGiftItemSubtitle(item),
     url: `${origin()}/view/${id}`,
+    musicTrack: sharePayload.musicTrack,
   };
 }
 
@@ -90,6 +92,7 @@ async function persistCake(item, createdAt) {
     candles: candles.map(compactPosition),
     creamSwirls: Array.isArray(payload.creamSwirls) ? payload.creamSwirls.map(compactPosition) : [],
     toppings: Array.isArray(payload.toppings) ? payload.toppings.map(compactTopping) : [],
+    musicTrack: typeof payload.musicTrack === "string" ? payload.musicTrack : "none",
     createdAt,
   };
 
@@ -102,6 +105,7 @@ async function persistCake(item, createdAt) {
     title: getGiftItemTitle(item),
     subtitle: getGiftItemSubtitle(item),
     url: `${origin()}/cake/${id}`,
+    musicTrack: sharePayload.musicTrack,
   };
 }
 
@@ -115,6 +119,7 @@ async function persistGreetingCard(item, createdAt) {
     from: typeof payload.from === "string" ? payload.from.trim() : "",
     paper: typeof payload.paper === "string" ? payload.paper : "blush",
     decos: Array.isArray(payload.decos) ? payload.decos : [],
+    musicTrack: typeof payload.musicTrack === "string" ? payload.musicTrack : "none",
   };
   const sharePayload = {
     ...cardData,
@@ -132,6 +137,7 @@ async function persistGreetingCard(item, createdAt) {
     title: getGiftItemTitle(item),
     subtitle: getGiftItemSubtitle(item),
     url: `${origin()}/greeting-card?card=${encodeURIComponent(encodeCardData(cardData))}`,
+    musicTrack: cardData.musicTrack,
   };
 }
 
@@ -151,6 +157,7 @@ async function persistHugCard(item) {
     title: getGiftItemTitle(item),
     subtitle: getGiftItemSubtitle(item),
     url,
+    musicTrack: payload.musicTrack || "none",
   };
 }
 
@@ -165,6 +172,7 @@ async function persistPlushie(item, createdAt) {
     msg: typeof payload.msg === "string" ? payload.msg : "",
     to: typeof payload.to === "string" ? payload.to.trim() : "",
     from: typeof payload.from === "string" ? payload.from.trim() : "",
+    musicTrack: typeof payload.musicTrack === "string" ? payload.musicTrack : "none",
   };
   const sharePayload = {
     ...plushieData,
@@ -183,6 +191,7 @@ async function persistPlushie(item, createdAt) {
     title: getGiftItemTitle(item),
     subtitle: getGiftItemSubtitle(item),
     url: `${origin()}/plushie/${id}?data=${encodeURIComponent(encoded)}`,
+    musicTrack: plushieData.musicTrack,
   };
 }
 

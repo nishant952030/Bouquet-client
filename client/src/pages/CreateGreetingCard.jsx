@@ -6,6 +6,7 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 import { applySeo, seoKeywords } from "../lib/seo";
 import { trackEvent } from "../lib/analytics";
 import { addGiftCartItem } from "../lib/giftCart";
+import MusicSelector from "../components/MusicSelector";
 
 /* ── Paper textures (CSS only) ── */
 const PAPERS = [
@@ -123,6 +124,7 @@ export default function CreateGreetingCard() {
   const [fromName, setFromName] = useState("");
   const [paper, setPaper] = useState("blush");
   const [decos, setDecos] = useState(["hearts"]);
+  const [musicTrack, setMusicTrack] = useState("none");
   const [added, setAdded] = useState(false);
 
   const selectedPaper = PAPERS.find(p => p.id === paper) || PAPERS[0];
@@ -156,7 +158,7 @@ export default function CreateGreetingCard() {
   };
 
   const buildCardData = () => (
-    { to: toName.trim(), title: title.trim(), msg: message, from: fromName.trim(), paper, decos }
+    { to: toName.trim(), title: title.trim(), msg: message, from: fromName.trim(), paper, decos, musicTrack }
   );
 
   const handlePreview = () => {
@@ -281,6 +283,8 @@ export default function CreateGreetingCard() {
             ))}
           </div>
         </div>
+
+        <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} />
       </div>
 
       {/* Fixed bottom CTA bar */}

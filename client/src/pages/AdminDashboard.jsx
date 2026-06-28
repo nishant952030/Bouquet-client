@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, orderBy, where, getCountFromServer } from "firebase/firestore";
+import { collection, getDocs, query, where, getCountFromServer } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "../lib/firebase";
 import { 
-  BarChart3, Users, Globe, Smartphone, ArrowRight, Lock, KeyRound, Clock, Activity, CreditCard
+  BarChart3, Users, Globe, Smartphone, ArrowRight, Lock, KeyRound, Clock, Activity, CreditCard,
+  Loader2
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
@@ -40,7 +41,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchStats();
-      const interval = setInterval(fetchStats, 60000); // refresh every minute
+      const interval = setInterval(fetchStats, 60000);
       return () => clearInterval(interval);
     }
   }, [isAuthenticated, dateRange]);
@@ -54,11 +55,13 @@ export default function AdminDashboard() {
     }
     if (password === correctPassword) {
       localStorage.setItem("pw_admin", "true");
+      localStorage.setItem("pw_admin_key", password); // Store for server-side payout operations
       setIsAuthenticated(true);
     } else {
       setError("Incorrect password");
     }
   };
+
 
   const fetchStats = async () => {
     if (!isFirebaseConfigured || !db) return;
@@ -232,6 +235,8 @@ export default function AdminDashboard() {
       .slice(0, limit);
   };
 
+
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-neutral-200 p-4 md:p-8 font-sans pb-32">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -247,224 +252,227 @@ export default function AdminDashboard() {
               Your visits are currently excluded from tracking.
             </p>
           </div>
-          <div className="flex bg-neutral-800/50 p-1 rounded-xl border border-neutral-800 w-fit">
-            {["today", "7d", "30d", "all"].map((range) => (
-              <button
-                key={range}
-                onClick={() => setDateRange(range)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  dateRange === range 
-                    ? "bg-neutral-700 text-white shadow-sm" 
-                    : "text-neutral-400 hover:text-white hover:bg-neutral-800"
-                }`}
-              >
-                {range === "today" ? "Today" : range === "7d" ? "7 Days" : range === "30d" ? "30 Days" : "All Time"}
-              </button>
-            ))}
+
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex bg-neutral-800/50 p-1 rounded-xl border border-neutral-800 w-fit">
+              {["today", "7d", "30d", "all"].map((range) => (
+                <button
+                  key={range}
+                  onClick={() => setDateRange(range)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    dateRange === range 
+                      ? "bg-neutral-700 text-white shadow-sm" 
+                      : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+                  }`}
+                >
+                  {range === "today" ? "Today" : range === "7d" ? "7 Days" : range === "30d" ? "30 Days" : "All Time"}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Top KPIs */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full blur-3xl" />
-            <div className="flex items-center gap-3 text-neutral-400 mb-2">
-              <Activity className="w-4 h-4 text-green-400" />
-              <span className="text-sm font-medium">Live Users</span>
-            </div>
-            <div className="text-4xl font-bold text-white flex items-baseline gap-2">
-              {loading ? "..." : stats.liveUsers}
-              <span className="text-xs font-normal text-green-400 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                Active now
-              </span>
-            </div>
-          </div>
-          
-          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
-            <div className="flex items-center gap-3 text-neutral-400 mb-2">
-              <Users className="w-4 h-4 text-rose-400" />
-              <span className="text-sm font-medium">Unique Visitors</span>
-            </div>
-            <div className="text-4xl font-bold text-white">
-              {loading ? "..." : (dateRange === "today" ? stats.todayUnique : stats.totalUnique)}
-            </div>
-          </div>
+        <>
+            {/* Top KPIs */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full blur-3xl" />
+                <div className="flex items-center gap-3 text-neutral-400 mb-2">
+                  <Activity className="w-4 h-4 text-green-400" />
+                  <span className="text-sm font-medium">Live Users</span>
+                </div>
+                <div className="text-4xl font-bold text-white flex items-baseline gap-2">
+                  {loading ? "..." : stats.liveUsers}
+                  <span className="text-xs font-normal text-green-400 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    Active now
+                  </span>
+                </div>
+              </div>
+              
+              <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
+                <div className="flex items-center gap-3 text-neutral-400 mb-2">
+                  <Users className="w-4 h-4 text-rose-400" />
+                  <span className="text-sm font-medium">Unique Visitors</span>
+                </div>
+                <div className="text-4xl font-bold text-white">
+                  {loading ? "..." : (dateRange === "today" ? stats.todayUnique : stats.totalUnique)}
+                </div>
+              </div>
 
-          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
-            <div className="flex items-center gap-3 text-neutral-400 mb-2">
-              <BarChart3 className="w-4 h-4 text-blue-400" />
-              <span className="text-sm font-medium">Page Views</span>
-            </div>
-            <div className="text-4xl font-bold text-white">
-              {loading ? "..." : (dateRange === "today" ? stats.todayViews : stats.totalViews)}
-            </div>
-          </div>
+              <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
+                <div className="flex items-center gap-3 text-neutral-400 mb-2">
+                  <BarChart3 className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm font-medium">Page Views</span>
+                </div>
+                <div className="text-4xl font-bold text-white">
+                  {loading ? "..." : (dateRange === "today" ? stats.todayViews : stats.totalViews)}
+                </div>
+              </div>
 
-          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl relative overflow-hidden lg:col-span-2">
-             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl" />
-            <div className="flex items-center gap-3 text-neutral-400 mb-2">
-              <CreditCard className="w-4 h-4 text-amber-400" />
-              <span className="text-sm font-medium">Total Gifts Saved</span>
-            </div>
-            <div className="text-4xl font-bold text-white">
-              {loading ? "..." : stats.paymentsCount}
-            </div>
-            <p className="text-xs text-neutral-500 mt-1">Bouquets, Cakes & Cards</p>
-          </div>
-          
-          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
-            <div className="flex items-center gap-3 text-neutral-400 mb-2">
-              <span className="text-sm font-medium">Bounce Rate</span>
-            </div>
-            <div className="text-4xl font-bold text-white">
-              {loading ? "..." : `${stats.bounceRate}%`}
-            </div>
-            <p className="text-xs text-neutral-500 mt-1">Single page visits</p>
-          </div>
+              <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl relative overflow-hidden lg:col-span-2">
+                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl" />
+                <div className="flex items-center gap-3 text-neutral-400 mb-2">
+                  <CreditCard className="w-4 h-4 text-amber-400" />
+                  <span className="text-sm font-medium">Total Gifts Saved</span>
+                </div>
+                <div className="text-4xl font-bold text-white">
+                  {loading ? "..." : stats.paymentsCount}
+                </div>
+                <p className="text-xs text-neutral-500 mt-1">Bouquets, Cakes & Cards</p>
+              </div>
+              
+              <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
+                <div className="flex items-center gap-3 text-neutral-400 mb-2">
+                  <span className="text-sm font-medium">Bounce Rate</span>
+                </div>
+                <div className="text-4xl font-bold text-white">
+                  {loading ? "..." : `${stats.bounceRate}%`}
+                </div>
+                <p className="text-xs text-neutral-500 mt-1">Single page visits</p>
+              </div>
 
-          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
-            <div className="flex items-center gap-3 text-neutral-400 mb-2">
-              <span className="text-sm font-medium">Pages/Session</span>
+              <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
+                <div className="flex items-center gap-3 text-neutral-400 mb-2">
+                  <span className="text-sm font-medium">Pages/Session</span>
+                </div>
+                <div className="text-4xl font-bold text-white">
+                  {loading ? "..." : stats.avgSessionViews}
+                </div>
+                <p className="text-xs text-neutral-500 mt-1">Average views</p>
+              </div>
             </div>
-            <div className="text-4xl font-bold text-white">
-              {loading ? "..." : stats.avgSessionViews}
-            </div>
-            <p className="text-xs text-neutral-500 mt-1">Average views</p>
-          </div>
-        </div>
 
-
-
-        {/* Traffic Chart */}
-        {stats.chartData.length > 0 && (
-          <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-              <Activity className="w-5 h-5 text-neutral-400" /> Page Views Over Time
-            </h3>
-            <div className="h-72 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={stats.chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <XAxis 
-                    dataKey="date" 
-                    tickFormatter={(tick) => {
-                      const d = new Date(tick);
-                      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-                    }}
-                    stroke="#525252" 
-                    fontSize={12} 
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis stroke="#525252" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#171717', borderColor: '#262626', borderRadius: '8px', color: '#fff' }}
-                    itemStyle={{ color: '#f43f5e' }}
-                    labelStyle={{ color: '#a3a3a3', marginBottom: '4px' }}
-                    labelFormatter={(label) => new Date(label).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
-                  />
-                  <Area type="monotone" dataKey="views" name="Page Views" stroke="#f43f5e" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" />
-                  <Area type="monotone" dataKey="unique" name="Unique Visitors" stroke="#3b82f6" strokeWidth={2} fillOpacity={0} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
-
-        {/* Detailed Breakdown Grids */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {/* Top Pages */}
-          <div className="bg-neutral-900/30 border border-neutral-800 p-6 rounded-2xl lg:col-span-2">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <Globe className="w-5 h-5 text-neutral-400" /> Top Pages
-            </h3>
-            <div className="space-y-4">
-              {getTopEntries(stats.topPages, 8).map(([path, count]) => (
-                <div key={path} className="flex items-center justify-between">
-                  <div className="truncate text-sm pr-4">{path}</div>
-                  <div className="flex items-center gap-4 text-sm w-32 justify-end">
-                    <span className="text-white font-medium">{count}</span>
-                    <div className="w-16 h-1.5 bg-neutral-800 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-rose-500/50 rounded-full"
-                        style={{ width: `${Math.min(100, (count / (dateRange === "today" ? stats.todayViews : stats.totalViews)) * 100)}%` }}
+            {/* Traffic Chart */}
+            {stats.chartData.length > 0 && (
+              <div className="bg-neutral-900/50 border border-neutral-800 p-6 rounded-2xl">
+                <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-neutral-400" /> Page Views Over Time
+                </h3>
+                <div className="h-72 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={stats.chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <XAxis 
+                        dataKey="date" 
+                        tickFormatter={(tick) => {
+                          const d = new Date(tick);
+                          return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+                        }}
+                        stroke="#525252" 
+                        fontSize={12} 
+                        tickLine={false}
+                        axisLine={false}
                       />
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {Object.keys(stats.topPages).length === 0 && !loading && (
-                <p className="text-neutral-500 text-sm">No data available</p>
-              )}
-            </div>
-          </div>
-
-          {/* Traffic Sources */}
-          <div className="bg-neutral-900/30 border border-neutral-800 p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <ArrowRight className="w-5 h-5 text-neutral-400" /> Referrers
-            </h3>
-            <div className="space-y-4">
-              {getTopEntries(stats.referrers, 8).map(([source, count]) => (
-                <div key={source} className="flex items-center justify-between text-sm">
-                  <span className="text-neutral-300">{source}</span>
-                  <span className="text-white font-medium bg-neutral-800 px-2 py-0.5 rounded-md">{count}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Countries */}
-          <div className="bg-neutral-900/30 border border-neutral-800 p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <Globe className="w-5 h-5 text-neutral-400" /> Countries
-            </h3>
-            <div className="space-y-4">
-              {getTopEntries(stats.countries, 6).map(([country, count]) => (
-                <div key={country} className="flex items-center justify-between text-sm">
-                  <span className="text-neutral-300">{country}</span>
-                  <span className="text-white font-medium bg-neutral-800 px-2 py-0.5 rounded-md">{count}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Devices */}
-          <div className="bg-neutral-900/30 border border-neutral-800 p-6 rounded-2xl">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <Smartphone className="w-5 h-5 text-neutral-400" /> Devices
-            </h3>
-            <div className="space-y-4 mt-6">
-              {["mobile", "desktop", "tablet"].map(device => {
-                const count = stats.devices[device] || 0;
-                const total = dateRange === "today" ? stats.todayViews : stats.totalViews;
-                const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
-                return (
-                  <div key={device} className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="capitalize text-neutral-300">{device}</span>
-                      <span className="text-white font-medium">{percentage}% ({count})</span>
-                    </div>
-                    <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-blue-500/50 rounded-full"
-                        style={{ width: `${percentage}%` }}
+                      <YAxis stroke="#525252" fontSize={12} tickLine={false} axisLine={false} />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#171717', borderColor: '#262626', borderRadius: '8px', color: '#fff' }}
+                        itemStyle={{ color: '#f43f5e' }}
+                        labelStyle={{ color: '#a3a3a3', marginBottom: '4px' }}
+                        labelFormatter={(label) => new Date(label).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
                       />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+                      <Area type="monotone" dataKey="views" name="Page Views" stroke="#f43f5e" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" />
+                      <Area type="monotone" dataKey="unique" name="Unique Visitors" stroke="#3b82f6" strokeWidth={2} fillOpacity={0} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
 
-        </div>
+            {/* Detailed Breakdown Grids */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              
+              {/* Top Pages */}
+              <div className="bg-neutral-900/30 border border-neutral-800 p-6 rounded-2xl lg:col-span-2">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-neutral-400" /> Top Pages
+                </h3>
+                <div className="space-y-4">
+                  {getTopEntries(stats.topPages, 8).map(([path, count]) => (
+                    <div key={path} className="flex items-center justify-between">
+                      <div className="truncate text-sm pr-4">{path}</div>
+                      <div className="flex items-center gap-4 text-sm w-32 justify-end">
+                        <span className="text-white font-medium">{count}</span>
+                        <div className="w-16 h-1.5 bg-neutral-800 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-rose-500/50 rounded-full"
+                            style={{ width: `${Math.min(100, (count / (dateRange === "today" ? stats.todayViews : stats.totalViews)) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {Object.keys(stats.topPages).length === 0 && !loading && (
+                    <p className="text-neutral-500 text-sm">No data available</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Traffic Sources */}
+              <div className="bg-neutral-900/30 border border-neutral-800 p-6 rounded-2xl">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <ArrowRight className="w-5 h-5 text-neutral-400" /> Referrers
+                </h3>
+                <div className="space-y-4">
+                  {getTopEntries(stats.referrers, 8).map(([source, count]) => (
+                    <div key={source} className="flex items-center justify-between text-sm">
+                      <span className="text-neutral-300">{source}</span>
+                      <span className="text-white font-medium bg-neutral-800 px-2 py-0.5 rounded-md">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Countries */}
+              <div className="bg-neutral-900/30 border border-neutral-800 p-6 rounded-2xl">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-neutral-400" /> Countries
+                </h3>
+                <div className="space-y-4">
+                  {getTopEntries(stats.countries, 6).map(([country, count]) => (
+                    <div key={country} className="flex items-center justify-between text-sm">
+                      <span className="text-neutral-300">{country}</span>
+                      <span className="text-white font-medium bg-neutral-800 px-2 py-0.5 rounded-md">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Devices */}
+              <div className="bg-neutral-900/30 border border-neutral-800 p-6 rounded-2xl">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Smartphone className="w-5 h-5 text-neutral-400" /> Devices
+                </h3>
+                <div className="space-y-4 mt-6">
+                  {["mobile", "desktop", "tablet"].map(device => {
+                    const count = stats.devices[device] || 0;
+                    const total = dateRange === "today" ? stats.todayViews : stats.totalViews;
+                    const percentage = total > 0 ? Math.round((count / total) * 100) : 0;
+                    return (
+                      <div key={device} className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="capitalize text-neutral-300">{device}</span>
+                          <span className="text-white font-medium">{percentage}% ({count})</span>
+                        </div>
+                        <div className="w-full h-2 bg-neutral-800 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-blue-500/50 rounded-full"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+            </div>
+          </>
       </div>
     </div>
   );

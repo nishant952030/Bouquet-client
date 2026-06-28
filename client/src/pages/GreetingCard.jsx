@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { applySeo, seoKeywords } from "../lib/seo";
 import LanguageSwitcher from "../components/LanguageSwitcher";
+import MusicPlayer from "../components/MusicPlayer";
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Greeting Card — Centered Envelope → Card Reveal
@@ -405,6 +406,7 @@ export default function GreetingCard() {
   return (
     <div className="md-page">
       <style>{CSS}</style>
+      <MusicPlayer trackId={cardData?.musicTrack} />
 
       <div className="md-lang">
         <LanguageSwitcher />

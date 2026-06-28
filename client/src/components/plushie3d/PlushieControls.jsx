@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PLUSHIE_TYPES, COLOR_PRESETS, ACCESSORIES, BOX_STYLES } from "./plushieConfig";
+import MusicSelector from "../MusicSelector";
 
 export default function PlushieControls({
   plushieState,
@@ -144,6 +145,8 @@ export default function PlushieControls({
           {plushieState.msg.length}/240
         </p>
       </div>
+
+      <MusicSelector selectedTrackId={plushieState.musicTrack} onChange={(val) => onChange("musicTrack", val)} />
 
       {error && <div className="plushie3d-error">{error}</div>}
 

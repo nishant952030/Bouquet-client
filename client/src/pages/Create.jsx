@@ -8,6 +8,7 @@ import { track } from "@vercel/analytics";
 import CanvasBoard from "../components/CanvasBoard";
 import FlowerPicker from "../components/FlowerPicker";
 import NoteCard from "../components/NoteCard";
+import MusicSelector from "../components/MusicSelector";
 import { bouquetSuggestions, noteSuggestions } from "../data/bouquetSuggestions";
 import { flowers } from "../data/flowerCatalog";
 import { trackEvent } from "../lib/analytics";
@@ -364,6 +365,7 @@ export default function Create() {
   const [showMoreBouquets, setShowMoreBouquets] = useState(false);
   const [showMoreNotes, setShowMoreNotes] = useState(false);
   const [activeTab, setActiveTab] = useState("flowers");
+  const [musicTrack, setMusicTrack] = useState("none");
   const [isDesktop, setIsDesktop] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia("(min-width: 1024px)").matches;
@@ -451,11 +453,12 @@ export default function Create() {
     if (!draft) return;
     if (draft.note) setNote(draft.note);
     if (draft.senderName) setSenderName(draft.senderName);
+    if (draft.musicTrack) setMusicTrack(draft.musicTrack);
     if (Array.isArray(draft.stems) && draft.stems.length)
       setPresetRequest({ id: `draft_${Date.now()}`, stems: draft.stems });
   }, []);
 
-  useEffect(() => { saveCheckoutDraft({ stems, note, senderName }); }, [stems, note, senderName]);
+  useEffect(() => { saveCheckoutDraft({ stems, note, senderName, musicTrack }); }, [stems, note, senderName, musicTrack]);
 
   const handleCanvasStateChange = useCallback((nextStems) => {
     if (Array.isArray(nextStems)) setStems(nextStems);
@@ -492,16 +495,16 @@ export default function Create() {
   /* Mandatory payment gate before link generation */
   const goToShare = () => {
     if (!hasBouquetContent) return;
-    saveCheckoutDraft({ stems, note, senderName });
+    saveCheckoutDraft({ stems, note, senderName, musicTrack });
     track("share_page_open", { flowerCount, wordCount });
     trackEvent("share_page_open", { flowerCount, wordCount });
-    navigate("/payment", { state: { flowerCount, stems, note, senderName } });
+    navigate("/payment", { state: { flowerCount, stems, note, senderName, musicTrack } });
   };
 
   const addBouquetToCart = () => {
     if (!hasBouquetContent) return;
-    saveCheckoutDraft({ stems, note, senderName });
-    addGiftCartItem("bouquet", { stems, note, senderName });
+    saveCheckoutDraft({ stems, note, senderName, musicTrack });
+    addGiftCartItem("bouquet", { stems, note, senderName, musicTrack });
     track("gift_cart_add", { type: "bouquet", flowerCount, wordCount });
     trackEvent("gift_cart_add", { type: "bouquet", flowerCount, wordCount });
     setAdded(true);
@@ -777,6 +780,8 @@ export default function Create() {
                 onBlur={(e) => e.target.style.borderColor = "#ede8e9"}
               />
             </div>
+
+            <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} />
 
             {/* WD note suggestions */}
             {wdActive && (

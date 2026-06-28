@@ -6,6 +6,7 @@ import { doc, getDoc, getDocFromServer } from "firebase/firestore";
 import RecipientBouquetCanvas from "../components/RecipientBouquetCanvas";
 import { db, isFirebaseConfigured } from "../lib/firebase";
 import { applySeo, seoKeywords } from "../lib/seo";
+import MusicPlayer from "../components/MusicPlayer";
 
 /* ── helpers ── */
 function getSharedBouquetFromLocalStorage(id) {
@@ -417,6 +418,7 @@ export default function ViewBouquet() {
     <main className="vb-root" style={{ minHeight: "100vh", paddingBottom: "3rem" }}>
       <style>{CSS}</style>
       <FloatingDecorations />
+      <MusicPlayer trackId={shared.musicTrack} />
 
       <div style={{ maxWidth: 420, margin: "0 auto", padding: "0 1.25rem", overflow: "visible" }}>
 

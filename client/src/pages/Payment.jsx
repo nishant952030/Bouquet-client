@@ -9,6 +9,7 @@ import { trackEvent } from "../lib/analytics";
 import { loadRazorpayScript } from "../lib/razorpay";
 import { applySeo, seoKeywords } from "../lib/seo";
 import { clearCheckoutDraft, loadCheckoutDraft } from "../lib/checkoutStorage";
+import AnonymousDeliveryModal from "../components/AnonymousDeliveryModal";
 
 /* -- constants -- */
 const PENDING_KEY = "pw_pending_global_checkout";
@@ -247,6 +248,7 @@ export default function Payment() {
   const [isSaving, setIsSaving] = useState(false);
   const [copied, setCopied] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
+  const [showAnonModal, setShowAnonModal] = useState(false);
 
   /* Tip jar state */
   const [countryCode, setCountryCode] = useState(() => getLikelyCountryFromClient());
@@ -546,6 +548,36 @@ export default function Payment() {
                   {t("payment.whatsapp", "WhatsApp")}
                 </a>
               </div>
+
+              {/* ── Anonymous Delivery CTA ── */}
+              <button
+                id="anon-delivery-btn"
+                onClick={() => setShowAnonModal(true)}
+                style={{
+                  width: "100%",
+                  marginTop: "0.75rem",
+                  padding: "0.75rem 1rem",
+                  background: "linear-gradient(135deg, #1a0a0a 0%, #7b5455 100%)",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "0.875rem",
+                  fontFamily: "'Manrope', sans-serif",
+                  fontSize: "0.82rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.05em",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  transition: "transform 0.15s, box-shadow 0.15s",
+                  boxShadow: "0 4px 16px rgba(20,0,0,0.25)",
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
+                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+              >
+                🕵️ Send Anonymously to Their WhatsApp — ₹49
+              </button>
             </div>
           </>
         ) : (
@@ -726,6 +758,15 @@ export default function Payment() {
         </div>
 
       </div>
+
+      {/* Anonymous Delivery Modal */}
+      {showAnonModal && shareUrl && (
+        <AnonymousDeliveryModal
+          giftUrl={shareUrl}
+          giftType="bouquet"
+          onClose={() => setShowAnonModal(false)}
+        />
+      )}
     </main>
   );
 }
