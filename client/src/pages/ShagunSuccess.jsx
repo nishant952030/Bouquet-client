@@ -122,25 +122,15 @@ export default function ShagunSuccess() {
       }
 
       try {
-        if (isFirebaseConfigured && db) {
-          const snap = await getDoc(doc(db, "cards", id));
-          if (snap.exists()) {
-            const shagunData = snap.data();
-            const claimSnap = await getDoc(doc(db, "cards", "claim_success_" + id));
-            if (claimSnap.exists()) {
-              const claimData = claimSnap.data();
-              shagunData.status = "claimed";
-              shagunData.receiverRealName = claimData.receiverRealName;
-              shagunData.receiverUpi = claimData.receiverUpi;
-              shagunData.claimedAt = claimData.claimedAt;
-              shagunData.utr = claimData.utr;
-            }
-            if (!cancelled) {
-              setData(shagunData);
-              setIsLoading(false);
-            }
-            return;
+        // Fetch securely from our serverless function
+        const res = await fetch(`/api/shagun/get?id=${id}`);
+        if (res.ok) {
+          const shagunData = await res.json();
+          if (!cancelled) {
+            setData(shagunData);
+            setIsLoading(false);
           }
+          return;
         }
 
         // Fallback to local storage (for offline or local demo checks)

@@ -5,6 +5,7 @@ import sendOtp from "./_handlers/send-otp.js";
 import verifyOtp from "./_handlers/verify-otp.js";
 import verifyUpi from "./_handlers/verify-upi.js";
 import verify from "./_handlers/verify.js";
+import getShagun from "./_handlers/get.js";
 
 export default async function handler(req, res) {
   // Extract action parameter (Vercel routes /api/shagun/:action to this file)
@@ -17,6 +18,7 @@ export default async function handler(req, res) {
   if (action === "verify-otp") return verifyOtp(req, res);
   if (action === "verify-upi") return verifyUpi(req, res);
   if (action === "verify") return verify(req, res);
+  if (action === "get") return getShagun(req, res);
 
   return res.status(404).json({ error: `Shagun action '${action}' not found` });
 }

@@ -171,25 +171,18 @@ export default function ClaimShagun() {
     const fetchShagun = async () => {
       if (!id) { setFetchError(true); setIsLoading(false); return; }
       try {
-        if (isFirebaseConfigured && db) {
-          const snap = await getDoc(doc(db, "cards", id));
-          if (snap.exists()) {
-            const shagunData = snap.data();
-            const claimSnap = await getDoc(doc(db, "cards", "claim_success_" + id));
-            if (claimSnap.exists()) {
-              const claimData = claimSnap.data();
-              shagunData.claimStatus = claimData.status || "payout_pending";
-              shagunData.receiverRealName = claimData.receiverRealName;
-              shagunData.receiverUpiName = claimData.receiverUpiName || claimData.receiverRealName;
-              shagunData.receiverUpi = claimData.receiverUpi;
-              shagunData.receiverPhone = claimData.receiverPhone || "";
-              shagunData.claimedAt = claimData.claimedAt;
-              shagunData.utr = claimData.utr;
-            }
-            if (!cancelled) { setData(shagunData); setIsLoading(false); }
-            return;
+        // Fetch securely from our serverless function
+        const res = await fetch(`/api/shagun/get?id=${id}`);
+        if (res.ok) {
+          const shagunData = await res.json();
+          if (!cancelled) {
+            setData(shagunData);
+            setIsLoading(false);
           }
+          return;
         }
+
+        // Fallback to local storage (for offline or local demo checks)
         const localRaw = localStorage.getItem(`shagun_share_${id}`);
         if (localRaw) {
           if (!cancelled) { setData(JSON.parse(localRaw)); setIsLoading(false); }
@@ -197,10 +190,11 @@ export default function ClaimShagun() {
           if (!cancelled) { setFetchError(true); setIsLoading(false); }
         }
       } catch (err) {
-        console.error("Error fetching Shagun:", err);
+        console.error("Error fetching shagun:", err);
         if (!cancelled) { setFetchError(true); setIsLoading(false); }
       }
     };
+
     fetchShagun();
     return () => { cancelled = true; };
   }, [id]);
