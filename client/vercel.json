@@ -14,6 +14,9 @@
     }
   ],
   "rewrites": [
+    { "source": "/api/shagun/:action", "destination": "/api/shagun/router.js?action=:action" },
+    { "source": "/api/stripe/:action", "destination": "/api/stripe/router.js?action=:action" },
+    { "source": "/api/razorpay/:action", "destination": "/api/razorpay/router.js?action=:action" },
     { "source": "/((?!api/|@|.*\\..*).*)", "destination": "/index.html" }
   ]
 }
