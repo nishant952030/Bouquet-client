@@ -46,6 +46,7 @@ export default async function handler(req, res) {
       senderName: shagunData.senderName,
       receiverName: shagunData.receiverName || "",
       amount: shagunData.amount,
+      fee: shagunData.fee || 15,
       message: shagunData.message || "",
       theme: shagunData.theme || "wedding",
       paymentStatus: shagunData.paymentStatus || "funded",
