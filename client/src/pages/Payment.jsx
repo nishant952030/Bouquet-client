@@ -518,20 +518,20 @@ export default function Payment() {
                 {t("payment.liveHeadlinePrefix", "Your bouquet is ")} <em style={{ color: "#7b5455" }}>{t("payment.liveHeadlineSuffix", "live!")}</em>
               </h1>
               <p style={{ fontSize: "0.85rem", color: "#6b5e5f" }}>
-                {t("payment.shareLinkBelow")}
+                {t("payment.liveDesc", "Share your bouquet link below")}
               </p>
             </div>
 
             {/* -- Share link card -- */}
             <div className="vv-card au au-2" style={{ padding: "1.25rem", marginBottom: "1rem" }}>
-              <p className="vv-label" style={{ marginBottom: "0.6rem" }}>{t("payment.yourShareLink")}</p>
+              <p className="vv-label" style={{ marginBottom: "0.6rem" }}>{t("payment.yourShareLink", "Your share link")}</p>
               <div className="share-url-box" style={{ marginBottom: "0.75rem" }}>{shareUrl}</div>
               <div style={{ display: "flex", gap: "0.5rem" }}>
                 <button onClick={copyLink} className="share-btn" style={{
                   background: copied ? "#166534" : "#7b5455",
                   color: "#fff",
                 }}>
-                  {copied ? t("payment.copied") : t("payment.copyLink")}
+                  {copied ? t("common.copied", "Copied") : t("common.copyLink", "Copy link")}
                 </button>
                 <a
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
