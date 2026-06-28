@@ -1,5 +1,5 @@
 import process from "node:process";
-import { db, isConfigured } from "../_lib/firebase-server.js";
+import { db, isConfigured } from "../../_lib/firebase-server.js";
 
 function maskUpi(upi) {
   const parts = upi.split("@");

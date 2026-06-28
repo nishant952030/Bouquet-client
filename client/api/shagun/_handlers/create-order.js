@@ -1,5 +1,5 @@
 import process from "node:process";
-import { db, isConfigured } from "../_lib/firebase-server.js";
+import { db, isConfigured } from "../../_lib/firebase-server.js";
 import { doc, setDoc } from "firebase/firestore";
 
 const PLATFORM_FEE_INR = 15;

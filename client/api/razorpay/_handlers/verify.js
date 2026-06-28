@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import process from "node:process";
-import { notifyPayment } from "../_lib/notify.js";
+import { notifyPayment } from "../../_lib/notify.js";
 
 function verifySignature({ orderId, paymentId, signature, secret }) {
   const digest = crypto.createHmac("sha256", secret).update(`${orderId}|${paymentId}`).digest("hex");

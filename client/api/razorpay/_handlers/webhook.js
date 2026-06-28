@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { Buffer } from "node:buffer";
 import process from "node:process";
-import { db, isConfigured } from "../_lib/firebase-server.js";
+import { db, isConfigured } from "../../_lib/firebase-server.js";
 
 function getRawBody(req) {
   if (typeof req.body === "string") return req.body;

@@ -1,5 +1,5 @@
 import process from "node:process";
-import { db, isConfigured } from "../_lib/firebase-server.js";
+import { db, isConfigured } from "../../_lib/firebase-server.js";
 
 async function sendSmsNotification({ phone, amount, shagunId, utr, receiverName }) {
   const authKey = process.env.MSG91_AUTH_KEY;
