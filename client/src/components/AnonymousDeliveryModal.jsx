@@ -214,7 +214,7 @@ export default function AnonymousDeliveryModal({ giftUrl, giftType = "bouquet", 
   const [errorMsg, setErrorMsg] = useState("");
   const [isMock, setIsMock] = useState(false);
 
-  const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
+  const razorpayKeyId = process.env.VITE_RAZORPAY_KEY_ID;
 
   const isValidPhone = /^[6-9]\d{9}$/.test(phone.replace(/\s/g, ""));
 

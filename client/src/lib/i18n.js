@@ -10,6 +10,7 @@ const RTL_LANGS = ["ar"];
  * Update <html lang> and <html dir> when language changes.
  */
 function applyDocumentDirection(lng) {
+  if (typeof document === "undefined") return;
   const resolved = lng || i18n.language || "en";
   const base = resolved.split("-")[0]; // "en-US" → "en"
   document.documentElement.lang = base;
@@ -19,6 +20,7 @@ function applyDocumentDirection(lng) {
 const phDetector = {
   name: 'phDetector',
   lookup(options) {
+    if (typeof window === "undefined" || !globalThis.localStorage) return undefined;
     if (localStorage.getItem('i18nextLng')) return undefined;
     try {
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;

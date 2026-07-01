@@ -1,11 +1,11 @@
-const GROK_PROXY_URL = import.meta.env.VITE_GROK_PROXY_URL;
-const GROK_API_URL = import.meta.env.VITE_GROK_API_URL || "https://api.x.ai/v1/chat/completions";
-const GROK_MODEL = import.meta.env.VITE_GROK_MODEL || "grok-2-latest";
-const GROK_API_KEY = import.meta.env.VITE_GROK_API_KEY;
+const GROK_PROXY_URL = process.env.VITE_GROK_PROXY_URL;
+const GROK_API_URL = process.env.VITE_GROK_API_URL || "https://api.x.ai/v1/chat/completions";
+const GROK_MODEL = process.env.VITE_GROK_MODEL || "grok-2-latest";
+const GROK_API_KEY = process.env.VITE_GROK_API_KEY;
 
-const GROQ_API_URL = import.meta.env.VITE_GROQ_API_URL || "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = import.meta.env.VITE_GROQ_MODEL || "llama-3.3-70b-versatile";
-const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
+const GROQ_API_URL = process.env.VITE_GROQ_API_URL || "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL = process.env.VITE_GROQ_MODEL || "llama-3.3-70b-versatile";
+const GROQ_API_KEY = process.env.VITE_GROQ_API_KEY;
 
 function extractText(responseJson) {
   const content = responseJson?.choices?.[0]?.message?.content;

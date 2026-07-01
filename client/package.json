@@ -4,14 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build && node scripts/postbuild-seo.mjs",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.0",
+    "@tailwindcss/postcss": "^4.3.2",
     "@tailwindcss/vite": "^4.2.0",
     "@vercel/analytics": "^1.6.1",
     "fabric": "^7.2.0",
@@ -21,6 +22,8 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "i18next-http-backend": "^3.0.6",
     "lucide-react": "^1.14.0",
+    "next": "^16.2.9",
+    "postcss": "^8.5.16",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-i18next": "^17.0.6",

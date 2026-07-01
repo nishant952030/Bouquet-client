@@ -5,7 +5,7 @@ const WEBSITE_ID = 'petalsandwords';
 
 // ✅ INIT GA
 export function initGoogleAnalytics() {
-  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+  const measurementId = process.env.VITE_GA_MEASUREMENT_ID;
 
   if (typeof window === "undefined" || !measurementId) return;
   if (window.__gaInitialized) return;
@@ -37,7 +37,7 @@ export function initGoogleAnalytics() {
 export function trackPageView(url) {
   if (typeof window === "undefined") return;
 
-  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+  const measurementId = process.env.VITE_GA_MEASUREMENT_ID;
 
   if (typeof window.gtag === "function") {
     window.gtag("event", "page_view", {

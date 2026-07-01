@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation } from "react-router-dom";
 import { collection, addDoc } from "firebase/firestore";
 import { db, isFirebaseConfigured } from "../lib/firebase";
 
 export default function FeedbackWidget() {
   const { t } = useTranslation();
-  const location = useLocation();
+  const pathname = typeof window !== 'undefined' ? window.location.pathname + window.location.search : '';
   const [isOpen, setIsOpen] = useState(false);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -57,7 +56,7 @@ export default function FeedbackWidget() {
         await addDoc(collection(db, "feedbacks"), {
           rating,
           message: message.trim(),
-          path: location.pathname + location.search,
+          path: pathname,
           timestamp: new Date().toISOString(),
           userAgent: window.navigator.userAgent,
         });

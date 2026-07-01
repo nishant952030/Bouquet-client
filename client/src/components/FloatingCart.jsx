@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 import { loadGiftCart } from "../lib/giftCart";
 
 export default function FloatingCart() {
-  const location = useLocation();
   const [count, setCount] = useState(() => loadGiftCart().length);
 
   useEffect(() => {
@@ -17,12 +15,14 @@ export default function FloatingCart() {
     };
   }, []);
 
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+
   // Hide the floating cart on the cart page itself, or if it's empty.
-  if (count === 0 || location.pathname === "/cart") return null;
+  if (count === 0 || pathname === "/cart") return null;
 
   return (
-    <Link 
-      to="/cart" 
+    <a 
+      href="/cart" 
       style={{
         position: "fixed",
         bottom: "2rem",
@@ -64,6 +64,6 @@ export default function FloatingCart() {
       }}>
         {count}
       </span>
-    </Link>
+    </a>
   );
 }

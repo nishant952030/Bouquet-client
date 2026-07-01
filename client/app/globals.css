@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(1200px 700px at 10% -10%, #f7d7c8 0%, transparent 60%),
+    radial-gradient(900px 500px at 90% 110%, #f4e0c7 0%, transparent 60%),
+    linear-gradient(160deg, #fefaf5 0%, #f8efe6 100%);
+  color: #2d251f;
+}
+
+.note-paper {
+  background:
+    radial-gradient(130% 120% at 20% 0%, rgba(255, 255, 255, 0.85), rgba(255, 247, 234, 0.75) 45%, rgba(246, 225, 194, 0.65) 100%),
+    linear-gradient(175deg, rgba(255, 255, 255, 0.35), rgba(244, 220, 186, 0.35));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -18px 30px rgba(230, 190, 140, 0.08);
+}
+
+.note-paper-textarea {
+  background-color: #fff8ed;
+  background-image:
+    radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.6) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 80% 70%, rgba(232, 196, 148, 0.28) 0 1px, transparent 1.5px),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(189, 133, 69, 0.08) 0,
+      rgba(189, 133, 69, 0.08) 1px,
+      transparent 1px,
+      transparent 2.05em
+    );
+  box-shadow:
+    inset 0 1px 2px rgba(120, 87, 53, 0.08),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.7);
+}
+
+/* ── RTL support for Arabic ────────────────────────────────── */
+[dir="rtl"] body {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] .vv-label,
+[dir="rtl"] .vv-body,
+[dir="rtl"] .vv-display {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Flip flex row layouts */
+[dir="rtl"] .vv-btn-primary,
+[dir="rtl"] .vv-btn-ghost,
+[dir="rtl"] .vv-btn-cake,
+[dir="rtl"] .vb-cta-btn,
+[dir="rtl"] .share-btn,
+[dir="rtl"] .tip-cta {
+  flex-direction: row-reverse;
+}
+
+/* Ensure centered text stays centered */
+[dir="rtl"] [style*="text-align: center"],
+[dir="rtl"] [style*="textAlign"] {
+  text-align: center;
+}
+
+/* Tag position flip for RTL */
+[dir="rtl"] .vv-tag-new {
+  right: auto;
+  left: -5px;
+  transform: rotate(-8deg);
+}
