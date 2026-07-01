@@ -1,5 +1,30 @@
 import { db } from "../../../../api/_lib/firebase-server";
 
+// Food items and their hunger restoration percentages
+const FOOD_BOOSTS = {
+  // Universal fallback
+  default:    { boost: 0.30, name: "Snack" },
+  // Puppy foods
+  bone:       { boost: 0.20, name: "Bone" },
+  steak:      { boost: 0.40, name: "Steak" },
+  kibble:     { boost: 0.30, name: "Kibble" },
+  treat:      { boost: 0.15, name: "Doggy Treat" },
+  // Kitten foods
+  fish:       { boost: 0.35, name: "Fresh Fish" },
+  milk:       { boost: 0.20, name: "Warm Milk" },
+  shrimp:     { boost: 0.40, name: "Shrimp" },
+  catfood:    { boost: 0.30, name: "Cat Food" },
+  // Panda foods
+  bamboo:     { boost: 0.40, name: "Bamboo" },
+  leaves:     { boost: 0.20, name: "Leaves" },
+  apple:      { boost: 0.30, name: "Apple" },
+  carrot:     { boost: 0.25, name: "Carrot" },
+  // Bunny foods
+  pellets:    { boost: 0.30, name: "Pellets" },
+  lettuce:    { boost: 0.25, name: "Lettuce" },
+  berries:    { boost: 0.35, name: "Berries" },
+};
+
 // Dynamic Next.js Route Handler for Pet Gift actions
 export async function GET(request, { params }) {
   const { action } = await params;
@@ -157,9 +182,24 @@ export async function POST(request, { params }) {
         });
       }
 
-      const nowStr = new Date().toISOString();
+      const now = Date.now();
+      const nowStr = new Date(now).toISOString();
       if (actionType === "feed") {
-        updateData.lastFedAt = nowStr;
+        // Compute hunger boost: shift lastFedAt forward so hunger restores by the food's boost %
+        const isTestMode = !!pet.isTestMode;
+        const DECAY_DURATION_MS = isTestMode ? 10 * 60 * 1000 : 24 * 60 * 60 * 1000;
+        const foodKey = (body.foodType || "default").toLowerCase();
+        const foodBoostPct = (FOOD_BOOSTS[foodKey] || FOOD_BOOSTS.default).boost;
+
+        // Current elapsed since last feed
+        const currentFedTime = new Date(pet.lastFedAt).getTime();
+        const elapsedFed = now - currentFedTime;
+        // New elapsed = max(0, currentElapsed - boostEquivalentMs)
+        const boostMs = foodBoostPct * DECAY_DURATION_MS;
+        const newElapsed = Math.max(0, elapsedFed - boostMs);
+        const newLastFedAt = new Date(now - newElapsed).toISOString();
+
+        updateData.lastFedAt = newLastFedAt;
         updateData.status = "active";
       } else if (["play", "pet", "talk"].includes(actionType)) {
         updateData.lastInteractedAt = nowStr;

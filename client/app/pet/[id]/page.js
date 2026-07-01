@@ -9,6 +9,34 @@ import { auth, googleProvider } from "../../../src/lib/firebase";
 import LanguageSwitcher from "../../../src/components/LanguageSwitcher";
 import RivePet from "../../../src/components/RivePet";
 
+// Food menus per pet type
+const FOOD_MENU = {
+  puppy: [
+    { id: "treat",  emoji: "🍪", name: "Doggy Treat", boost: 15, desc: "Quick snack" },
+    { id: "kibble", emoji: "🥣", name: "Kibble",      boost: 30, desc: "Standard meal" },
+    { id: "bone",   emoji: "🦴", name: "Bone",        boost: 20, desc: "Loves to chew" },
+    { id: "steak",  emoji: "🥩", name: "Steak",       boost: 40, desc: "Big feast!" },
+  ],
+  kitten: [
+    { id: "milk",    emoji: "🥛", name: "Warm Milk",   boost: 20, desc: "Cozy & calming" },
+    { id: "catfood", emoji: "🐾", name: "Cat Food",    boost: 30, desc: "Balanced diet" },
+    { id: "fish",    emoji: "🐟", name: "Fresh Fish",  boost: 35, desc: "Purr-fect!" },
+    { id: "shrimp",  emoji: "🍤", name: "Shrimp",      boost: 40, desc: "Fancy treat" },
+  ],
+  panda: [
+    { id: "leaves", emoji: "🍃", name: "Leaves",   boost: 20, desc: "Forest flavours" },
+    { id: "carrot", emoji: "🥕", name: "Carrot",   boost: 25, desc: "Crunchy & sweet" },
+    { id: "apple",  emoji: "🍎", name: "Apple",    boost: 30, desc: "Juicy delight" },
+    { id: "bamboo", emoji: "🎋", name: "Bamboo",   boost: 40, desc: "Favourite food!" },
+  ],
+  bunny: [
+    { id: "lettuce", emoji: "🥬", name: "Lettuce",  boost: 25, desc: "Fresh & leafy" },
+    { id: "carrot",  emoji: "🥕", name: "Carrot",   boost: 25, desc: "Classic bunny" },
+    { id: "berries", emoji: "🫐", name: "Berries",  boost: 35, desc: "Sweet & fruity" },
+    { id: "pellets", emoji: "🌾", name: "Pellets",  boost: 30, desc: "Balanced meal" },
+  ],
+};
+
 // Pet SVGs and Visual Helpers
 const PET_VISUALS = {
   puppy: (status, hunger, attention, mousePos) => {
@@ -481,6 +509,7 @@ export default function PetDashboard() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [hearts, setHearts] = useState([]);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [showFoodPicker, setShowFoodPicker] = useState(false);
   const cardRef = useRef(null);
 
   // Sync auth state
@@ -641,7 +670,7 @@ export default function PetDashboard() {
     }
   };
 
-  const handleAction = async (actionType) => {
+  const handleAction = async (actionType, foodType = null) => {
     if (!pet || !user) return;
     setIsPerforming(true);
     setError("");
@@ -654,6 +683,7 @@ export default function PetDashboard() {
           id: pet.id,
           actionType,
           userUid: user.uid,
+          ...(foodType ? { foodType } : {}),
         }),
       });
 
@@ -663,10 +693,14 @@ export default function PetDashboard() {
         spawnHearts();
         
         if (actionType === "feed") {
+          const foodLabel = foodType
+            ? (FOOD_MENU[pet.petType] || []).find(f => f.id === foodType)?.name || foodType
+            : "snack";
           playSoundEffect("munch");
-          addLog(`🍖 Fed ${pet.petName} a tasty snack.`);
+          setShowFoodPicker(false);
+          addLog(`🍽️ Fed ${pet.petName} some ${foodLabel}.`);
           setTimeout(() => {
-            speakReaction(`Munch munch! Thank you for the treat!`);
+            speakReaction(`Munch munch! That ${foodLabel} was delicious!`);
           }, 300);
         } else if (actionType === "play") {
           playSoundEffect("happy");
@@ -978,6 +1012,65 @@ export default function PetDashboard() {
           transform: translateY(-2px);
           box-shadow: 0 12px 32px rgba(236, 72, 153, 0.45);
         }
+
+        /* Food picker drawer */
+        .food-drawer {
+          background: rgba(15, 23, 42, 0.85);
+          border: 1px solid rgba(244, 63, 94, 0.2);
+          border-radius: 1.25rem;
+          padding: 1rem;
+          margin-bottom: 0.75rem;
+          animation: drawerSlideIn 0.2s ease-out forwards;
+        }
+
+        @keyframes drawerSlideIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .food-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 0.5rem;
+        }
+
+        .food-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 3px;
+          padding: 0.6rem 0.3rem;
+          border-radius: 0.85rem;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          cursor: pointer;
+          transition: all 0.18s cubic-bezier(0.34,1.56,0.64,1);
+          color: #f1f5f9;
+        }
+
+        .food-item:hover:not(:disabled) {
+          background: rgba(244, 63, 94, 0.15);
+          border-color: rgba(244, 63, 94, 0.4);
+          transform: translateY(-3px) scale(1.04);
+          box-shadow: 0 8px 18px rgba(244, 63, 94, 0.15);
+        }
+
+        .food-item:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+
+        .food-emoji { font-size: 1.6rem; line-height: 1; }
+        .food-name  { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #cbd5e1; text-align: center; }
+        .food-boost { font-size: 0.65rem; font-weight: 800; color: #10b981; }
+        .food-desc  { font-size: 0.5rem; color: #64748b; text-align: center; line-height: 1.2; }
+
+        /* Active state for Feed button when drawer is open */
+        .act-btn-active {
+          background: rgba(244, 63, 94, 0.2) !important;
+          border-color: rgba(244, 63, 94, 0.5) !important;
+          color: #f43f5e !important;
+        }
       `}</style>
 
       {/* Header */}
@@ -1160,15 +1253,40 @@ export default function PetDashboard() {
                     </div>
                   )}
 
+                  {/* Food Picker Drawer (slides in above buttons) */}
+                  {showFoodPicker && (
+                    <div className="food-drawer">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">What should {pet.petName} eat?</span>
+                        <button onClick={() => setShowFoodPicker(false)} className="text-slate-500 hover:text-slate-300 text-xs bg-none border-none cursor-pointer">✕ Close</button>
+                      </div>
+                      <div className="food-grid">
+                        {(FOOD_MENU[pet.petType] || FOOD_MENU.puppy).map((food) => (
+                          <button
+                            key={food.id}
+                            onClick={() => handleAction("feed", food.id)}
+                            disabled={isPerforming}
+                            className="food-item"
+                          >
+                            <span className="food-emoji">{food.emoji}</span>
+                            <span className="food-name">{food.name}</span>
+                            <span className="food-boost">+{food.boost}%</span>
+                            <span className="food-desc">{food.desc}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Action buttons with glowing shadows */}
-                  <div className="grid grid-cols-4 gap-2 mt-6">
+                  <div className="grid grid-cols-4 gap-2 mt-4">
                     <button
-                      onClick={() => handleAction("feed")}
+                      onClick={() => setShowFoodPicker(prev => !prev)}
                       disabled={isPerforming || pet.status === "runaway"}
-                      className="act-btn pd-btn rounded-xl"
+                      className={`act-btn pd-btn rounded-xl ${showFoodPicker ? "act-btn-active" : ""}`}
                       title="Feed Pet"
                     >
-                      🍖 Feed
+                      🍽️ Feed
                     </button>
                     <button
                       onClick={() => handleAction("play")}
