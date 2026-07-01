@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.VITE_FIREBASE_API_KEY,
@@ -13,12 +14,16 @@ const firebaseConfig = {
 const isFirebaseConfigured = Object.values(firebaseConfig).every(Boolean);
 
 let db = null;
+let auth = null;
+let googleProvider = null;
 
 if (isFirebaseConfigured) {
   const app = initializeApp(firebaseConfig);
   db = getFirestore(app);
+  auth = getAuth(app);
+  googleProvider = new GoogleAuthProvider();
 } else {
   console.warn("Firebase config missing. Using localStorage fallback for bouquet sharing.");
 }
 
-export { db, isFirebaseConfigured };
+export { db, auth, googleProvider, isFirebaseConfigured };
