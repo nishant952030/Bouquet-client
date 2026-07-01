@@ -11,14 +11,79 @@ import RivePet from "../../../src/components/RivePet";
 
 // Pet SVGs and Visual Helpers
 const PET_VISUALS = {
-  puppy: (status, hunger, attention) => {
+  puppy: (status, hunger, attention, mousePos) => {
     const isSick = status === "sick";
     const isLow = hunger <= 30 || attention <= 30;
-    const eyeClass = isSick ? "eye-sick" : isLow ? "eye-sad" : "eye-happy";
-    const tongueClass = isSick ? "hidden" : isLow ? "tongue-sad" : "tongue-pant";
+    const isVerySick = hunger <= 9 || attention <= 9;
+    
+    // Breathing state
+    const breatheClass = isSick || isLow ? "body-breathe-weak" : "body-breathe-stable";
+    const shiverClass = isVerySick ? "body-shiver" : "";
+
+    // Eye expression
+    let eyeContent = (
+      <>
+        {/* Left Eye */}
+        <circle cx="80" cy="78" r="7" fill="#1e293b" className="eye-blink" />
+        <circle cx="78" cy="75" r="2.5" fill="#fff" className="eye-blink" />
+        {/* Right Eye */}
+        <circle cx="120" cy="78" r="7" fill="#1e293b" className="eye-blink" />
+        <circle cx="118" cy="75" r="2.5" fill="#fff" className="eye-blink" />
+      </>
+    );
+
+    if (isSick) {
+      eyeContent = (
+        <g stroke="#1e293b" strokeWidth="3" strokeLinecap="round" fill="none">
+          {/* Left Eye X */}
+          <path d="M 75 73 L 85 83" /><path d="M 85 73 L 75 83" />
+          {/* Right Eye X */}
+          <path d="M 115 73 L 125 83" /><path d="M 125 73 L 115 83" />
+        </g>
+      );
+    } else if (isVerySick) {
+      eyeContent = (
+        <g stroke="#1e293b" strokeWidth="3" strokeLinecap="round" fill="none">
+          {/* Horizontal slits */}
+          <path d="M 73 78 L 87 78" />
+          <path d="M 113 78 L 127 78" />
+        </g>
+      );
+    } else if (isLow) {
+      // Sad / Drooping eyelids
+      eyeContent = (
+        <>
+          <path d="M 73 82 Q 80 73 87 82" fill="none" stroke="#1e293b" strokeWidth="3" strokeLinecap="round" />
+          <path d="M 113 82 Q 120 73 127 82" fill="none" stroke="#1e293b" strokeWidth="3" strokeLinecap="round" />
+        </>
+      );
+    }
+
+    // Mouth expression
+    let mouthContent = <path d="M 96 98 Q 100 102 104 98" fill="none" stroke="#1e293b" strokeWidth="2.5" strokeLinecap="round" />;
+    let tongueClass = "hidden";
+
+    if (isSick || isVerySick) {
+      // Miserable downturned mouth
+      mouthContent = <path d="M 94 103 Q 100 97 106 103" fill="none" stroke="#1e293b" strokeWidth="2.5" strokeLinecap="round" />;
+    } else if (isLow) {
+      // Drooping tongue for hunger / sadness
+      mouthContent = <path d="M 94 99 Q 100 103 106 99" fill="none" stroke="#1e293b" strokeWidth="2.5" strokeLinecap="round" />;
+      tongueClass = "tongue-pant-slow";
+    } else {
+      // Happy panting tongue
+      tongueClass = "tongue-pant";
+    }
+
+    // Ear drooping
     const earClass = isSick || isLow ? "ears-droop" : "ears-perky";
+
+    // Mouse Tracking Parallax values
+    const mx = mousePos?.x || 0;
+    const my = mousePos?.y || 0;
+
     return (
-      <svg className="pet-graphic" viewBox="0 0 200 200" width="160" height="160">
+      <svg className={`pet-graphic ${shiverClass}`} viewBox="0 0 200 200" width="160" height="160">
         <defs>
           <radialGradient id="dog-body" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#eab308" />
@@ -33,60 +98,112 @@ const PET_VISUALS = {
         <path d="M 140 130 C 160 110, 180 120, 175 100 C 170 80, 150 95, 135 115" fill="none" stroke="#854d0e" strokeWidth="12" strokeLinecap="round" className="tail-wag" />
         
         {/* Body (Breathing) */}
-        <ellipse cx="100" cy="135" rx="55" ry="45" fill="url(#dog-body)" className="body-breathe" />
-        <ellipse cx="100" cy="140" rx="35" ry="25" fill="#fef08a" className="body-breathe" />
+        <ellipse cx="100" cy="135" rx="55" ry="45" fill="url(#dog-body)" className={breatheClass} />
+        <ellipse cx="100" cy="140" rx="35" ry="25" fill="#fef08a" className={breatheClass} />
 
         {/* Feet */}
         <circle cx="65" cy="175" r="14" fill="#854d0e" />
         <circle cx="135" cy="175" r="14" fill="#854d0e" />
 
-        {/* Ears */}
-        <g className={earClass}>
-          <path d="M 35 60 C 15 60, 20 120, 45 110 C 55 100, 50 70, 45 65" fill="url(#dog-ears)" />
-          <path d="M 165 60 C 185 60, 180 120, 155 110 C 145 100, 150 70, 155 65" fill="url(#dog-ears)" />
-        </g>
-
-        {/* Head */}
-        <circle cx="100" cy="85" r="48" fill="url(#dog-body)" className="head-bob" />
-
-        {/* Eyes (Blinking & Expressions) */}
-        <g className="eyes-group head-bob">
-          <g className={eyeClass}>
-            {/* Left Eye */}
-            <circle cx="80" cy="78" r="7" fill="#1e293b" className="eye-blink" />
-            <circle cx="78" cy="75" r="2.5" fill="#fff" className="eye-blink" />
-            {/* Right Eye */}
-            <circle cx="120" cy="78" r="7" fill="#1e293b" className="eye-blink" />
-            <circle cx="118" cy="75" r="2.5" fill="#fff" className="eye-blink" />
+        {/* Head Group with Mouse Tracking */}
+        <g style={{ transform: `translate(${mx * 8}px, ${my * 6}px)`, transformOrigin: "100px 85px", transition: "transform 0.08s ease-out" }}>
+          
+          {/* Ears */}
+          <g className={earClass} style={{ transform: `translate(${mx * -2}px, ${my * -1}px)` }}>
+            <path d="M 35 60 C 15 60, 20 120, 45 110 C 55 100, 50 70, 45 65" fill="url(#dog-ears)" />
+            <path d="M 165 60 C 185 60, 180 120, 155 110 C 145 100, 150 70, 155 65" fill="url(#dog-ears)" />
           </g>
-          {/* Sick/Sad Eyebrows */}
-          {(isSick || isLow) && (
-            <g stroke="#854d0e" strokeWidth="3" strokeLinecap="round" fill="none">
-              <path d="M 72 67 Q 80 72 88 68" />
-              <path d="M 128 67 Q 120 72 112 68" />
-            </g>
-          )}
-        </g>
 
-        {/* Snout & Mouth */}
-        <g className="head-bob">
-          <ellipse cx="100" cy="94" rx="16" ry="11" fill="#fef08a" />
-          <polygon points="94,90 106,90 100,96" fill="#1e293b" />
-          {/* Mouth line */}
-          <path d="M 96 98 Q 100 102 104 98" fill="none" stroke="#1e293b" strokeWidth="2.5" strokeLinecap="round" />
-          {/* Tongue */}
-          <path d="M 97 101 C 97 110, 103 110, 103 101 Z" fill="#ec4899" className={tongueClass} />
+          {/* Head Base */}
+          <circle cx="100" cy="85" r="48" fill="url(#dog-body)" className="head-bob" />
+
+          {/* Eyes Group with Additional Parallax */}
+          <g style={{ transform: `translate(${mx * 5}px, ${my * 3}px)`, transformOrigin: "100px 78px", transition: "transform 0.08s ease-out" }}>
+            {eyeContent}
+            {/* Sad/Sick Eyebrows */}
+            {(isSick || isLow) && (
+              <g stroke="#854d0e" strokeWidth="3" strokeLinecap="round" fill="none">
+                <path d="M 72 67 Q 80 72 88 68" />
+                <path d="M 128 67 Q 120 72 112 68" />
+              </g>
+            )}
+          </g>
+
+          {/* Snout, Nose & Mouth with Parallax */}
+          <g style={{ transform: `translate(${mx * 3}px, ${my * 2}px)`, transformOrigin: "100px 94px", transition: "transform 0.08s ease-out" }}>
+            <ellipse cx="100" cy="94" rx="16" ry="11" fill="#fef08a" />
+            <polygon points="94,90 106,90 100,96" fill="#1e293b" />
+            {mouthContent}
+            {/* Tongue */}
+            <path d="M 97 101 C 97 110, 103 110, 103 101 Z" fill="#ec4899" className={tongueClass} />
+          </g>
+
         </g>
       </svg>
     );
   },
-  kitten: (status, hunger, attention) => {
+  kitten: (status, hunger, attention, mousePos) => {
     const isSick = status === "sick";
     const isLow = hunger <= 30 || attention <= 30;
-    const eyeClass = isSick ? "eye-sick" : isLow ? "eye-sad" : "eye-happy";
+    const isVerySick = hunger <= 9 || attention <= 9;
+    
+    // Breathing state
+    const breatheClass = isSick || isLow ? "body-breathe-weak" : "body-breathe-stable";
+    const shiverClass = isVerySick ? "body-shiver" : "";
+
+    // Eye expression
+    let eyeContent = (
+      <>
+        <circle cx="82" cy="78" r="6" fill="#1e293b" className="eye-blink" />
+        <circle cx="80" cy="76" r="2" fill="#fff" className="eye-blink" />
+        <circle cx="118" cy="78" r="6" fill="#1e293b" className="eye-blink" />
+        <circle cx="116" cy="76" r="2" fill="#fff" className="eye-blink" />
+      </>
+    );
+
+    if (isSick) {
+      eyeContent = (
+        <g stroke="#1e293b" strokeWidth="2.5" strokeLinecap="round" fill="none">
+          <path d="M 77 75 L 87 81" /><path d="M 87 75 L 77 81" />
+          <path d="M 113 75 L 123 81" /><path d="M 123 75 L 113 81" />
+        </g>
+      );
+    } else if (isVerySick) {
+      eyeContent = (
+        <g stroke="#1e293b" strokeWidth="2.5" strokeLinecap="round" fill="none">
+          <path d="M 76 78 L 88 78" />
+          <path d="M 112 78 L 124 78" />
+        </g>
+      );
+    } else if (isLow) {
+      eyeContent = (
+        <>
+          <path d="M 76 81 Q 82 74 88 81" fill="none" stroke="#1e293b" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 112 81 Q 118 74 124 81" fill="none" stroke="#1e293b" strokeWidth="2.5" strokeLinecap="round" />
+        </>
+      );
+    }
+
+    // Mouth and Whiskers expression
+    let mouthContent = <path d="M 96 95 Q 100 98 104 95" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" />;
+    let whiskerColor = "#fdba74";
+
+    if (isSick || isVerySick) {
+      mouthContent = <path d="M 95 98 Q 100 93 105 98" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" />;
+      whiskerColor = "#cbd5e1"; // pale whiskers
+    } else if (isLow) {
+      // open crying mouth
+      mouthContent = <ellipse cx="100" cy="96" rx="4" ry="6" fill="#f43f5e" />;
+    }
+
     const tailSpeed = isSick ? "tail-wag-slow" : "tail-wag";
+
+    // Mouse Tracking Parallax values
+    const mx = mousePos?.x || 0;
+    const my = mousePos?.y || 0;
+
     return (
-      <svg className="pet-graphic" viewBox="0 0 200 200" width="160" height="160">
+      <svg className={`pet-graphic ${shiverClass}`} viewBox="0 0 200 200" width="160" height="160">
         <defs>
           <radialGradient id="cat-body" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#fdba74" />
@@ -101,102 +218,204 @@ const PET_VISUALS = {
         <path d="M 135 130 C 155 100, 175 110, 170 85 C 165 60, 140 70, 145 95" fill="none" stroke="#ea580c" strokeWidth="10" strokeLinecap="round" className={tailSpeed} />
         
         {/* Body */}
-        <ellipse cx="100" cy="135" rx="52" ry="42" fill="url(#cat-body)" className="body-breathe" />
-        <ellipse cx="100" cy="140" rx="30" ry="22" fill="#ffedd5" className="body-breathe" />
+        <ellipse cx="100" cy="135" rx="52" ry="42" fill="url(#cat-body)" className={breatheClass} />
+        <ellipse cx="100" cy="140" rx="30" ry="22" fill="#ffedd5" className={breatheClass} />
 
         {/* Feet */}
         <circle cx="70" cy="173" r="12" fill="#ea580c" />
         <circle cx="130" cy="173" r="12" fill="#ea580c" />
 
-        {/* Ears (Pointy) */}
-        <g className="head-bob">
-          <polygon points="45,45 75,70 45,85" fill="url(#cat-ears)" />
-          <polygon points="48,52 68,70 48,80" fill="#fecdd3" /> {/* Pink inner */}
-          <polygon points="155,45 125,70 155,85" fill="url(#cat-ears)" />
-          <polygon points="152,52 132,70 152,80" fill="#fecdd3" />
-        </g>
-
-        {/* Head */}
-        <circle cx="100" cy="85" r="45" fill="url(#cat-body)" className="head-bob" />
-
-        {/* Eyes */}
-        <g className="eyes-group head-bob">
-          <g className={eyeClass}>
-            <circle cx="82" cy="78" r="6" fill="#1e293b" className="eye-blink" />
-            <circle cx="80" cy="76" r="2" fill="#fff" className="eye-blink" />
-            <circle cx="118" cy="78" r="6" fill="#1e293b" className="eye-blink" />
-            <circle cx="116" cy="76" r="2" fill="#fff" className="eye-blink" />
+        {/* Head Group with Mouse Tracking */}
+        <g style={{ transform: `translate(${mx * 8}px, ${my * 6}px)`, transformOrigin: "100px 85px", transition: "transform 0.08s ease-out" }}>
+          
+          {/* Ears */}
+          <g className="head-bob" style={{ transform: `translate(${mx * -1.5}px, ${my * -1}px)` }}>
+            <polygon points="45,45 75,70 45,85" fill="url(#cat-ears)" />
+            <polygon points="48,52 68,70 48,80" fill="#fecdd3" />
+            <polygon points="155,45 125,70 155,85" fill="url(#cat-ears)" />
+            <polygon points="152,52 132,70 152,80" fill="#fecdd3" />
           </g>
-        </g>
 
-        {/* Nose & Whiskers */}
-        <g className="head-bob">
-          <polygon points="96,88 104,88 100,92" fill="#f43f5e" />
-          {/* Whiskers */}
-          <line x1="60" y1="90" x2="40" y2="88" stroke="#fdba74" strokeWidth="2.5" strokeLinecap="round" />
-          <line x1="60" y1="95" x2="38" y2="98" stroke="#fdba74" strokeWidth="2.5" strokeLinecap="round" />
-          <line x1="140" y1="90" x2="160" y2="88" stroke="#fdba74" strokeWidth="2.5" strokeLinecap="round" />
-          <line x1="140" y1="95" x2="162" y2="98" stroke="#fdba74" strokeWidth="2.5" strokeLinecap="round" />
-          {/* Tiny Mouth */}
-          <path d="M 96 95 Q 100 98 104 95" fill="none" stroke="#ea580c" strokeWidth="2" strokeLinecap="round" />
+          {/* Head Base */}
+          <circle cx="100" cy="85" r="45" fill="url(#cat-body)" className="head-bob" />
+
+          {/* Eyes Group with Additional Parallax */}
+          <g style={{ transform: `translate(${mx * 5}px, ${my * 3}px)`, transformOrigin: "100px 78px", transition: "transform 0.08s ease-out" }}>
+            {eyeContent}
+          </g>
+
+          {/* Snout & Whiskers with Parallax */}
+          <g style={{ transform: `translate(${mx * 3}px, ${my * 2}px)`, transformOrigin: "100px 90px", transition: "transform 0.08s ease-out" }}>
+            <polygon points="96,88 104,88 100,92" fill="#f43f5e" />
+            {/* Whiskers */}
+            <line x1="60" y1="90" x2="40" y2="88" stroke={whiskerColor} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="60" y1="95" x2="38" y2="98" stroke={whiskerColor} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="140" y1="90" x2="160" y2="88" stroke={whiskerColor} strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="140" y1="95" x2="162" y2="98" stroke={whiskerColor} strokeWidth="2.5" strokeLinecap="round" />
+            {mouthContent}
+          </g>
+
         </g>
       </svg>
     );
   },
-  panda: (status, hunger, attention) => {
+  panda: (status, hunger, attention, mousePos) => {
     const isSick = status === "sick";
     const isLow = hunger <= 30 || attention <= 30;
-    const eyeClass = isSick ? "eye-sick" : isLow ? "eye-sad" : "eye-happy";
+    const isVerySick = hunger <= 9 || attention <= 9;
+    
+    // Breathing state
+    const breatheClass = isSick || isLow ? "body-breathe-weak" : "body-breathe-stable";
+    const shiverClass = isVerySick ? "body-shiver" : "";
+
+    // Eye expression
+    let eyeContent = (
+      <>
+        <circle cx="80" cy="83" r="4.5" fill="#fff" className="eye-blink" />
+        <circle cx="120" cy="83" r="4.5" fill="#fff" className="eye-blink" />
+      </>
+    );
+
+    if (isSick) {
+      eyeContent = (
+        <g stroke="#fff" strokeWidth="2" strokeLinecap="round" fill="none">
+          <path d="M 77 80 L 83 86" /><path d="M 83 80 L 77 86" />
+          <path d="M 117 80 L 123 86" /><path d="M 123 80 L 117 86" />
+        </g>
+      );
+    } else if (isVerySick) {
+      eyeContent = (
+        <g stroke="#fff" strokeWidth="2.5" strokeLinecap="round" fill="none">
+          <path d="M 76 83 L 84 83" />
+          <path d="M 116 83 L 124 83" />
+        </g>
+      );
+    } else if (isLow) {
+      eyeContent = (
+        <g stroke="#fff" strokeWidth="2.5" strokeLinecap="round" fill="none">
+          {/* Sad drooping slits */}
+          <path d="M 76 85 Q 80 80 84 85" />
+          <path d="M 116 85 Q 120 80 124 85" />
+        </g>
+      );
+    }
+
+    // Mouth expression
+    let mouthContent = <path d="M 97 103 Q 100 105 103 103" fill="none" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" />;
+    if (isSick || isVerySick) {
+      mouthContent = <path d="M 96 105 Q 100 101 104 105" fill="none" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" />;
+    } else if (isLow) {
+      mouthContent = <circle cx="100" cy="104" r="2.5" fill="#1e293b" />;
+    }
+
+    // Mouse Tracking Parallax values
+    const mx = mousePos?.x || 0;
+    const my = mousePos?.y || 0;
+
     return (
-      <svg className="pet-graphic" viewBox="0 0 200 200" width="160" height="160">
+      <svg className={`pet-graphic ${shiverClass}`} viewBox="0 0 200 200" width="160" height="160">
         {/* Body */}
-        <ellipse cx="100" cy="135" rx="55" ry="45" fill="#f8fafc" stroke="#1e293b" strokeWidth="8" className="body-breathe" />
-        <ellipse cx="100" cy="138" rx="42" ry="32" fill="#1e293b" className="body-breathe" />
-        <ellipse cx="100" cy="138" rx="28" ry="22" fill="#f8fafc" className="body-breathe" />
+        <ellipse cx="100" cy="135" rx="55" ry="45" fill="#f8fafc" stroke="#1e293b" strokeWidth="8" className={breatheClass} />
+        <ellipse cx="100" cy="138" rx="42" ry="32" fill="#1e293b" className={breatheClass} />
+        <ellipse cx="100" cy="138" rx="28" ry="22" fill="#f8fafc" className={breatheClass} />
 
         {/* Feet */}
         <circle cx="65" cy="175" r="14" fill="#1e293b" />
         <circle cx="135" cy="175" r="14" fill="#1e293b" />
 
-        {/* Ears (Round Black) */}
-        <g className="head-bob">
-          <circle cx="60" cy="50" r="16" fill="#1e293b" />
-          <circle cx="140" cy="50" r="16" fill="#1e293b" />
-        </g>
-
-        {/* Head */}
-        <circle cx="100" cy="90" r="46" fill="#f8fafc" stroke="#1e293b" strokeWidth="6" className="head-bob" />
-
-        {/* Black Patches around Eyes */}
-        <g className="head-bob">
-          <ellipse cx="80" cy="85" rx="12" ry="16" fill="#1e293b" transform="rotate(-15 80 85)" />
-          <ellipse cx="120" cy="85" rx="12" ry="16" fill="#1e293b" transform="rotate(15 120 85)" />
-        </g>
-
-        {/* Eyes (Glowing inside patches) */}
-        <g className="eyes-group head-bob">
-          <g className={eyeClass}>
-            <circle cx="80" cy="83" r="4.5" fill="#fff" className="eye-blink" />
-            <circle cx="120" cy="83" r="4.5" fill="#fff" className="eye-blink" />
+        {/* Head Group with Mouse Tracking */}
+        <g style={{ transform: `translate(${mx * 8}px, ${my * 6}px)`, transformOrigin: "100px 90px", transition: "transform 0.08s ease-out" }}>
+          
+          {/* Ears (Round Black) */}
+          <g className="head-bob" style={{ transform: `translate(${mx * -1}px, ${my * -1}px)` }}>
+            <circle cx="60" cy="50" r="16" fill="#1e293b" />
+            <circle cx="140" cy="50" r="16" fill="#1e293b" />
           </g>
-        </g>
 
-        {/* Snout */}
-        <g className="head-bob">
-          <ellipse cx="100" cy="100" rx="9" ry="6" fill="#cbd5e1" />
-          <circle cx="100" cy="98" r="4" fill="#1e293b" />
-          <path d="M 97 103 Q 100 105 103 103" fill="none" stroke="#1e293b" strokeWidth="2" strokeLinecap="round" />
+          {/* Head Base */}
+          <circle cx="100" cy="90" r="46" fill="#f8fafc" stroke="#1e293b" strokeWidth="6" className="head-bob" />
+
+          {/* Black Patches */}
+          <g className="head-bob" style={{ transform: `translate(${mx * 4}px, ${my * 2.5}px)`, transition: "transform 0.08s ease-out" }}>
+            <ellipse cx="80" cy="85" rx="12" ry="16" fill="#1e293b" transform="rotate(-15 80 85)" />
+            <ellipse cx="120" cy="85" rx="12" ry="16" fill="#1e293b" transform="rotate(15 120 85)" />
+          </g>
+
+          {/* Eyes Group with Additional Parallax */}
+          <g style={{ transform: `translate(${mx * 5.5}px, ${my * 3.5}px)`, transformOrigin: "100px 83px", transition: "transform 0.08s ease-out" }}>
+            {eyeContent}
+          </g>
+
+          {/* Snout with Parallax */}
+          <g style={{ transform: `translate(${mx * 3}px, ${my * 2}px)`, transformOrigin: "100px 100px", transition: "transform 0.08s ease-out" }}>
+            <ellipse cx="100" cy="100" rx="9" ry="6" fill="#cbd5e1" />
+            <circle cx="100" cy="98" r="4" fill="#1e293b" />
+            {mouthContent}
+          </g>
+
         </g>
       </svg>
     );
   },
-  bunny: (status, hunger, attention) => {
+  bunny: (status, hunger, attention, mousePos) => {
     const isSick = status === "sick";
     const isLow = hunger <= 30 || attention <= 30;
-    const eyeClass = isSick ? "eye-sick" : isLow ? "eye-sad" : "eye-happy";
+    const isVerySick = hunger <= 9 || attention <= 9;
+    
+    // Breathing state
+    const breatheClass = isSick || isLow ? "body-breathe-weak" : "body-breathe-stable";
+    const shiverClass = isVerySick ? "body-shiver" : "";
+
+    // Eye expression
+    let eyeContent = (
+      <>
+        <circle cx="82" cy="78" r="5.5" fill="#fda4af" className="eye-blink" />
+        <circle cx="80" cy="76" r="2" fill="#fff" className="eye-blink" />
+        <circle cx="118" cy="78" r="5.5" fill="#fda4af" className="eye-blink" />
+        <circle cx="116" cy="76" r="2" fill="#fff" className="eye-blink" />
+      </>
+    );
+
+    if (isSick) {
+      eyeContent = (
+        <g stroke="#fda4af" strokeWidth="2" strokeLinecap="round" fill="none">
+          <path d="M 78 75 L 84 81" /><path d="M 84 75 L 78 81" />
+          <path d="M 114 75 L 120 81" /><path d="M 120 75 L 114 81" />
+        </g>
+      );
+    } else if (isVerySick) {
+      eyeContent = (
+        <g stroke="#fda4af" strokeWidth="2.5" strokeLinecap="round" fill="none">
+          <path d="M 76 78 L 84 78" />
+          <path d="M 116 78 L 124 78" />
+        </g>
+      );
+    } else if (isLow) {
+      eyeContent = (
+        <>
+          <path d="M 76 81 Q 82 75 88 81" fill="none" stroke="#fda4af" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M 116 81 Q 122 75 128 81" fill="none" stroke="#fda4af" strokeWidth="2.5" strokeLinecap="round" />
+        </>
+      );
+    }
+
+    // Mouth expression
+    let mouthContent = <path d="M 98 94 Q 100 96 102 94" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" />;
+    if (isSick || isVerySick) {
+      mouthContent = <path d="M 97 96 Q 100 92 103 96" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" />;
+    } else if (isLow) {
+      mouthContent = <circle cx="100" cy="95" r="2" fill="#94a3b8" />;
+    }
+
+    // Ear drooping
     const earClass = isSick || isLow ? "ears-droop" : "bunny-ears-bounce";
+
+    // Mouse Tracking Parallax values
+    const mx = mousePos?.x || 0;
+    const my = mousePos?.y || 0;
+
     return (
-      <svg className="pet-graphic" viewBox="0 0 200 200" width="160" height="160">
+      <svg className={`pet-graphic ${shiverClass}`} viewBox="0 0 200 200" width="160" height="160">
         <defs>
           <radialGradient id="bunny-body" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#f8fafc" />
@@ -204,47 +423,44 @@ const PET_VISUALS = {
           </radialGradient>
         </defs>
         {/* Tail */}
-        <circle cx="148" cy="145" r="14" fill="#e2e8f0" className="body-breathe" />
-        <circle cx="146" cy="143" r="10" fill="#fff" className="body-breathe" />
+        <circle cx="148" cy="145" r="14" fill="#e2e8f0" className={breatheClass} />
+        <circle cx="146" cy="143" r="10" fill="#fff" className={breatheClass} />
 
         {/* Body */}
-        <ellipse cx="100" cy="138" rx="50" ry="40" fill="url(#bunny-body)" className="body-breathe" />
+        <ellipse cx="100" cy="138" rx="50" ry="40" fill="url(#bunny-body)" className={breatheClass} />
         
         {/* Feet */}
         <ellipse cx="70" cy="174" rx="14" ry="10" fill="#e2e8f0" />
         <ellipse cx="130" cy="174" rx="14" ry="10" fill="#e2e8f0" />
 
-        {/* Ears */}
-        <g className={earClass}>
-          {/* Left Ear */}
-          <path d="M 70 55 C 55 5, 80 5, 80 55 Z" fill="#e2e8f0" />
-          <path d="M 72 45 C 62 15, 78 15, 76 45 Z" fill="#fda4af" />
-          {/* Right Ear */}
-          <path d="M 120 55 C 105 5, 130 5, 120 55 Z" fill="#e2e8f0" />
-          <path d="M 122 45 C 112 15, 128 15, 126 45 Z" fill="#fda4af" />
-        </g>
-
-        {/* Head */}
-        <circle cx="100" cy="85" r="42" fill="url(#bunny-body)" className="head-bob" />
-
-        {/* Eyes */}
-        <g className="eyes-group head-bob">
-          <g className={eyeClass}>
-            <circle cx="82" cy="78" r="5.5" fill="#fda4af" className="eye-blink" />
-            <circle cx="80" cy="76" r="2" fill="#fff" className="eye-blink" />
-            <circle cx="118" cy="78" r="5.5" fill="#fda4af" className="eye-blink" />
-            <circle cx="116" cy="76" r="2" fill="#fff" className="eye-blink" />
+        {/* Head Group with Mouse Tracking */}
+        <g style={{ transform: `translate(${mx * 8}px, ${my * 6}px)`, transformOrigin: "100px 85px", transition: "transform 0.08s ease-out" }}>
+          
+          {/* Ears */}
+          <g className={earClass} style={{ transform: `translate(${mx * -1.5}px, ${my * -1}px)` }}>
+            <path d="M 70 55 C 55 5, 80 5, 80 55 Z" fill="#e2e8f0" />
+            <path d="M 72 45 C 62 15, 78 15, 76 45 Z" fill="#fda4af" />
+            <path d="M 120 55 C 105 5, 130 5, 120 55 Z" fill="#e2e8f0" />
+            <path d="M 122 45 C 112 15, 128 15, 126 45 Z" fill="#fda4af" />
           </g>
-        </g>
 
-        {/* Nose & Whiskers */}
-        <g className="head-bob">
-          <polygon points="97,88 103,88 100,91" fill="#fda4af" />
-          {/* Whisker Twitch */}
-          <line x1="65" y1="92" x2="48" y2="92" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
-          <line x1="135" y1="92" x2="152" y2="92" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
-          {/* Mouth */}
-          <path d="M 98 94 Q 100 96 102 94" fill="none" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round" />
+          {/* Head Base */}
+          <circle cx="100" cy="85" r="42" fill="url(#bunny-body)" className="head-bob" />
+
+          {/* Eyes Group with Additional Parallax */}
+          <g style={{ transform: `translate(${mx * 5}px, ${my * 3}px)`, transformOrigin: "100px 78px", transition: "transform 0.08s ease-out" }}>
+            {eyeContent}
+          </g>
+
+          {/* Nose & Whiskers with Parallax */}
+          <g style={{ transform: `translate(${mx * 3}px, ${my * 2}px)`, transformOrigin: "100px 88px", transition: "transform 0.08s ease-out" }}>
+            <polygon points="97,88 103,88 100,91" fill="#fda4af" />
+            {/* Whiskers */}
+            <line x1="65" y1="92" x2="48" y2="92" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
+            <line x1="135" y1="92" x2="152" y2="92" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" />
+            {mouthContent}
+          </g>
+
         </g>
       </svg>
     );
@@ -264,6 +480,8 @@ export default function PetDashboard() {
   const [activityLog, setActivityLog] = useState([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [hearts, setHearts] = useState([]);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const cardRef = useRef(null);
 
   // Sync auth state
   useEffect(() => {
@@ -299,6 +517,28 @@ export default function PetDashboard() {
     const timer = setInterval(fetchPet, 15000);
     return () => clearInterval(timer);
   }, [id]);
+
+  // Mouse Tracking Event Handlers
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const dx = e.clientX - centerX;
+    const dy = e.clientY - centerY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const maxRange = 250;
+    const r = Math.min(distance / maxRange, 1.0);
+    const angle = Math.atan2(dy, dx);
+    setMousePos({
+      x: Math.cos(angle) * r,
+      y: Math.sin(angle) * r,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setMousePos({ x: 0, y: 0 });
+  };
 
   const handleGoogleLogin = async () => {
     if (!auth || !googleProvider) {
@@ -337,11 +577,10 @@ export default function PetDashboard() {
     setActivityLog(prev => [{ text: message, time: timestamp }, ...prev.slice(0, 5)]);
   };
 
-  // Spark floating hearts animation
   const spawnHearts = () => {
     const newHearts = Array.from({ length: 6 }).map((_, i) => ({
       id: Math.random(),
-      left: 30 + Math.random() * 40, // centered
+      left: 30 + Math.random() * 40,
       delay: i * 0.15,
       scale: 0.5 + Math.random() * 0.8
     }));
@@ -351,7 +590,6 @@ export default function PetDashboard() {
     }, 2000);
   };
 
-  // Synthesize sound effects
   const playSoundEffect = (type) => {
     if (!soundEnabled) return;
     try {
@@ -398,7 +636,7 @@ export default function PetDashboard() {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.1;
-      utterance.pitch = 1.35; // cute, high-pitched pet voice
+      utterance.pitch = 1.35;
       window.speechSynthesis.speak(utterance);
     }
   };
@@ -572,15 +810,39 @@ export default function PetDashboard() {
           100% { transform: translateY(-130px) scale(1.2); opacity: 0; }
         }
 
-        /* Breathing body animation */
-        .body-breathe {
-          animation: breathe 2.2s infinite ease-in-out;
-          transform-origin: center 135px;
+        /* Breathing body animation - Slow & Deep when stable */
+        .body-breathe-stable {
+          animation: deepBreathe 3.5s infinite ease-in-out;
+          transform-origin: 100px 135px;
         }
 
-        @keyframes breathe {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.03, 0.98); }
+        /* Breathing body animation - Fast & Shallow when neglected/low stats */
+        .body-breathe-weak {
+          animation: shallowBreathe 1.1s infinite ease-in-out;
+          transform-origin: 100px 135px;
+        }
+
+        @keyframes deepBreathe {
+          0%, 100% { transform: scale(1.0, 1.0) translateY(0); }
+          50% { transform: scale(1.05, 0.95) translateY(2px); }
+        }
+
+        @keyframes shallowBreathe {
+          0%, 100% { transform: scale(1.0, 1.0) translateY(0); }
+          50% { transform: scale(1.02, 0.98) translateY(1px); }
+        }
+
+        /* Shivering effect for extremely sick pets */
+        .body-shiver {
+          animation: shiver 0.12s infinite linear;
+        }
+
+        @keyframes shiver {
+          0%, 100% { transform: translate(0, 0); }
+          20% { transform: translate(-1.2px, 0.8px); }
+          40% { transform: translate(0.8px, -1.2px); }
+          60% { transform: translate(-1.2px, -0.8px); }
+          80% { transform: translate(1.2px, 1.2px); }
         }
 
         /* Head bobbing animation */
@@ -611,7 +873,7 @@ export default function PetDashboard() {
 
         /* Eye Blinking */
         .eye-blink {
-          animation: blink 4s infinite ease-in-out;
+          animation: blink 4.2s infinite ease-in-out;
           transform-origin: center 78px;
         }
 
@@ -632,7 +894,7 @@ export default function PetDashboard() {
         }
 
         .ears-droop {
-          transform: translateY(4px) scaleY(0.9);
+          transform: translateY(4px) scaleY(0.88);
           transform-origin: center 60px;
         }
 
@@ -706,7 +968,6 @@ export default function PetDashboard() {
           cursor: not-allowed;
         }
 
-        /* Shimmer button */
         .g-shimmer {
           background: linear-gradient(135deg, #ec4899, #8b5cf6);
           box-shadow: 0 8px 24px rgba(236, 72, 153, 0.35);
@@ -757,7 +1018,7 @@ export default function PetDashboard() {
               <strong>{pet.senderName}</strong> sent you a sweet virtual companion named <strong>{pet.petName}</strong>! Claim them below to begin your pet-care adventure.
             </p>
 
-            {/* Closed Gift Box animation */}
+            {/* Closed Gift Box */}
             <div className="relative w-40 h-40 mx-auto mb-8 flex items-center justify-center bg-slate-900/60 rounded-3xl border border-solid border-slate-800 shadow-inner">
               <span className="text-7xl pet-bounce select-none">🎁</span>
               <div className="absolute bottom-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
@@ -797,7 +1058,12 @@ export default function PetDashboard() {
             ) : (
               <>
                 {/* Main Playroom Card */}
-                <div className="glass-panel rounded-[2.5rem] p-6 md:p-8 text-center relative overflow-hidden">
+                <div 
+                  className="glass-panel rounded-[2.5rem] p-6 md:p-8 text-center relative overflow-hidden"
+                  ref={cardRef}
+                  onMouseMove={handleMouseMove}
+                  onMouseLeave={handleMouseLeave}
+                >
                   
                   {/* Hearts floating animations layer */}
                   {hearts.map((h) => (
@@ -834,7 +1100,7 @@ export default function PetDashboard() {
                     {petBubble}
                   </div>
 
-                  {/* Animated SVG Character */}
+                  {/* Animated SVG Character / Rive */}
                   <div className="w-full h-44 flex items-center justify-center select-none my-4">
                     <RivePet
                       petType={pet.petType}
@@ -843,8 +1109,8 @@ export default function PetDashboard() {
                       attention={pet.attention}
                       fallbackSvg={
                         PET_VISUALS[pet.petType]
-                          ? PET_VISUALS[pet.petType](pet.status, pet.hunger, pet.attention)
-                          : PET_VISUALS.kitten(pet.status, pet.hunger, pet.attention)
+                          ? PET_VISUALS[pet.petType](pet.status, pet.hunger, pet.attention, mousePos)
+                          : PET_VISUALS.kitten(pet.status, pet.hunger, pet.attention, mousePos)
                       }
                     />
                   </div>
