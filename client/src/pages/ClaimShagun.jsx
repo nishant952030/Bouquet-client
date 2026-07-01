@@ -397,7 +397,7 @@ export default function ClaimShagun() {
                 <span className="text-3xl">⏳</span>
                 <h3 className="font-bold text-sm">Claim Submitted — Payout Processing!</h3>
                 <p className="text-xs text-stone-600 leading-relaxed">
-                  Your claim for <strong>₹{data.amount}</strong> has been registered. Our team will manually verify your UPI details and transfer the funds within 24 hours.
+                  Your claim for <strong>₹{data.amount}</strong> has been registered. Our team will manually verify your UPI details and transfer the funds within 10 minutes.
                 </p>
                 <div className="text-[10px] text-stone-500 bg-white/70 p-3 rounded-xl border border-solid border-amber-100 flex flex-col gap-1 text-left font-mono">
                   {(data.claimedAt || claimSuccess) && (
