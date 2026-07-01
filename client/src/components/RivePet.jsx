@@ -22,7 +22,8 @@ export default function RivePet({ petType, status, hunger, attention, fallbackSv
       
       try {
         const response = await fetch(src, { method: "HEAD" });
-        if (response.ok) {
+        const contentType = response.headers.get("content-type") || "";
+        if (response.ok && !contentType.includes("text/html")) {
           setRivSrc(src);
           setUseRiveAnimation(true);
         } else {
