@@ -67,10 +67,17 @@ export default function MusicSelector({ selectedTrackId, onChange }) {
           const isPreviewing = previewingId === track.id;
           
           return (
-            <button
+            <div
               key={track.id}
-              type="button"
+              role="button"
+              tabIndex={0}
               onClick={() => handleSelect(track.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleSelect(track.id);
+                }
+              }}
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -130,7 +137,7 @@ export default function MusicSelector({ selectedTrackId, onChange }) {
               <span style={{ fontSize: "0.65rem", color: "#8a7670", marginTop: "0.2rem", lineHeight: 1.2 }}>
                 {track.desc}
               </span>
-            </button>
+            </div>
           );
         })}
       </div>
