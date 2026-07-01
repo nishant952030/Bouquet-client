@@ -1,6 +1,6 @@
-import createOrder from "../../../../api/razorpay/_handlers/create-order.js";
-import verify from "../../../../api/razorpay/_handlers/verify.js";
-import webhook from "../../../../api/razorpay/_handlers/webhook.js";
+import createOrder from "../../../../_api_legacy/razorpay/_handlers/create-order.js";
+import verify from "../../../../_api_legacy/razorpay/_handlers/verify.js";
+import webhook from "../../../../_api_legacy/razorpay/_handlers/webhook.js";
 
 const handlers = {
   "create-order": createOrder,

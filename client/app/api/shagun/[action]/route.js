@@ -1,11 +1,11 @@
-import claim from "../../../../api/shagun/_handlers/claim.js";
-import completePayout from "../../../../api/shagun/_handlers/complete-payout.js";
-import createOrder from "../../../../api/shagun/_handlers/create-order.js";
-import sendOtp from "../../../../api/shagun/_handlers/send-otp.js";
-import verifyOtp from "../../../../api/shagun/_handlers/verify-otp.js";
-import verifyUpi from "../../../../api/shagun/_handlers/verify-upi.js";
-import verify from "../../../../api/shagun/_handlers/verify.js";
-import getShagun from "../../../../api/shagun/_handlers/get.js";
+import claim from "../../../../_api_legacy/shagun/_handlers/claim.js";
+import completePayout from "../../../../_api_legacy/shagun/_handlers/complete-payout.js";
+import createOrder from "../../../../_api_legacy/shagun/_handlers/create-order.js";
+import sendOtp from "../../../../_api_legacy/shagun/_handlers/send-otp.js";
+import verifyOtp from "../../../../_api_legacy/shagun/_handlers/verify-otp.js";
+import verifyUpi from "../../../../_api_legacy/shagun/_handlers/verify-upi.js";
+import verify from "../../../../_api_legacy/shagun/_handlers/verify.js";
+import getShagun from "../../../../_api_legacy/shagun/_handlers/get.js";
 
 const handlers = {
   claim,

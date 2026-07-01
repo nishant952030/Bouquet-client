@@ -1,4 +1,4 @@
-import { db } from "../../../../api/_lib/firebase-server";
+import { db } from "../../../../_api_legacy/_lib/firebase-server";
 
 // Food items and their hunger restoration percentages
 const FOOD_BOOSTS = {

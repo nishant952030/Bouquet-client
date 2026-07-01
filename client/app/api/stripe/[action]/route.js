@@ -1,6 +1,6 @@
-import createCheckoutSession from "../../../../api/stripe/_handlers/create-checkout-session.js";
-import verifySession from "../../../../api/stripe/_handlers/verify-session.js";
-import webhook from "../../../../api/stripe/_handlers/webhook.js";
+import createCheckoutSession from "../../../../_api_legacy/stripe/_handlers/create-checkout-session.js";
+import verifySession from "../../../../_api_legacy/stripe/_handlers/verify-session.js";
+import webhook from "../../../../_api_legacy/stripe/_handlers/webhook.js";
 
 const handlers = {
   "create-checkout-session": createCheckoutSession,
