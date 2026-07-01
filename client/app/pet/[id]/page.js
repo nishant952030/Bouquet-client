@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, googleProvider } from "../../../src/lib/firebase";
 import LanguageSwitcher from "../../../src/components/LanguageSwitcher";
+import RivePet from "../../../src/components/RivePet";
 
 // Pet SVGs and Visual Helpers
 const PET_VISUALS = {
@@ -835,9 +836,17 @@ export default function PetDashboard() {
 
                   {/* Animated SVG Character */}
                   <div className="w-full h-44 flex items-center justify-center select-none my-4">
-                    {PET_VISUALS[pet.petType]
-                      ? PET_VISUALS[pet.petType](pet.status, pet.hunger, pet.attention)
-                      : PET_VISUALS.kitten(pet.status, pet.hunger, pet.attention)}
+                    <RivePet
+                      petType={pet.petType}
+                      status={pet.status}
+                      hunger={pet.hunger}
+                      attention={pet.attention}
+                      fallbackSvg={
+                        PET_VISUALS[pet.petType]
+                          ? PET_VISUALS[pet.petType](pet.status, pet.hunger, pet.attention)
+                          : PET_VISUALS.kitten(pet.status, pet.hunger, pet.attention)
+                      }
+                    />
                   </div>
 
                   {/* ── Interactive Stats Controls ── */}
