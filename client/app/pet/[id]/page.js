@@ -6,8 +6,9 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, googleProvider } from "../../../src/lib/firebase";
+import dynamic from "next/dynamic";
 import LanguageSwitcher from "../../../src/components/LanguageSwitcher";
-import RivePet from "../../../src/components/RivePet";
+const LottiePet = dynamic(() => import("../../../src/components/LottiePet"), { ssr: false });
 
 // Food menus per pet type
 const FOOD_MENU = {
@@ -1193,18 +1194,15 @@ export default function PetDashboard() {
                     {petBubble}
                   </div>
 
-                  {/* Animated SVG Character / Rive */}
-                  <div className="w-full h-44 flex items-center justify-center select-none my-4">
-                    <RivePet
+                  {/* ── Lottie Animated Pet Character ── */}
+                  <div className="w-full flex items-center justify-center select-none my-2" style={{ height: 240 }}>
+                    <LottiePet
                       petType={pet.petType}
-                      status={pet.status}
                       hunger={pet.hunger}
                       attention={pet.attention}
-                      fallbackSvg={
-                        PET_VISUALS[pet.petType]
-                          ? PET_VISUALS[pet.petType](pet.status, pet.hunger, pet.attention, mousePos)
-                          : PET_VISUALS.kitten(pet.status, pet.hunger, pet.attention, mousePos)
-                      }
+                      status={pet.status}
+                      mousePos={mousePos}
+                      size={240}
                     />
                   </div>
 
