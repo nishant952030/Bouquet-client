@@ -8,9 +8,6 @@ import LanguageSwitcher from "../../src/components/LanguageSwitcher";
 
 const PET_TYPES = [
   { id: "puppy", name: "Puppy Dog", emoji: "🐶", desc: "Loyal, energetic, and always excited to play!" },
-  { id: "kitten", name: "Sweet Kitten", emoji: "🐱", desc: "Curious, soft, and loves gentle petting." },
-  { id: "panda", name: "Fluffy Panda", emoji: "🐼", desc: "Sleepy, peaceful, and eats lots of bamboo." },
-  { id: "bunny", name: "Playful Bunny", emoji: "🐰", desc: "Hoppy, active, and loves crunchy treats." },
 ];
 
 export default function CreatePet() {

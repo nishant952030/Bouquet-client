@@ -14,16 +14,8 @@ import AnonymousDeliveryModal from "../components/AnonymousDeliveryModal";
 /* -- constants -- */
 const PENDING_KEY = "pw_pending_global_checkout";
 
-const TIP_PRESETS_INR = [
-  { label: "Basic", amount: 29, display: "Rs 29" },
-  { label: "Please", amount: 59, display: "Rs 59" },
-  { label: "Please Please", amount: 69, display: "Rs 69" },
-];
-const TIP_PRESETS_USD = [
-  { label: "Basic", amount: 1.99, display: "$1.99" },
-  { label: "Please", amount: 2.99, display: "$2.99" },
-  { label: "Please Please", amount: 3.99, display: "$3.99" },
-];
+const TIP_PRESET_INR = { label: "Standard", amount: 49, display: "Rs 49" };
+const TIP_PRESET_USD = { label: "Standard", amount: 1.99, display: "$1.99" };
 const API_BASE_URL = String(process.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 
 /* -- helpers -- */
@@ -260,8 +252,7 @@ export default function Payment() {
 
   const razorpayKeyId = process.env.VITE_RAZORPAY_KEY_ID;
   const isIndia = countryCode === "IN";
-  const tipPresets = isIndia ? TIP_PRESETS_INR : TIP_PRESETS_USD;
-  const currentTip = tipPresets[selectedTip];
+  const currentTip = isIndia ? TIP_PRESET_INR : TIP_PRESET_USD;
 
   /* -- Detect country -- */
   useEffect(() => {
@@ -652,20 +643,6 @@ export default function Payment() {
               {t("payment.savedAfterPayment", "Your bouquet will be saved after payment.")}
             </p>
 
-            {/* Tip presets */}
-            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-              {tipPresets.map((preset, i) => (
-                <button
-                  key={preset.display}
-                  type="button"
-                  className={`tip-btn ${selectedTip === i ? "selected" : ""}`}
-                  onClick={() => setSelectedTip(i)}
-                >
-                  <span className="tip-emoji">{preset.label}</span>
-                  <span className="tip-amount">{preset.display}</span>
-                </button>
-              ))}
-            </div>
 
             {/* Pay button — Razorpay for all countries */}
             {isDetectingCountry ? (

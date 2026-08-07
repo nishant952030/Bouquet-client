@@ -8,7 +8,7 @@ import { signInWithPopup, signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, googleProvider } from "../../../src/lib/firebase";
 import dynamic from "next/dynamic";
 import LanguageSwitcher from "../../../src/components/LanguageSwitcher";
-const LottiePet = dynamic(() => import("../../../src/components/LottiePet"), { ssr: false });
+const PuppyVisual = dynamic(() => import("../../../src/components/PuppyVisual"), { ssr: false });
 
 // Food menus per pet type
 const FOOD_MENU = {
@@ -1149,6 +1149,40 @@ export default function PetDashboard() {
                   Logout Account
                 </button>
               </div>
+            ) : pet.status === "runaway" ? (
+              <div className="glass-panel rounded-[2.5rem] p-8 md:p-10 text-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+                
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-rose-500 block mb-2">
+                  Pet Ran Away 🐾
+                </span>
+                <h1 className="font-serif-playfair text-3xl font-extrabold text-slate-100 mb-4 leading-tight">
+                  Oh no! {pet.petName} is gone!
+                </h1>
+                <p className="text-xs text-slate-400 leading-relaxed mb-8 max-w-sm mx-auto">
+                  {pet.petName} felt neglected because their hunger or attention levels dropped to zero, and they ran away back to <strong>{pet.senderName}</strong>&apos;s backyard!
+                </p>
+
+                {/* Empty sad pet bed or silhouette */}
+                <div className="relative w-48 h-48 mx-auto mb-8 flex flex-col items-center justify-center bg-slate-950/40 rounded-3xl border border-solid border-slate-900/60 shadow-inner">
+                  {/* Sad empty house / missing poster vibe */}
+                  <span className="text-7xl select-none animate-bounce" style={{ animationDuration: '3s' }}>🏚️</span>
+                  <div className="absolute bottom-4 text-[9px] font-extrabold uppercase tracking-wider text-rose-500/80">
+                    Empty Playroom
+                  </div>
+                </div>
+
+                <div className="bg-slate-900/40 border border-solid border-slate-800/80 rounded-2xl p-4 text-[11px] text-slate-400 max-w-sm mx-auto mb-6 leading-relaxed">
+                  💡 Don&apos;t worry! Pets never die in our world. You can visit the <strong>Backyard Monitor</strong> to nurse them back to health and bring them home.
+                </div>
+
+                <Link
+                  href={`/pet/${pet.id}/yard`}
+                  className="g-shimmer pd-btn text-white w-full max-w-xs mx-auto flex items-center justify-center gap-2 no-underline"
+                >
+                  🏡 Visit Backyard to Rescue
+                </Link>
+              </div>
             ) : (
               <>
                 {/* Main Playroom Card */}
@@ -1194,10 +1228,9 @@ export default function PetDashboard() {
                     {petBubble}
                   </div>
 
-                  {/* ── Lottie Animated Pet Character ── */}
+                  {/* ── Interactive Puppy Visual character ── */}
                   <div className="w-full flex items-center justify-center select-none my-2" style={{ height: 240 }}>
-                    <LottiePet
-                      petType={pet.petType}
+                    <PuppyVisual
                       hunger={pet.hunger}
                       attention={pet.attention}
                       status={pet.status}

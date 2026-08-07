@@ -9,16 +9,8 @@ import { db, isFirebaseConfigured } from "../lib/firebase";
 import { loadRazorpayScript } from "../lib/razorpay";
 import { applySeo } from "../lib/seo";
 
-const TIP_PRESETS_INR = [
-  { labelKey: "payment.tipBasic", fallback: "Basic", amount: 29, display: "Rs 29" },
-  { labelKey: "payment.tipPopular", fallback: "Please", amount: 59, display: "Rs 59" },
-  { labelKey: "payment.tipSupporter", fallback: "Please Please", amount: 69, display: "Rs 69" },
-];
-const TIP_PRESETS_USD = [
-  { labelKey: "payment.tipBasic", fallback: "Basic", amount: 1.99, display: "$1.99" },
-  { labelKey: "payment.tipPopular", fallback: "Please", amount: 2.99, display: "$2.99" },
-  { labelKey: "payment.tipSupporter", fallback: "Please Please", amount: 3.99, display: "$3.99" },
-];
+const TIP_PRESET_INR = { labelKey: "payment.tipBasic", fallback: "Standard", amount: 49, display: "Rs 49" };
+const TIP_PRESET_USD = { labelKey: "payment.tipBasic", fallback: "Standard", amount: 1.99, display: "$1.99" };
 const API_BASE_URL = String(process.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 const BYPASS_CAKE_PAYMENT_FOR_TESTING = false;
 
@@ -241,8 +233,7 @@ export default function PaymentCake() {
 
   const razorpayKeyId = process.env.VITE_RAZORPAY_KEY_ID;
   const isIndia = countryCode === "IN";
-  const tipPresets = isIndia ? TIP_PRESETS_INR : TIP_PRESETS_USD;
-  const currentTip = tipPresets[selectedTip];
+  const currentTip = isIndia ? TIP_PRESET_INR : TIP_PRESET_USD;
 
   useEffect(() => {
     let cancelled = false;
@@ -588,19 +579,6 @@ export default function PaymentCake() {
               {t("paymentCake.payTinyAmount", "Pay a tiny amount to get your unique share link.")}<br />
             </p>
 
-            <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
-              {tipPresets.map((preset, i) => (
-                <button
-                  key={preset.display}
-                  type="button"
-                  className={`tip-btn ${selectedTip === i ? "selected" : ""}`}
-                  onClick={() => setSelectedTip(i)}
-                >
-                  <span className="tip-emoji">{t(preset.labelKey, preset.fallback)}</span>
-                  <span className="tip-amount">{preset.display}</span>
-                </button>
-              ))}
-            </div>
 
             {isDetectingCountry ? (
               <p style={{ fontSize: "0.78rem", color: "#9e8f90" }}>{t("payment.loadingOptions", "Loading payment option...")}</p>

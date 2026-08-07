@@ -1,9 +1,13 @@
 User-agent: *
 Allow: /
 
-# Keep private and transactional routes out of search results.
+# Keep private, checkout, and API routes out of search engines
 Disallow: /payment
+Disallow: /payment-*
 Disallow: /view/
 Disallow: /admin
+Disallow: /claim/
+Disallow: /shagun/success/
+Disallow: /api/
 
 Sitemap: https://www.petalsandwords.com/sitemap.xml

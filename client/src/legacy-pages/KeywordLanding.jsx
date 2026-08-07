@@ -304,16 +304,32 @@ export default function KeywordLanding() {
       title: page.seoTitle,
       description: page.description,
       keywords: page.keywords,
-      path: location.pathname,
-      alternates: countryAlternates,
+      path: "/virtual-bouquet-maker",
       jsonLd: {
         "@context": "https://schema.org",
         "@graph": [
           {
             "@type": "WebPage",
             name: page.seoTitle,
-            url: `${window.location.origin}${location.pathname}`,
+            url: `${window.location.origin}/virtual-bouquet-maker`,
             description: page.description,
+          },
+          {
+            "@type": "SoftwareApplication",
+            name: "Petals and Words Virtual Bouquet Maker",
+            applicationCategory: "LifestyleApplication",
+            operatingSystem: "Web",
+            offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+            areaServed: ["US", "GB", "CA", "AU", "PH", "IN", "ID"],
+          },
+          {
+            "@type": "HowTo",
+            name: "How to Build a Virtual Flower Bouquet",
+            step: [
+              { "@type": "HowToStep", position: 1, name: "Choose Stems", text: "Select 2D/3D flower stems to compose your layout." },
+              { "@type": "HowToStep", position: 2, name: "Personalize Note", text: "Write your message or select an AI template." },
+              { "@type": "HowToStep", position: 3, name: "Share Link", text: "Copy your unique share link and send via WhatsApp." },
+            ],
           },
           {
             "@type": "FAQPage",
@@ -322,7 +338,7 @@ export default function KeywordLanding() {
         ],
       },
     });
-  }, [countryAlternates, location.pathname, page]);
+  }, [location.pathname, page]);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-4 py-8 sm:py-12">
@@ -349,10 +365,10 @@ export default function KeywordLanding() {
 
           <article className="rounded-2xl border border-rose-100 bg-rose-50/60 p-4">
             <h2 className="text-2xl text-stone-900" style={{ fontFamily: '"Cormorant Garamond", serif' }}>
-              Use cases
+              Use cases & Special Days
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-stone-700">
-              Perfect for birthday wishes, apology notes, anniversaries, and everyday surprise messages with flowers.
+              Perfect for National Couples Day, Boyfriend Day, birthdays, apology notes, anniversaries, and long-distance surprise messages with flowers.
             </p>
           </article>
         </div>
@@ -362,7 +378,7 @@ export default function KeywordLanding() {
             100% Free — No Signup Required
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-stone-700">
-            Create and share unlimited digital bouquets with personal notes. No account needed, no payment required, no downloads. Just pick your flowers, write your message, and share instantly.
+            Create and share unlimited digital bouquets with personal notes. No account needed, no payment required to preview, no downloads. Just pick your flowers, write your message, and share instantly.
           </p>
         </article>
 
@@ -394,31 +410,22 @@ export default function KeywordLanding() {
             Home
           </Link>
           <Link to="/create" className="rounded-full border border-rose-200 bg-white px-4 py-2 text-rose-700 hover:border-rose-300">
-            Bouquet Builder
+            Bouquet Builder 💐
           </Link>
-          <Link to="/digital-bouquet-maker-usa" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
-            USA
+          <Link to="/create-cake" className="rounded-full border border-pink-200 bg-white px-4 py-2 text-pink-700 hover:border-pink-300">
+            3D Cake Builder 🎂
           </Link>
-          <Link to="/digital-bouquet-maker-uk" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
-            UK
+          <Link to="/create-greeting-card" className="rounded-full border border-purple-200 bg-white px-4 py-2 text-purple-700 hover:border-purple-300">
+            Greeting Card 💌
           </Link>
-          <Link to="/digital-bouquet-maker-canada" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
-            Canada
+          <Link to="/create-hug-card" className="rounded-full border border-amber-200 bg-white px-4 py-2 text-amber-700 hover:border-amber-300">
+            Virtual Hug 🤗
           </Link>
-          <Link to="/digital-bouquet-maker-australia" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
-            Australia
+          <Link to="/shagun" className="rounded-full border border-yellow-200 bg-white px-4 py-2 text-yellow-800 hover:border-yellow-300">
+            Shagun Envelope ✉️
           </Link>
-          <Link to="/virtual-bouquet-maker-online-free" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
-            Virtual Maker Free
-          </Link>
-          <Link to="/digital-bouquet-maker-online-free" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
-            Digital Maker Free
-          </Link>
-          <Link to="/digital-flower-bouquet-maker" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
-            Digital Flower Maker
-          </Link>
-          <Link to="/bouquet-maker-online" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
-            Bouquet Maker Online
+          <Link to="/blog" className="rounded-full border border-stone-200 bg-white px-4 py-2 text-stone-700 hover:border-stone-300">
+            Blog 📖
           </Link>
         </div>
       </section>

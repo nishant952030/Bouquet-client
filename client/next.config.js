@@ -18,7 +18,35 @@ const nextConfig = {
     VITE_ANALYTICS_WEBSITE_ID: process.env.VITE_ANALYTICS_WEBSITE_ID,
     VITE_SUPPORT_EMAIL: process.env.VITE_SUPPORT_EMAIL,
     VITE_ADMIN_KEY: process.env.VITE_ADMIN_KEY,
-  }
+  },
+  async redirects() {
+    return [
+      // 1. Bouquet-Maker Cluster Consolidation -> /virtual-bouquet-maker
+      { source: "/virtual-bouquet-maker-online-free", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/virtual-bouquet", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/virtual-bouquet-maker-free", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/digital-bouquet-maker", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/digital-bouquet-maker-online-free", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/digital-flower-bouquet-maker", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/digital-flower-bouquet", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/online-bouquet-maker", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/bouquet-maker", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/bouquet-maker-online", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/digital-bouquet-maker-usa", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/digital-bouquet-maker-uk", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/digital-bouquet-maker-canada", destination: "/virtual-bouquet-maker", permanent: true },
+      { source: "/digital-bouquet-maker-australia", destination: "/virtual-bouquet-maker", permanent: true },
+
+      // 2. Mother's Day & Legacy Greeting Card Consolidation -> Evergreen Pages
+      { source: "/free-digital-mothers-day-card", destination: "/create-greeting-card", permanent: true },
+      { source: "/best-virtual-mothers-day-card", destination: "/create-greeting-card", permanent: true },
+      { source: "/send-virtual-hug-mothers-day", destination: "/create-hug-card", permanent: true },
+      { source: "/mothers-day-digital-gift", destination: "/create", permanent: true },
+      { source: "/interactive-mothers-day-card", destination: "/create-greeting-card", permanent: true },
+      { source: "/mothers-day-card", destination: "/create-greeting-card", permanent: true },
+      { source: "/mothers-day", destination: "/create-greeting-card", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

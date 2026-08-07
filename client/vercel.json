@@ -12,6 +12,27 @@
       ],
       "destination": "https://www.petalsandwords.com/$1",
       "permanent": true
-    }
+    },
+    { "source": "/virtual-bouquet-maker-online-free", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/virtual-bouquet", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/virtual-bouquet-maker-free", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/digital-bouquet-maker", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/digital-bouquet-maker-online-free", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/digital-flower-bouquet-maker", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/digital-flower-bouquet", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/online-bouquet-maker", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/bouquet-maker", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/bouquet-maker-online", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/digital-bouquet-maker-usa", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/digital-bouquet-maker-uk", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/digital-bouquet-maker-canada", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/digital-bouquet-maker-australia", "destination": "/virtual-bouquet-maker", "permanent": true },
+    { "source": "/free-digital-mothers-day-card", "destination": "/create-greeting-card", "permanent": true },
+    { "source": "/best-virtual-mothers-day-card", "destination": "/create-greeting-card", "permanent": true },
+    { "source": "/send-virtual-hug-mothers-day", "destination": "/create-hug-card", "permanent": true },
+    { "source": "/mothers-day-digital-gift", "destination": "/create", "permanent": true },
+    { "source": "/interactive-mothers-day-card", "destination": "/create-greeting-card", "permanent": true },
+    { "source": "/mothers-day-card", "destination": "/create-greeting-card", "permanent": true },
+    { "source": "/mothers-day", "destination": "/create-greeting-card", "permanent": true }
   ]
 }

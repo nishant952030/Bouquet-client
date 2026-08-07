@@ -142,93 +142,32 @@ const appRoutes = [
 ];
 
 const bouquetKeywordRoutes = [
-  ["/virtual-bouquet-maker", "Virtual Bouquet Maker Online | Free Digital Flower Builder", "Create a virtual bouquet online, add a heartfelt note, and share a beautiful flower gift instantly with one link.", ["virtual bouquet maker", "virtual flower bouquet maker online free", "virtual flower maker"]],
-  ["/virtual-bouquet-maker-online-free", "Virtual Bouquet Maker Online Free | No Signup", "Use a free virtual bouquet maker online. Pick flowers, write your note, and send one clean bouquet link in under a minute.", ["virtual bouquet maker online free", "free virtual bouquet maker", "virtual bouquet free"]],
-  ["/virtual-bouquet", "Virtual Bouquet | Send Digital Flowers with Message", "Send a virtual bouquet with a personal message. Create your flowers online and share instantly through one secure link.", ["virtual bouquet", "send virtual bouquet", "virtual flower gift"]],
-  ["/virtual-bouquet-maker-free", "Virtual Bouquet Maker Free | Create and Share Online", "Try a free virtual bouquet maker. Design a custom bouquet, add your note, and share it instantly.", ["virtual bouquet maker free", "virtual flower maker free", "online bouquet maker free"]],
-  ["/digital-bouquet-maker", "Digital Bouquet Maker | Personalized Flower Messages", "Use a digital bouquet maker to craft custom flower arrangements and pair them with personal notes for birthdays, apologies, and love messages.", ["digital bouquet maker", "digital flower bouquet", "bouquet with message"]],
-  ["/digital-bouquet-maker-online-free", "Digital Bouquet Maker Online Free | Fast Share Link", "Create a digital bouquet online for free. Choose flowers, write your message, and share instantly.", ["digital bouquet maker online free", "digital bouquet online free", "free digital bouquet maker"]],
-  ["/digital-flower-bouquet-maker", "Digital Flower Bouquet Maker | Build Online in Minutes", "Use a digital flower bouquet maker to create beautiful online flower arrangements and pair them with personal notes.", ["digital flower bouquet maker", "online flower bouquet maker", "flower bouquet maker online"]],
-  ["/digital-flower-bouquet", "Digital Flower Bouquet | Create and Send Online", "Create a digital flower bouquet online and send it with a personal message. Quick builder, beautiful output, instant share.", ["digital flower bouquet", "digital flowers online", "send digital flower bouquet"]],
-  ["/online-bouquet-maker", "Online Bouquet Maker and Online Flower Bouquet Maker", "Try an online bouquet maker to create custom bouquets, write notes, and share instantly.", ["online bouquet maker", "online flower bouquet maker", "bouquet maker online"]],
-  ["/bouquet-maker", "Bouquet Maker | Build and Share a Digital Bouquet", "Try a bouquet maker for personalized digital flower arrangements with message cards and instant share links.", ["bouquet maker", "bouquet creator", "digital bouquet maker"]],
-  ["/bouquet-maker-online", "Bouquet Maker Online | Digital Flowers with Note", "Use this bouquet maker online to create flower arrangements with notes and share instantly with one link.", ["bouquet maker online", "online bouquet maker", "bouquet with note"]],
-  ["/digital-bouquet-maker-usa", "Digital Bouquet Maker USA | Send Virtual Flowers Online", "Send virtual flowers in the USA with a digital bouquet maker. Create a bouquet, add your note, and share instantly.", ["digital bouquet maker usa", "send virtual flowers usa", "online bouquet usa"]],
-  ["/digital-bouquet-maker-uk", "Digital Bouquet Maker UK | Send Online Flowers with Message", "Create and send online flowers in the UK with a custom message. Build your digital bouquet in minutes and share instantly.", ["digital bouquet maker uk", "online flowers uk digital", "virtual bouquet uk"]],
-  ["/digital-bouquet-maker-canada", "Digital Bouquet Maker Canada | Virtual Flower Gift Online", "Use a digital bouquet maker in Canada to create virtual flower gifts with personalised notes and instant share links.", ["digital bouquet maker canada", "virtual flower gift canada", "digital flowers canada"]],
-  ["/digital-bouquet-maker-australia", "Digital Bouquet Maker Australia | Online Virtual Bouquet", "Create a virtual bouquet in Australia with a custom note. Send meaningful digital flowers instantly with one secure link.", ["digital bouquet maker australia", "virtual bouquet australia", "online digital flowers australia"]],
-].map(([pathName, title, description, keywords]) => ({
-  path: pathName,
-  title,
-  description,
-  keywords,
-  kind: "webpage",
-  priority: "0.82",
-  changefreq: "weekly",
-  faqs: [
-    {
-      q: "Is this bouquet maker free?",
-      a: "Yes. You can create a digital bouquet and share it online without signing up.",
-    },
-    {
-      q: "Can I add a personal note?",
-      a: "Yes. Each bouquet can include a custom note before you share the link.",
-    },
-  ],
-}));
-
-const mothersDayKeywordRoutes = [
-  ["/free-digital-mothers-day-card", "Free Digital Mother's Day Card | Create and Send Online", "Create a beautiful, personalized, and interactive digital Mother's Day card for free. Send instantly via WhatsApp, text, or email.", ["free digital mothers day card", "create mothers day card online", "personalized mothers day card free"]],
-  ["/best-virtual-mothers-day-card", "Best Virtual Mother's Day Card | Interactive and Free", "Design a memorable virtual Mother's Day card with an interactive envelope reveal, custom message, and beautiful digital styling.", ["virtual mothers day card free", "best free digital mothers day card", "mothers day ecard free"]],
-  ["/send-virtual-hug-mothers-day", "Send a Virtual Hug for Mother's Day | Free Hug Card", "Send Mom a free interactive virtual hug this Mother's Day. Share a warm digital embrace instantly with one link.", ["send virtual hug mothers day", "virtual hug for mom", "mothers day hug card free"]],
-  ["/mothers-day-digital-gift", "Mother's Day Digital Gift | Free Card, Bouquet and Hug", "Give Mom a free digital gift for Mother's Day: choose from interactive cards, virtual bouquets, or a pull-to-open hug card.", ["mothers day digital gift free", "free online gift for mom", "virtual gift for mother"]],
-  ["/interactive-mothers-day-card", "Interactive Mother's Day Card | Free Animated Card for Mom", "Create a free interactive Mother's Day card with an animated reveal effect, personal message, and instant sharing.", ["interactive mothers day card", "animated mothers day card free", "digital card for mom interactive"]],
-].map(([pathName, title, description, keywords]) => ({
-  path: pathName,
-  title,
-  description,
-  keywords,
-  kind: "webpage",
-  priority: "0.85",
-  changefreq: "weekly",
-  faqs: [
-    {
-      q: "Is this Mother's Day card free?",
-      a: "Yes. You can create and share the digital Mother's Day card online for free.",
-    },
-    {
-      q: "Can I share it on WhatsApp?",
-      a: "Yes. The card generates a link that can be shared on WhatsApp, text, email, or other messaging apps.",
-    },
-  ],
-}));
-
-const cakeKeywordRoutes = [
-  ["/tl/virtual-cake-anniversary", "Virtual Cake Anniversary | Send an Online Cake", "Create a virtual anniversary cake online, add a message, and share it instantly with someone special.", ["virtual cake anniversary", "virtual cake online", "send online cake"]],
-  ["/es/pastel-de-cumpleanos-virtual", "Pastel de Cumpleanos Virtual | Enviar Online Gratis", "Crea un pastel de cumpleanos virtual en 3D. Escribe un mensaje personal y envia el enlace al instante.", ["pastel de cumpleanos virtual", "torta de cumpleanos online", "enviar pastel virtual"]],
-  ["/bn/virtual-janmadin-cake", "Virtual Janmadin Cake | Free Online Birthday Cake", "Create a free virtual birthday cake online, add a message, and share it instantly with one link.", ["virtual janmadin cake", "birthday cake online", "free virtual cake"]],
-].map(([pathName, title, description, keywords]) => ({
-  path: pathName,
-  title,
-  description,
-  keywords,
-  kind: "webpage",
-  priority: "0.72",
-  changefreq: "monthly",
-}));
+  {
+    path: "/virtual-bouquet-maker",
+    title: "Virtual Bouquet Maker Online | Free Digital Flower Builder",
+    description: "Create a virtual bouquet online, add a heartfelt note, and share a beautiful flower gift instantly with one link.",
+    keywords: ["virtual bouquet maker", "virtual flower bouquet maker online free", "virtual flower maker"],
+    kind: "webpage",
+    priority: "0.9",
+    changefreq: "weekly",
+    faqs: [
+      { q: "Is this bouquet maker free?", a: "Yes. You can create a digital bouquet and share it online without signing up." },
+      { q: "Can I add a personal note?", a: "Yes. Each bouquet can include a custom note before you share the link." },
+    ],
+  },
+];
 
 const blogRoutes = [
   {
     path: "/blog",
     title: "Flower Blog | Bouquet Ideas, Messages and Digital Gifting Guides",
     description:
-      "Read practical guides on flower meanings, bouquet notes, apology messages, birthday ideas, Mother's Day gifts, and digital gifting tips.",
+      "Read practical guides on flower meanings, bouquet notes, apology messages, birthday ideas, and digital gifting tips.",
     keywords: [
       "flower blog",
       "bouquet message ideas",
       "digital gifting ideas",
       "flower meanings",
-      "mothers day flowers",
     ],
     kind: "blog",
     priority: "0.8",
@@ -250,8 +189,6 @@ const blogRoutes = [
 const routes = [
   ...appRoutes,
   ...bouquetKeywordRoutes,
-  ...mothersDayKeywordRoutes,
-  ...cakeKeywordRoutes,
   ...blogRoutes,
 ];
 

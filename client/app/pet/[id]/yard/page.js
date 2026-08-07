@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import dynamic from "next/dynamic";
 import LanguageSwitcher from "../../../../src/components/LanguageSwitcher";
+const PuppyVisual = dynamic(() => import("../../../../src/components/PuppyVisual"), { ssr: false });
 
 const ANIMAL_EMOJIS = {
   puppy: "🐶",
@@ -261,8 +263,13 @@ export default function SenderYard() {
                 </p>
               </div>
 
-              <div className="text-[7.5rem] leading-none select-none my-4 yard-pet-emoji">
-                🏥
+              <div className="w-full flex items-center justify-center select-none my-4" style={{ height: 200 }}>
+                <PuppyVisual
+                  hunger={pet.hunger}
+                  attention={pet.attention}
+                  status={pet.status}
+                  size={200}
+                />
               </div>
 
               {healSuccess && (
@@ -297,8 +304,13 @@ export default function SenderYard() {
                 </p>
               </div>
 
-              <div className="text-[7.5rem] leading-none select-none my-4 yard-pet-emoji">
-                {ANIMAL_EMOJIS[pet.petType] || "🐶"}
+              <div className="w-full flex items-center justify-center select-none my-4" style={{ height: 200 }}>
+                <PuppyVisual
+                  hunger={pet.hunger}
+                  attention={pet.attention}
+                  status={pet.status}
+                  size={200}
+                />
               </div>
 
               {/* Stats overview */}

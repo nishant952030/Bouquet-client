@@ -26,16 +26,8 @@ function getCountry() {
   } catch { return "IN"; }
 }
 
-const TIP_INR = [
-  { label: "Basic", amount: 29, display: "₹29" },
-  { label: "Please", amount: 59, display: "₹59" },
-  { label: "Please Please", amount: 69, display: "₹69" },
-];
-const TIP_USD = [
-  { label: "Basic", amount: 1.99, display: "$1.99" },
-  { label: "Please", amount: 2.99, display: "$2.99" },
-  { label: "Please Please", amount: 3.99, display: "$3.99" },
-];
+const TIP_INR = { label: "Standard", amount: 49, display: "₹49" };
+const TIP_USD = { label: "Standard", amount: 1.99, display: "$1.99" };
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Manrope:wght@400;500;600;700;800&display=swap');
@@ -94,8 +86,7 @@ export default function PaymentPlushie() {
 
   const razorpayKey = process.env.VITE_RAZORPAY_KEY_ID;
   const isIndia = countryCode === "IN";
-  const tips = isIndia ? TIP_INR : TIP_USD;
-  const tip = tips[selectedTip];
+  const tip = isIndia ? TIP_INR : TIP_USD;
 
   useEffect(() => {
     applySeo({ title: "Complete Payment | Plushie Box", path: "/payment-plushie", robots: "noindex,nofollow" });
@@ -274,14 +265,6 @@ export default function PaymentPlushie() {
                 Pay a small amount to generate your unique share link.
               </p>
 
-              <div className="pp-tip-row">
-                {tips.map((t, i) => (
-                  <button key={t.display} type="button" className={`pp-tip ${selectedTip === i ? "sel" : ""}`} onClick={() => setSelectedTip(i)}>
-                    <span className="pp-tip-label">{t.label}</span>
-                    <span className="pp-tip-amount">{t.display}</span>
-                  </button>
-                ))}
-              </div>
 
               {detecting ? (
                 <p style={{ fontSize: "0.78rem", color: "#9e8f90" }}>Loading payment...</p>
