@@ -37,12 +37,7 @@ const nextConfig = {
       { source: "/digital-bouquet-maker-canada", destination: "/virtual-bouquet-maker", permanent: true },
       { source: "/digital-bouquet-maker-australia", destination: "/virtual-bouquet-maker", permanent: true },
 
-      // 2. Mother's Day & Legacy Greeting Card Consolidation -> Evergreen Pages
-      { source: "/free-digital-mothers-day-card", destination: "/create-greeting-card", permanent: true },
-      { source: "/best-virtual-mothers-day-card", destination: "/create-greeting-card", permanent: true },
-      { source: "/send-virtual-hug-mothers-day", destination: "/create-hug-card", permanent: true },
-      { source: "/mothers-day-digital-gift", destination: "/create", permanent: true },
-      { source: "/interactive-mothers-day-card", destination: "/create-greeting-card", permanent: true },
+      // 2. Generic Mother's Day aliases -> Evergreen Pages
       { source: "/mothers-day-card", destination: "/create-greeting-card", permanent: true },
       { source: "/mothers-day", destination: "/create-greeting-card", permanent: true },
     ];

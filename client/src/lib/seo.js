@@ -50,6 +50,10 @@ export function applySeo({
   keywords = [],
   path = "/",
   image = "/logo-transparent.png",
+  ogNote,
+  ogSender,
+  ogCount,
+  ogType = "bouquet",
   robots = "index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1",
   jsonLd,
   alternates = [],
@@ -57,7 +61,17 @@ export function applySeo({
   const canonical = toAbsoluteUrl(path);
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
   const keywordText = Array.isArray(keywords) ? keywords.join(", ") : "";
-  const shareImage = toAbsoluteUrl(image);
+
+  let shareImage = toAbsoluteUrl(image);
+  if (ogNote) {
+    const params = new URLSearchParams({
+      note: ogNote,
+      sender: ogSender || "",
+      count: String(ogCount || 7),
+      type: ogType,
+    });
+    shareImage = `${SITE_URL}/api/og?${params.toString()}`;
+  }
 
   document.title = fullTitle;
 

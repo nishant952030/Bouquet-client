@@ -28,7 +28,21 @@ export default function HomeClient() {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
   const [isToolsModalOpen, setIsToolsModalOpen] = useState(false);
+  const [load3D, setLoad3D] = useState(false);
   const featuredPosts = useMemo(() => blogPosts.slice(0, 3), []);
+
+  useEffect(() => {
+    // Defer 3D scene loading to guarantee sub-1s initial mobile LCP on 3G/4G
+    if (typeof window !== "undefined") {
+      if ("requestIdleCallback" in window) {
+        const id = window.requestIdleCallback(() => setLoad3D(true), { timeout: 1000 });
+        return () => window.cancelIdleCallback(id);
+      } else {
+        const id = window.setTimeout(() => setLoad3D(true), 250);
+        return () => window.clearTimeout(id);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -120,9 +134,9 @@ export default function HomeClient() {
         }
       `}</style>
 
-      {/* 3D Canvas - Client Rendered Only */}
+      {/* 3D Canvas - Deferred client rendering for sub-1s mobile LCP */}
       <div className="absolute inset-0 z-0">
-        <HomeScene />
+        {load3D && <HomeScene />}
       </div>
 
       {/* UI Overlay */}

@@ -319,11 +319,14 @@ export default function ViewBouquet() {
 
   useEffect(() => {
     applySeo({
-      title: "Someone sent you flowers! 💐 | Petals and Words",
-      description: "Open and read a heartfelt digital flower bouquet with a personal note crafted just for you.",
+      title: shared?.senderName ? `${shared.senderName} sent you flowers! 💐` : "Someone sent you flowers! 💐",
+      description: shared?.note ? `"${shared.note.slice(0, 90)}..." — Sent by ${shared.senderName || 'someone special'}` : "Open and read a heartfelt digital flower bouquet with a personal note crafted just for you.",
       keywords: seoKeywords.view,
       path: id ? `/view/${id}` : "/view",
-      image: shared?.stems?.[0]?.src || "/logo-transparent.png",
+      ogNote: shared?.note || "",
+      ogSender: shared?.senderName || "",
+      ogCount: shared?.stems?.length || 7,
+      ogType: "bouquet",
       robots: "noindex,nofollow",
     });
   }, [id, shared]);

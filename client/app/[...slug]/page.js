@@ -1,11 +1,5 @@
-"use client";
-
-import dynamic from "next/dynamic";
-
-const ClientApp = dynamic(() => import("./client-app-fallback"), {
-  ssr: false,
-});
+import LegacyAppShell from "./LegacyAppShell";
 
 export default function CatchAllPage() {
-  return <ClientApp />;
+  return <LegacyAppShell />;
 }
