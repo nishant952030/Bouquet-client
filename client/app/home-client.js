@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -8,373 +8,803 @@ import dynamic from "next/dynamic";
 import LanguageSwitcher from "../src/components/LanguageSwitcher";
 import { blogPosts } from "../src/data/blogPosts";
 
-// Dynamically load the 3D scene on the client-side only (prevents SSR / build timeouts)
-const HomeScene = dynamic(() => import("./home-scene"), {
-  ssr: false,
-});
+const HomeScene = dynamic(() => import("./home-scene"), { ssr: false });
+
+// ─── Data ────────────────────────────────────────────────────────────────────
+
+const ALL_GIFTS = [
+  { title: "Digital Bouquet", desc: "Arrange real flower stems with a heartfelt note.", icon: "💐", path: "/create", tag: "", color: "#fce4ec", accent: "#e48d9c", indiaOnly: false },
+  { title: "Greeting Card", desc: "A beautiful letter in a customisable envelope.", icon: "💌", path: "/create-greeting-card", tag: "NEW", color: "#f3e5f5", accent: "#ab47bc", indiaOnly: false },
+  { title: "Shagun Envelope", desc: "Digital cash gift claimed via UPI. Perfect for weddings.", icon: "✉️", path: "/shagun", tag: "NEW", color: "#fff8e1", accent: "#f9a825", indiaOnly: true },
+  { title: "3D Birthday Cake", desc: "Bake & decorate a real 3D cake with candles.", icon: "🎂", path: "/create-cake", tag: "", color: "#e8f5e9", accent: "#66bb6a", indiaOnly: false },
+  { title: "Plushie Gift Box", desc: "Cute furry 3D plushie inside a surprise box.", icon: "🧸", path: "/create-plushie", tag: "", color: "#e3f2fd", accent: "#42a5f5", indiaOnly: false },
+  { title: "Virtual Hug Card", desc: "Pull-to-open interactive warm hug card.", icon: "🤗", path: "/create-hug-card", tag: "", color: "#fce4ec", accent: "#ef5350", indiaOnly: false },
+];
+
+const TESTIMONIALS_IN = [
+  { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi", city: "Mumbai", stars: 5 },
+  { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "Rahul", city: "Bengaluru", stars: 5 },
+  { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Sneha", city: "Pune", stars: 5 },
+  { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Priya", city: "Hyderabad", stars: 5 },
+  { quote: "Got the share link in seconds. Sent it on WhatsApp and she loved it instantly.", author: "Neha", city: "Delhi", stars: 5 },
+];
+
+const TESTIMONIALS_GLOBAL = [
+  { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Sarah", city: "New York", stars: 5 },
+  { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "James", city: "London", stars: 5 },
+  { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Emma", city: "Toronto", stars: 5 },
+  { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Lily", city: "Sydney", stars: 5 },
+  { quote: "Got the share link in seconds. Sent it on WhatsApp and she loved it instantly.", author: "Sofia", city: "Amsterdam", stars: 5 },
+];
+
+const TICKER_IN = [
+  "💐 Aditi just sent a bouquet to her mom · 2m ago",
+  "🎂 Rohan baked a birthday cake for Riya · 5m ago",
+  "💌 Sneha sent a greeting card to her bestie · 8m ago",
+  "🧸 Karan gifted a plushie to his girlfriend · 12m ago",
+  "✉️ Amit sent a Shagun envelope for Pooja's wedding · 15m ago",
+  "🤗 Priya sent a virtual hug to her sister · 18m ago",
+  "💐 Dev made a bouquet for Teacher's Day · 21m ago",
+  "🎂 Neha baked a cake for her dad's birthday · 25m ago",
+];
+
+const TICKER_GLOBAL = [
+  "💐 Sarah just sent a bouquet to her mom · 2m ago",
+  "🎂 James baked a birthday cake for Emma · 5m ago",
+  "💌 Lily sent a greeting card to her best friend · 8m ago",
+  "🧸 Marco gifted a plushie to his partner · 12m ago",
+  "🤗 Sofia sent a virtual hug to her sister · 15m ago",
+  "💐 Alex made a bouquet for Mother's Day · 18m ago",
+  "🎂 Olivia baked a cake for her dad's birthday · 22m ago",
+  "💌 Noah sent a card to surprise his girlfriend · 26m ago",
+];
+
+const HOW_IT_WORKS = [
+  { step: "01", title: "Pick a gift", desc: "Choose from bouquets, cakes, cards, plushies & more.", icon: "🎁" },
+  { step: "02", title: "Personalise it", desc: "Add your name, a note, and customise the look.", icon: "✏️" },
+  { step: "03", title: "Share the link", desc: "Send via WhatsApp, iMessage, or copy the link. Done.", icon: "🔗" },
+];
+
+const FEATURES_IN = [
+  "🌸 Real bouquet layouts", "🎨 Custom colors & themes", "💬 Personal note included",
+  "📲 WhatsApp-ready link", "🚀 Ready in 60 seconds", "🔒 No signup needed",
+  "❤️ Made with love in India", "💸 100% Free forever",
+];
+
+const FEATURES_GLOBAL = [
+  "🌸 Real bouquet layouts", "🎨 Custom colors & themes", "💬 Personal note included",
+  "📲 WhatsApp-ready link", "🚀 Ready in 60 seconds", "🔒 No signup needed",
+  "🌍 Works worldwide", "💸 100% Free forever",
+];
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function useCountUp(target, duration = 1800, start = false) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!start) return;
+    let startTime = null;
+    const step = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(eased * target));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [target, duration, start]);
+  return count;
+}
+
+function useIntersectionOnce(ref) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
+      { threshold: 0.3 }
+    );
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [ref]);
+  return visible;
+}
+
+// Detect visitor country via lightweight IP geo API. Returns "IN" for India,
+// another ISO-3166-1 alpha-2 code for everywhere else, or null while loading.
+function useCountry() {
+  const [country, setCountry] = useState(null);
+  useEffect(() => {
+    fetch("https://api.country.is/")
+      .then(r => r.json())
+      .then(d => setCountry(d?.country ?? "XX"))
+      .catch(() => setCountry("XX")); // fail-open: treat as non-India
+  }, []);
+  return country;
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function Stars({ count = 5 }) {
+  return <span style={{ color: "#f9a825", letterSpacing: "2px", fontSize: "0.85rem" }}>{"★".repeat(count)}</span>;
+}
+
+function GiftCard({ gift, onClick }) {
+  return (
+    <button
+      onClick={() => onClick(gift.path)}
+      style={{
+        flexShrink: 0, width: "200px",
+        background: gift.color,
+        border: `1.5px solid ${gift.accent}22`,
+        borderRadius: "1.5rem", padding: "1.25rem 1rem",
+        textAlign: "left", cursor: "pointer",
+        transition: "transform 0.22s ease, box-shadow 0.22s ease",
+        position: "relative", outline: "none",
+      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 16px 40px ${gift.accent}33`; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
+    >
+      {gift.tag && (
+        <span style={{
+          position: "absolute", top: "10px", right: "10px",
+          background: "linear-gradient(135deg, #e91e63, #f48fb1)",
+          color: "#fff", fontSize: "0.6rem", fontWeight: 800,
+          letterSpacing: "0.1em", padding: "2px 8px", borderRadius: "9999px",
+        }}>{gift.tag}</span>
+      )}
+      <div style={{ fontSize: "2.2rem", marginBottom: "0.75rem" }}>{gift.icon}</div>
+      <div style={{ fontWeight: 700, fontSize: "0.88rem", color: "#3d3028", marginBottom: "0.35rem", fontFamily: "'Montserrat', sans-serif" }}>{gift.title}</div>
+      <div style={{ fontSize: "0.75rem", color: "#705f58", lineHeight: 1.5 }}>{gift.desc}</div>
+      <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "4px", fontSize: "0.7rem", fontWeight: 700, color: gift.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+        Make it free
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+      </div>
+    </button>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function HomeClient() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const testimonials = useMemo(() => [
-    { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi", city: "Mumbai" },
-    { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "Rahul", city: "Bengaluru" },
-    { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Sneha", city: "Pune" },
-    { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Priya", city: "Hyderabad" },
-    { quote: "Got the share link in seconds. So quick and easy!", author: "Neha", city: "Delhi" },
-  ], []);
+  const country = useCountry();
+  const isIndia = country === "IN";
+
+  // Locale-aware data — all India-specific content hidden for non-India visitors
+  const GIFTS      = useMemo(() => isIndia ? ALL_GIFTS : ALL_GIFTS.filter(g => !g.indiaOnly), [isIndia]);
+  const TESTIMONIALS = useMemo(() => isIndia ? TESTIMONIALS_IN : TESTIMONIALS_GLOBAL, [isIndia]);
+  const TICKER_ITEMS = useMemo(() => isIndia ? TICKER_IN : TICKER_GLOBAL, [isIndia]);
+  const FEATURES   = useMemo(() => isIndia ? FEATURES_IN : FEATURES_GLOBAL, [isIndia]);
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
-  const [isToolsModalOpen, setIsToolsModalOpen] = useState(false);
   const [load3D, setLoad3D] = useState(false);
+  const [tickerIdx, setTickerIdx] = useState(0);
+  const [tickerVisible, setTickerVisible] = useState(true);
+
+  const statsRef = useRef(null);
+  const statsVisible = useIntersectionOnce(statsRef);
+  const bouquetCount = useCountUp(12847, 1800, statsVisible);
+  const happyCount = useCountUp(98, 1200, statsVisible);
+  const secondsCount = useCountUp(60, 900, statsVisible);
+
   const featuredPosts = useMemo(() => blogPosts.slice(0, 3), []);
 
+
   useEffect(() => {
-    // Defer 3D scene loading to guarantee sub-1s initial mobile LCP on 3G/4G
-    if (typeof window !== "undefined") {
-      if ("requestIdleCallback" in window) {
-        const id = window.requestIdleCallback(() => setLoad3D(true), { timeout: 1000 });
-        return () => window.cancelIdleCallback(id);
-      } else {
-        const id = window.setTimeout(() => setLoad3D(true), 250);
-        return () => window.clearTimeout(id);
-      }
+    if (typeof window === "undefined") return;
+    if ("requestIdleCallback" in window) {
+      const id = window.requestIdleCallback(() => setLoad3D(true), { timeout: 1000 });
+      return () => window.cancelIdleCallback(id);
     }
+    const id = window.setTimeout(() => setLoad3D(true), 250);
+    return () => window.clearTimeout(id);
   }, []);
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
+    const timer = setInterval(() => {
       setIsSliding(true);
-      window.setTimeout(() => { setActiveIdx(v => (v + 1) % testimonials.length); setIsSliding(false); }, 220);
-    }, 3600);
-    return () => window.clearInterval(timer);
-  }, [testimonials.length]);
+      setTimeout(() => { setActiveIdx(v => (v + 1) % TESTIMONIALS.length); setIsSliding(false); }, 220);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTickerVisible(false);
+      setTimeout(() => { setTickerIdx(v => (v + 1) % TICKER_ITEMS.length); setTickerVisible(true); }, 350);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const handleGiftClick = useCallback((path) => router.push(path), [router]);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#fff5f6] font-sans">
+    <div style={{ position: "relative", width: "100%", minHeight: "100vh", overflowX: "hidden", background: "linear-gradient(160deg, #fdf6f0 0%, #f8edf0 50%, #fdf0f5 100%)", fontFamily: "'Montserrat', sans-serif" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@400;500;600;700&display=swap');
-        .glass-card {
-          background: rgba(255, 255, 255, 0.55);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.7);
-          box-shadow: 0 10px 40px rgba(228, 141, 156, 0.15);
-        }
-        .ui-layer { pointer-events: none; }
-        .ui-layer * { pointer-events: auto; }
-        
-        .vv-btn-primary {
-          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-          background: linear-gradient(135deg, #a65d5d 0%, #7c4343 100%);
-          color: #ffffff;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 0.95rem; font-weight: 600;
-          letter-spacing: 0.08em; text-transform: uppercase;
-          border: none; border-radius: 9999px;
-          padding: 0 2rem; min-height: 56px;
-          cursor: pointer;
-          box-shadow: 0 12px 30px rgba(124, 67, 67, 0.25);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-          width: 100%;
-        }
-        .vv-btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 16px 40px rgba(124, 67, 67, 0.35);
-        }
-        
-        .vv-btn-secondary {
-          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-          background: #ffffff;
-          color: #7c4343;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 0.95rem; font-weight: 600;
-          letter-spacing: 0.05em; text-transform: uppercase;
-          border: 1.5px solid rgba(166, 93, 93, 0.2);
-          border-radius: 9999px;
-          padding: 0 2rem; min-height: 56px;
-          cursor: pointer;
-          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-          width: 100%;
-        }
-        .vv-btn-secondary:hover {
-          transform: translateY(-2px);
-          border-color: rgba(166, 93, 93, 0.5);
-          box-shadow: 0 10px 25px rgba(166, 93, 93, 0.1);
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Montserrat:wght@400;500;600;700;800&display=swap');
+        * { box-sizing: border-box; }
+
+        .hw-glass {
+          background: rgba(255,255,255,0.65);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(255,255,255,0.8);
+          box-shadow: 0 8px 40px rgba(200,130,140,0.12);
         }
 
-        .vv-tag-new {
-          position: absolute; top: -10px; right: 10px;
-          background: linear-gradient(135deg, #e91e63 0%, #f48fb1 100%);
-          color: #ffffff;
-          font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em;
-          padding: 0.25rem 0.6rem; border-radius: 9999px;
-          box-shadow: 0 4px 12px rgba(233,30,99,0.3);
-          transform: rotate(8deg);
+        @keyframes petalDrift {
+          0%   { transform: translateY(0px) rotate(0deg) scale(1); }
+          33%  { transform: translateY(-18px) rotate(12deg) scale(1.04); }
+          66%  { transform: translateY(-8px) rotate(-8deg) scale(0.97); }
+          100% { transform: translateY(0px) rotate(0deg) scale(1); }
         }
-        
-        /* Shimmer badge */
-        @keyframes vvShimmer {
-          0%   { background-position: -200% center; }
-          100% { background-position: 200% center; }
+        @keyframes floatUp {
+          0%   { opacity: 0; transform: translateY(24px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
-        .vv-shimmer {
-          background: linear-gradient(90deg, #7c4343 0%, #e48d9c 40%, #c8a96e 70%, #7c4343 100%);
-          background-size: 200% auto;
+        @keyframes shimmerText {
+          0%   { background-position: -300% center; }
+          100% { background-position: 300% center; }
+        }
+        @keyframes marqueeScroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes pulseSoft {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(166,93,93,0.3); }
+          50%       { box-shadow: 0 0 0 10px rgba(166,93,93,0); }
+        }
+
+        .hw-shimmer {
+          background: linear-gradient(90deg, #7c4343 0%, #c8637a 25%, #d4956a 50%, #c8637a 75%, #7c4343 100%);
+          background-size: 300% auto;
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          animation: vvShimmer 4s linear infinite;
+          animation: shimmerText 5s linear infinite;
         }
-        @keyframes modalFadeIn {
-          from { opacity: 0; transform: scale(0.96) translateY(12px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
+        .hw-cta {
+          display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+          background: linear-gradient(135deg, #a65d5d 0%, #7c3f4f 100%);
+          color: #fff; font-family: 'Montserrat', sans-serif;
+          font-size: 0.9rem; font-weight: 700;
+          letter-spacing: 0.08em; text-transform: uppercase;
+          border: none; border-radius: 9999px;
+          padding: 0 2.2rem; min-height: 56px; cursor: pointer;
+          box-shadow: 0 14px 34px rgba(124,63,79,0.30);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          animation: pulseSoft 2.5s infinite;
+          text-decoration: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .hw-cta:hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(124,63,79,0.38); }
+        .hw-cta:active { transform: scale(0.98); }
+
+        .hw-cta-ghost {
+          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+          background: rgba(255,255,255,0.7); color: #7c4343;
+          font-family: 'Montserrat', sans-serif;
+          font-size: 0.85rem; font-weight: 600;
+          letter-spacing: 0.05em; text-transform: uppercase;
+          border: 1.5px solid rgba(124,67,67,0.25); border-radius: 9999px;
+          padding: 0 1.8rem; min-height: 52px; cursor: pointer;
+          transition: all 0.2s ease; text-decoration: none;
+          -webkit-tap-highlight-color: transparent;
+        }
+        .hw-cta-ghost:hover { border-color: rgba(124,67,67,0.6); background: rgba(255,255,255,0.95); transform: translateY(-2px); }
+        .hw-cta-ghost:active { transform: scale(0.98); }
+
+        .petal-deco {
+          position: absolute; border-radius: 50% 0 50% 0;
+          opacity: 0.4; pointer-events: none;
+          animation: petalDrift ease-in-out infinite;
+        }
+        .hw-scroll-strip {
+          display: flex; gap: 0.85rem; overflow-x: auto;
+          padding: 0.5rem 1rem 1.25rem;
+          scrollbar-width: none; -ms-overflow-style: none;
+          -webkit-overflow-scrolling: touch;
+          scroll-snap-type: x mandatory;
+        }
+        .hw-scroll-strip::-webkit-scrollbar { display: none; }
+        .hw-scroll-strip > * {
+          scroll-snap-align: start;
+        }
+
+        .hw-marquee-track {
+          display: flex; gap: 2.5rem;
+          animation: marqueeScroll 22s linear infinite;
+          white-space: nowrap;
+        }
+        .hw-step-card {
+          flex: 1; min-width: 180px; text-align: center;
+          padding: 2rem 1.25rem; border-radius: 1.75rem;
+          background: rgba(255,255,255,0.6);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255,255,255,0.75);
+          transition: transform 0.2s ease;
+        }
+        .hw-step-card:hover { transform: translateY(-3px); }
+
+        /* Responsive Mobile Styles */
+        @media (max-width: 640px) {
+          .hw-header {
+            padding: 0.75rem 1rem !important;
+          }
+          .hw-logo-img {
+            height: 38px !important;
+          }
+          .hw-hero-section {
+            padding: 1.25rem 1rem 0 !important;
+          }
+          .hw-hero-eyebrow {
+            padding: 0.35rem 0.9rem !important;
+            font-size: 0.65rem !important;
+            margin-bottom: 1rem !important;
+          }
+          .hw-hero-headline { 
+            font-size: 2.45rem !important; 
+            line-height: 1.15 !important;
+            margin-bottom: 1rem !important;
+          }
+          .hw-hero-sub {
+            font-size: 0.92rem !important;
+            line-height: 1.6 !important;
+            margin-bottom: 1.75rem !important;
+            padding: 0 0.25rem !important;
+          }
+          .hw-cta-group {
+            flex-direction: column !important;
+            gap: 0.75rem !important;
+            width: 100% !important;
+            max-width: 320px !important;
+            margin: 0 auto 2rem !important;
+          }
+          .hw-cta, .hw-cta-ghost {
+            width: 100% !important;
+            min-height: 50px !important;
+            font-size: 0.85rem !important;
+          }
+          .hw-ticker-wrap {
+            padding: 0 1rem !important;
+            margin-bottom: 2.5rem !important;
+          }
+          .hw-stats-grid { 
+            gap: 0.5rem !important; 
+            padding: 0 0.75rem !important;
+            margin-bottom: 3rem !important;
+          }
+          .hw-stat-card {
+            padding: 1rem 0.5rem !important;
+            border-radius: 1.2rem !important;
+            flex: 1 1 30% !important;
+            min-width: 90px !important;
+          }
+          .hw-stat-num {
+            font-size: 1.75rem !important;
+          }
+          .hw-stat-label {
+            font-size: 0.62rem !important;
+          }
+          .hw-section-title {
+            font-size: 2rem !important;
+          }
+          .hw-steps { 
+            flex-direction: column !important; 
+            gap: 0.85rem !important; 
+          }
+          .hw-step-card {
+            padding: 1.35rem 1rem !important;
+            border-radius: 1.35rem !important;
+          }
+          .hw-step-arrow-h {
+            display: none !important;
+          }
+          .hw-step-arrow-v {
+            display: block !important;
+            font-size: 1.25rem !important;
+            color: #e48d9c !important;
+            opacity: 0.6 !important;
+            margin-top: 0.5rem !important;
+          }
+          .hw-grid-twocol {
+            grid-template-columns: 1fr !important;
+            gap: 1.25rem !important;
+            padding: 0 1rem !important;
+            margin-bottom: 3rem !important;
+          }
+          .hw-testimonial-card, .hw-blog-card {
+            padding: 1.5rem 1.25rem !important;
+            border-radius: 1.5rem !important;
+          }
+          .hw-testimonial-quote {
+            font-size: 1.15rem !important;
+            line-height: 1.5 !important;
+          }
+          .hw-banner-card {
+            padding: 2.5rem 1.25rem !important;
+            border-radius: 1.75rem !important;
+          }
+          .hw-banner-heading {
+            font-size: 2rem !important;
+            line-height: 1.2 !important;
+          }
+          .hw-banner-btn {
+            width: 100% !important;
+            max-width: 280px !important;
+          }
+        }
+
+        @media (min-width: 641px) {
+          .hw-step-arrow-v {
+            display: none !important;
+          }
         }
       `}</style>
 
-      {/* 3D Canvas - Deferred client rendering for sub-1s mobile LCP */}
-      <div className="absolute inset-0 z-0">
+      {/* 3D Background */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 0 }}>
         {load3D && <HomeScene />}
       </div>
 
-      {/* UI Overlay */}
-      <div className="ui-layer absolute inset-0 z-10 flex flex-col items-center overflow-y-auto px-4 pb-20">
-        
+      {/* CSS Petal Decorations */}
+      <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", overflow: "hidden" }}>
+        {[
+          { w: 90, h: 55, top: "8%",  left: "3%",   color: "#f48fb1", dur: "7s",  delay: "0s"   },
+          { w: 60, h: 38, top: "20%", left: "92%",  color: "#ffcc80", dur: "9s",  delay: "1.5s" },
+          { w: 75, h: 45, top: "70%", left: "5%",   color: "#f8bbd0", dur: "8s",  delay: "3s"   },
+          { w: 50, h: 30, top: "80%", left: "88%",  color: "#ce93d8", dur: "10s", delay: "0.8s" },
+          { w: 40, h: 25, top: "45%", left: "96%",  color: "#ef9a9a", dur: "6s",  delay: "2s"   },
+          { w: 65, h: 40, top: "60%", left: "-2%",  color: "#ffe082", dur: "11s", delay: "4s"   },
+        ].map((p, i) => (
+          <div key={i} className="petal-deco" style={{
+            width: p.w, height: p.h, top: p.top, left: p.left,
+            background: `radial-gradient(ellipse at 30% 30%, ${p.color}cc, ${p.color}55)`,
+            animationDuration: p.dur, animationDelay: p.delay,
+          }} />
+        ))}
+      </div>
+
+      {/* UI Layer */}
+      <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: "5rem" }}>
+
         {/* Header */}
-        <header className="w-full max-w-6xl flex items-center justify-between py-6 mb-4 md:mb-10">
-          <img src="/logo-transparent.png" alt="Petals and Words" className="h-8 md:h-10" />
-          <div className="flex items-center gap-4">
-            <Link href="/blog" className="text-[#7c4343] font-semibold text-sm tracking-wide hover:opacity-70 transition-opacity hidden md:block">{t("common.blog")}</Link>
-            <LanguageSwitcher />
+        <header className="hw-header" style={{ 
+          width: "100%", 
+          maxWidth: "1160px", 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "space-between", 
+          padding: "1rem 1.5rem",
+          zIndex: 20
+        }}>
+          <Link 
+            href="/" 
+            style={{ 
+              display: "inline-flex", 
+              alignItems: "center", 
+              textDecoration: "none",
+              transition: "transform 0.2s ease, opacity 0.2s ease",
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = "scale(1.03)";
+              e.currentTarget.style.opacity = "0.9";
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.opacity = "1";
+            }}
+          >
+            <img 
+              src="/logo-transparent.png" 
+              alt="Petals and Words" 
+              className="hw-logo-img"
+              style={{ 
+                height: "44px", 
+                width: "auto", 
+                objectFit: "contain",
+                display: "block",
+                userSelect: "none"
+              }} 
+            />
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Link 
+              href="/blog" 
+              style={{ 
+                color: "#7c4343", 
+                fontWeight: 600, 
+                fontSize: "0.78rem", 
+                letterSpacing: "0.06em", 
+                textTransform: "uppercase", 
+                textDecoration: "none", 
+                padding: "0.45rem 0.9rem",
+                borderRadius: "9999px",
+                background: "rgba(255, 255, 255, 0.75)",
+                backdropFilter: "blur(12px)",
+                border: "1px solid rgba(228, 141, 156, 0.3)",
+                boxShadow: "0 2px 10px rgba(124, 67, 67, 0.06)",
+                transition: "all 0.2s ease",
+                whiteSpace: "nowrap"
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = "#ffffff";
+                e.currentTarget.style.boxShadow = "0 4px 16px rgba(124, 67, 67, 0.12)";
+                e.currentTarget.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = "rgba(255, 255, 255, 0.75)";
+                e.currentTarget.style.boxShadow = "0 2px 10px rgba(124, 67, 67, 0.06)";
+                e.currentTarget.style.transform = "translateY(0)";
+              }}
+            >
+              {t("common.blog", "Blog")}
+            </Link>
+            <div style={{
+              background: "rgba(255, 255, 255, 0.75)",
+              backdropFilter: "blur(12px)",
+              borderRadius: "9999px",
+              border: "1px solid rgba(228, 141, 156, 0.3)",
+              boxShadow: "0 2px 10px rgba(124, 67, 67, 0.06)",
+              padding: "0.15rem 0.35rem"
+            }}>
+              <LanguageSwitcher />
+            </div>
           </div>
         </header>
 
-        {/* Hero Section Card */}
-        <main className="w-full flex items-center justify-center mb-16">
-          <div className="glass-card max-w-2xl w-full rounded-[3rem] p-10 md:p-16 text-center relative overflow-hidden">
-            
-            {/* Logo Area */}
-            <div className="mb-8 flex flex-col items-center">
-              <div className="mb-4 text-[#e48d9c] opacity-60">
-                <svg fill="none" height="30" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 60 30" width="60"><path d="M30 15c-5-10-15-10-20-5 5 5 15 5 20 5m0 0c5-10 15-10 20-5-5 5-15 5-20 5" strokeLinecap="round"></path></svg>
-              </div>
-              <h2 className="uppercase tracking-widest text-xs font-bold mb-2 text-[#7c4343] opacity-80">
-                {t("home.label", "Made for Meaningful Moments")}
-              </h2>
-            </div>
-
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#3d3028] mb-6 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Send flowers that <br className="hidden md:block"/>
-              <em className="vv-shimmer italic font-medium">feel like you</em>
-            </h1>
-            
-            <p className="text-[#5c4a40] text-sm md:text-base font-medium mb-10 max-w-md mx-auto leading-relaxed">
-              Birthdays, rainy days, Father's Day, anniversaries — or just because you thought of them. Free, in 60 seconds.
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-col gap-4 max-w-xs mx-auto">
-              <button className="vv-btn-primary animate-pulse" onClick={() => setIsToolsModalOpen(true)}>
-                🎁 {t("home.toolsGifts", "Tools & Gifts")}
-              </button>
-            </div>
-            
-            <p className="mt-8 text-[10px] md:text-xs tracking-widest uppercase font-semibold text-[#a65d5d] opacity-70">
-              No login • Ready in 60 seconds
-            </p>
+        {/* Hero */}
+        <main className="hw-hero-section" style={{ width: "100%", maxWidth: "900px", padding: "2rem 1.5rem 0", animation: "floatUp 0.8s ease both" }}>
+          {/* Eyebrow */}
+          <div style={{ textAlign: "center", marginBottom: "1.25rem" }}>
+            <span className="hw-hero-eyebrow" style={{
+              display: "inline-flex", alignItems: "center", gap: "8px",
+              background: "rgba(255,255,255,0.7)", border: "1px solid rgba(228,141,156,0.3)",
+              borderRadius: "9999px", padding: "0.45rem 1.2rem",
+              fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em",
+              textTransform: "uppercase", color: "#a65d5d", backdropFilter: "blur(12px)",
+            }}>
+              <span style={{ fontSize: "1rem" }}>🌸</span>
+              Made for meaningful moments
+            </span>
           </div>
+
+          {/* Headline */}
+          <h1 className="hw-hero-headline" style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: "4.2rem", fontWeight: 500, lineHeight: 1.1,
+            color: "#3d3028", textAlign: "center", margin: "0 auto 1.5rem", maxWidth: "780px",
+          }}>
+            Someone out there is<br />
+            waiting for a message{" "}
+            <em className="hw-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>from you.</em>
+          </h1>
+
+          {/* Sub-headline */}
+          <p className="hw-hero-sub" style={{ textAlign: "center", maxWidth: "520px", margin: "0 auto 2.25rem", fontSize: "1.05rem", color: "#5c4a40", lineHeight: 1.75, fontWeight: 400 }}>
+            Birthdays, rainy Tuesdays, anniversaries, Father's Day — or just because you thought of them.
+            Free digital gifts, ready in 60 seconds.
+          </p>
+
+          {/* CTAs */}
+          <div className="hw-cta-group" style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center", marginBottom: "2.5rem" }}>
+            <Link href="/create" className="hw-cta">💐 Make a Bouquet</Link>
+            <button className="hw-cta-ghost" onClick={() => document.getElementById("hw-gift-strip")?.scrollIntoView({ behavior: "smooth" })}>
+              See all gifts ↓
+            </button>
+          </div>
+
+          <p style={{ textAlign: "center", fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#a65d5d", opacity: 0.75, marginBottom: "3rem" }}>
+            No login · No credit card · Free forever
+          </p>
         </main>
 
-        {/* Below the fold content */}
-        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
-          
+        {/* Live Ticker */}
+        <div className="hw-ticker-wrap" style={{ width: "100%", maxWidth: "600px", margin: "0 auto 3rem", padding: "0 1.5rem" }}>
+          <div style={{
+            display: "flex", alignItems: "center", gap: "10px",
+            background: "rgba(255,255,255,0.85)", backdropFilter: "blur(20px)",
+            border: "1px solid rgba(228,141,156,0.35)", borderRadius: "9999px", padding: "0.6rem 1.25rem",
+            boxShadow: "0 4px 20px rgba(124, 67, 67, 0.08)",
+            overflow: "hidden"
+          }}>
+            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#43a047", boxShadow: "0 0 0 3px rgba(67,160,71,0.25)", flexShrink: 0 }} />
+            <span style={{
+              fontSize: "0.8rem", color: "#3d3028", fontWeight: 600,
+              opacity: tickerVisible ? 1 : 0,
+              transform: tickerVisible ? "translateY(0)" : "translateY(6px)",
+              transition: "opacity 0.3s ease, transform 0.3s ease",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis"
+            }}>
+              {TICKER_ITEMS[tickerIdx]}
+            </span>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div ref={statsRef} className="hw-stats-grid" style={{
+          display: "flex", gap: "1.25rem", flexWrap: "wrap", justifyContent: "center",
+          margin: "0 auto 4rem", padding: "0 1.5rem", maxWidth: "700px", width: "100%"
+        }}>
+          {[
+            { num: bouquetCount.toLocaleString() + "+", label: "moments sent", icon: "💐" },
+            { num: happyCount + "%", label: "would send again", icon: "❤️" },
+            { num: secondsCount + "s", label: "to make one", icon: "⚡" },
+          ].map(stat => (
+            <div key={stat.label} className="hw-stat-card" style={{
+              textAlign: "center", flex: "1 1 140px",
+              background: "rgba(255,255,255,0.65)", backdropFilter: "blur(16px)",
+              border: "1px solid rgba(255,255,255,0.8)", borderRadius: "1.5rem",
+              padding: "1.5rem 1rem", boxShadow: "0 4px 24px rgba(200,130,140,0.1)",
+            }}>
+              <div style={{ fontSize: "1.6rem", marginBottom: "0.25rem" }}>{stat.icon}</div>
+              <div className="hw-stat-num" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.4rem", fontWeight: 600, color: "#7c3f4f", lineHeight: 1, marginBottom: "0.35rem" }}>{stat.num}</div>
+              <div className="hw-stat-label" style={{ fontSize: "0.72rem", color: "#a65d5d", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Gift Strip */}
+        <section id="hw-gift-strip" style={{ width: "100%", maxWidth: "1100px", padding: "0 1rem", marginBottom: "4rem" }}>
+          <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
+            <p style={{ fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#a65d5d", fontWeight: 700, marginBottom: "0.5rem" }}>Pick your gift</p>
+            <h2 className="hw-section-title" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.6rem", fontWeight: 500, color: "#3d3028", margin: 0 }}>Six ways to make someone's day</h2>
+          </div>
+          <div className="hw-scroll-strip">
+            {GIFTS.map(gift => <GiftCard key={gift.path} gift={gift} onClick={handleGiftClick} />)}
+          </div>
+          <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#a65d5d", opacity: 0.65, marginTop: "0.5rem" }}>← swipe to see all →</p>
+        </section>
+
+        {/* Marquee Trust Strip */}
+        <div style={{
+          width: "100%", overflow: "hidden",
+          borderTop: "1px solid rgba(228,141,156,0.2)", borderBottom: "1px solid rgba(228,141,156,0.2)",
+          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)",
+          padding: "0.85rem 0", marginBottom: "4rem",
+        }}>
+          <div style={{ display: "flex", overflow: "hidden" }}>
+            <div className="hw-marquee-track">
+              {[...FEATURES, ...FEATURES].map((f, i) => (
+                <span key={i} style={{ fontSize: "0.76rem", fontWeight: 600, color: "#7c4343", letterSpacing: "0.06em" }}>
+                  {f}<span style={{ marginLeft: "2.5rem", color: "#e48d9c", opacity: 0.5 }}>·</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* How It Works */}
+        <section style={{ width: "100%", maxWidth: "900px", padding: "0 1rem", marginBottom: "4rem" }}>
+          <div style={{ textAlign: "center", marginBottom: "2.25rem" }}>
+            <p style={{ fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#a65d5d", fontWeight: 700, marginBottom: "0.5rem" }}>Simple as sending a text</p>
+            <h2 className="hw-section-title" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.6rem", fontWeight: 500, color: "#3d3028", margin: 0 }}>How it works</h2>
+          </div>
+          <div className="hw-steps" style={{ display: "flex", gap: "1.25rem" }}>
+            {HOW_IT_WORKS.map((s, i) => (
+              <div key={s.step} className="hw-step-card">
+                <div style={{ fontSize: "2.2rem", marginBottom: "0.75rem" }}>{s.icon}</div>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.75rem", fontWeight: 700, color: "#e48d9c", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.4rem" }}>Step {s.step}</div>
+                <h3 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "1rem", fontWeight: 700, color: "#3d3028", margin: "0 0 0.4rem" }}>{s.title}</h3>
+                <p style={{ fontSize: "0.82rem", color: "#705f58", lineHeight: 1.6, margin: 0 }}>{s.desc}</p>
+                {i < HOW_IT_WORKS.length - 1 && (
+                  <>
+                    <div className="hw-step-arrow-h" style={{ fontSize: "1.4rem", color: "#e48d9c", opacity: 0.4, marginTop: "0.75rem" }}>→</div>
+                    <div className="hw-step-arrow-v">↓</div>
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Testimonials + Blog */}
+        <div className="hw-grid-twocol" style={{
+          width: "100%", maxWidth: "1000px",
+          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+          gap: "1.5rem", padding: "0 1.25rem", marginBottom: "4rem",
+        }}>
           {/* Testimonials */}
-          <div className="glass-card rounded-[2rem] p-8">
-            <h3 className="uppercase tracking-widest text-xs font-bold mb-6 text-[#7c4343] opacity-80">{t("home.testimonials")}</h3>
-            <div 
-              style={{
-                opacity: isSliding ? 0 : 1,
-                transform: isSliding ? "translateX(-12px)" : "translateX(0)",
-                transition: "opacity 0.2s, transform 0.2s",
-              }}
-            >
-              <p className="font-serif text-xl italic text-[#3d3028] mb-6 leading-relaxed" style={{ fontFamily: "'Playfair Display', serif" }}>
-                "{testimonials[activeIdx].quote}"
+          <div className="hw-glass hw-testimonial-card" style={{ borderRadius: "2rem", padding: "2.25rem" }}>
+            <p style={{ fontSize: "0.7rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#a65d5d", fontWeight: 700, margin: "0 0 1.25rem" }}>
+              {t("home.testimonials", "What people say")}
+            </p>
+            <div style={{ opacity: isSliding ? 0 : 1, transform: isSliding ? "translateX(-10px)" : "translateX(0)", transition: "opacity 0.22s ease, transform 0.22s ease", minHeight: "140px" }}>
+              <Stars count={TESTIMONIALS[activeIdx].stars} />
+              <p className="hw-testimonial-quote" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.3rem", fontStyle: "italic", color: "#3d3028", lineHeight: 1.6, margin: "0.75rem 0 1.25rem" }}>
+                "{TESTIMONIALS[activeIdx].quote}"
               </p>
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-[#fbc4ab] text-[#7c4343] flex items-center justify-center font-bold">
-                  {testimonials[activeIdx].author[0]}
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #fbc4ab, #f48fb1)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#7c4343", fontSize: "0.95rem" }}>
+                  {TESTIMONIALS[activeIdx].author[0]}
                 </div>
                 <div>
-                  <p className="font-semibold text-[#5c4a40] text-sm">{testimonials[activeIdx].author}</p>
-                  <p className="text-xs text-[#a65d5d]">{testimonials[activeIdx].city}</p>
+                  <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "#3d3028", margin: 0 }}>{TESTIMONIALS[activeIdx].author}</p>
+                  <p style={{ fontSize: "0.75rem", color: "#a65d5d", margin: 0 }}>{TESTIMONIALS[activeIdx].city}</p>
                 </div>
               </div>
             </div>
-            <div className="flex gap-2 mt-8">
-              {testimonials.map((_, i) => (
-                <div 
-                  key={i} 
-                  onClick={() => setActiveIdx(i)}
-                  className={`h-2 rounded-full cursor-pointer transition-all ${i === activeIdx ? 'w-8 bg-[#7c4343]' : 'w-2 bg-[#e48d9c] opacity-40'}`} 
-                />
+            <div style={{ display: "flex", gap: "8px", marginTop: "1.5rem" }}>
+              {TESTIMONIALS.map((_, i) => (
+                <div key={i} onClick={() => setActiveIdx(i)} style={{ height: 6, borderRadius: "9999px", cursor: "pointer", transition: "all 0.3s ease", width: i === activeIdx ? 28 : 6, background: i === activeIdx ? "#7c4343" : "rgba(228,141,156,0.4)" }} />
               ))}
             </div>
           </div>
 
-          {/* Blog / Explore */}
-          <div className="glass-card rounded-[2rem] p-8">
-            <h3 className="uppercase tracking-widest text-xs font-bold mb-6 text-[#7c4343] opacity-80">{t("home.fromBlog")}</h3>
-            <div className="flex flex-col gap-4">
-              {featuredPosts.map(post => (
-                <Link key={post.slug} href={`/blog/${post.slug}`} className="block group">
-                  <h4 className="font-semibold text-[#3d3028] text-sm mb-1 group-hover:text-[#7c4343] transition-colors">
-                    {post.title}
-                  </h4>
-                  <p className="text-xs text-[#5c4a40] opacity-80 line-clamp-2">
-                    {post.description}
-                  </p>
+          {/* Blog */}
+          <div className="hw-glass hw-blog-card" style={{ borderRadius: "2rem", padding: "2.25rem" }}>
+            <p style={{ fontSize: "0.7rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#a65d5d", fontWeight: 700, margin: "0 0 1.25rem" }}>
+              {t("home.fromBlog", "From the blog")}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+              {featuredPosts.map((post, i) => (
+                <Link key={post.slug} href={`/blog/${post.slug}`} style={{ textDecoration: "none", display: "block" }}>
+                  <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
+                    <div style={{ width: 28, height: 28, flexShrink: 0, marginTop: "2px", borderRadius: "50%", background: "linear-gradient(135deg, #fbc4ab, #e48d9c)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 800, color: "#7c4343" }}>{i + 1}</div>
+                    <div>
+                      <h4 style={{ fontSize: "0.88rem", fontWeight: 700, color: "#3d3028", margin: "0 0 0.3rem", transition: "color 0.2s" }}
+                        onMouseEnter={e => e.currentTarget.style.color = "#7c4343"}
+                        onMouseLeave={e => e.currentTarget.style.color = "#3d3028"}
+                      >{post.title}</h4>
+                      <p style={{ fontSize: "0.75rem", color: "#705f58", margin: 0, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{post.description}</p>
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>
-            
-            <div className="mt-8 pt-6 border-t border-[#e48d9c]/20">
-               <Link href="/blog" className="text-xs font-bold tracking-widest uppercase text-[#a65d5d] hover:text-[#7c4343] transition-colors flex items-center gap-2">
-                  View all articles
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-               </Link>
+            <div style={{ marginTop: "1.75rem", paddingTop: "1.25rem", borderTop: "1px solid rgba(228,141,156,0.2)" }}>
+              <Link href="/blog" style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#a65d5d", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                View all articles
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+              </Link>
             </div>
           </div>
-
         </div>
-        
-      </div>
 
-      {/* Tools & Gifts Modal */}
-      {isToolsModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3d3028]/45 backdrop-blur-md transition-opacity duration-300"
-          onClick={() => setIsToolsModalOpen(false)}
-        >
-          <div 
-            className="relative w-full max-w-lg rounded-[2.5rem] p-8 md:p-10 text-[#3d3028] shadow-2xl animate-fade-in"
-            onClick={(e) => e.stopPropagation()}
-            style={{ 
-              animation: "modalFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              background: "rgba(255, 255, 255, 0.9)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.85)"
+        {/* Final CTA Banner */}
+        <section style={{ width: "100%", maxWidth: "860px", padding: "0 1rem", marginBottom: "3rem" }}>
+          <div className="hw-banner-card" style={{
+            borderRadius: "2.5rem",
+            background: "linear-gradient(135deg, #a65d5d 0%, #7c3f4f 60%, #5c3344 100%)",
+            padding: "3.5rem 2.5rem", textAlign: "center", position: "relative", overflow: "hidden",
+            boxShadow: "0 24px 60px rgba(92,51,68,0.35)",
+          }}>
+            <div style={{ position: "absolute", width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.06)", top: -60, right: -40, pointerEvents: "none" }} />
+            <div style={{ position: "absolute", width: 140, height: 140, borderRadius: "50%", background: "rgba(255,255,255,0.04)", bottom: -40, left: -20, pointerEvents: "none" }} />
+            <p style={{ fontSize: "1.75rem", margin: "0 0 0.75rem" }}>🌸</p>
+            <h2 className="hw-banner-heading" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.8rem", fontWeight: 500, color: "#fff", margin: "0 0 1rem", lineHeight: 1.15 }}>
+              Don't wait for a reason.<br /><em>Make someone's day today.</em>
+            </h2>
+            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.95rem", margin: "0 auto 2rem", maxWidth: "420px", lineHeight: 1.7 }}>
+              Free, takes 60 seconds, works on WhatsApp. No account needed.
+            </p>
+            <Link href="/create" className="hw-banner-btn" style={{
+              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "10px",
+              background: "#fff", color: "#7c3f4f",
+              fontFamily: "'Montserrat', sans-serif",
+              fontSize: "0.9rem", fontWeight: 800,
+              letterSpacing: "0.08em", textTransform: "uppercase",
+              border: "none", borderRadius: "9999px",
+              padding: "0 2.5rem", minHeight: "56px",
+              textDecoration: "none",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+              transition: "transform 0.2s ease, box-shadow 0.2s ease",
             }}
-          >
-            {/* Close Button */}
-            <button 
-              className="absolute top-6 right-6 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer bg-[#fff5f6] text-[#7c4343] hover:bg-[#7c4343] hover:text-white transition-colors duration-200"
-              onClick={() => setIsToolsModalOpen(false)}
-              aria-label="Close modal"
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 16px 40px rgba(0,0,0,0.2)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.15)"; }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-
-            {/* Modal Header */}
-            <div className="text-center mb-8">
-              <span className="text-xs font-bold tracking-widest uppercase text-[#a65d5d] opacity-80 block mb-2">
-                Choose a Digital Surprise
-              </span>
-              <h2 className="text-3xl font-serif text-[#3d3028] leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                Interactive Gifts & Tools
-              </h2>
-            </div>
-
-            {/* Grid of Options */}
-            <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto pr-1">
-              {[
-                {
-                  title: "Digital Shagun Envelope",
-                  desc: "Digitize cash gifts for weddings, Eid, and Diwali. Claim via UPI.",
-                  icon: "✉️",
-                  path: "/shagun",
-                  tag: "NEW"
-                },
-                {
-                  title: t("common.createBouquet", "Create Bouquet"),
-                  desc: "Arrange beautiful 2D flower stems with a card note.",
-                  icon: "💐",
-                  path: "/create",
-                  tag: ""
-                },
-                {
-                  title: t("home.createCard", "Send a Card"),
-                  desc: "Write a letter in a beautiful customizable envelope.",
-                  icon: "💌",
-                  path: "/create-greeting-card",
-                  tag: t("common.new", "NEW")
-                },
-                {
-                  title: t("home.sendPlushie", "Send a Plushie"),
-                  desc: "Customize a furry 3D plushie inside a surprise gift box.",
-                  icon: "🧸",
-                  path: "/create-plushie",
-                  tag: ""
-                },
-                {
-                  title: t("home.bakeCake", "Bake a Cake"),
-                  desc: "Bake and decorate a 3D birthday cake with candles.",
-                  icon: "🎂",
-                  path: "/create-cake",
-                  tag: ""
-                },
-                {
-                  title: "Virtual Hug Card",
-                  desc: "Send an interactive pull-to-open warm hug card.",
-                  icon: "🤗",
-                  path: "/create-hug-card",
-                  tag: ""
-                }
-              ].map((opt) => (
-                <button
-                  key={opt.path}
-                  onClick={() => {
-                    setIsToolsModalOpen(false);
-                    router.push(opt.path);
-                  }}
-                  className="flex items-center gap-4 w-full text-left p-4 rounded-2xl border border-solid border-[#e48d9c]/20 hover:border-[#7c4343]/40 bg-white/80 hover:bg-[#fff9fa] transition-all duration-200 cursor-pointer group shadow-sm hover:shadow-md hover:-translate-y-0.5"
-                  style={{ border: "1px solid rgba(228, 141, 156, 0.25)" }}
-                >
-                  <div className="text-3xl flex-shrink-0 bg-[#fff5f6] p-2 rounded-xl group-hover:scale-110 transition-transform duration-200">
-                    {opt.icon}
-                  </div>
-                  <div className="flex-grow min-width-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm text-[#3d3028] group-hover:text-[#7c4343] transition-colors duration-150">
-                        {opt.title}
-                      </span>
-                      {opt.tag && (
-                        <span className="text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-[#e91e63] to-[#f48fb1] text-white">
-                          {opt.tag}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-[#705f58] line-clamp-1 mt-0.5">
-                      {opt.desc}
-                    </p>
-                  </div>
-                  <div className="text-[#a65d5d] opacity-0 group-hover:opacity-100 transition-opacity duration-150 pr-1">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </button>
-              ))}
-            </div>
+              💐 Start for free
+            </Link>
           </div>
-        </div>
-      )}
+        </section>
+
+      </div>
     </div>
   );
 }
