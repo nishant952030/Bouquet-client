@@ -79,8 +79,8 @@ export const GEO_PH = {
   paymentCopy: {
     headline: "Your bouquet is beautiful!",
     sub: "One small payment unlocks your permanent share link — ready to send via Messenger, Viber, or WhatsApp.",
-    paymentNote: "Secure checkout · GCash & Maya accepted via Razorpay · No recurring charges",
-    trustPills: ["💚 GCash / Maya OK", "⚡ Link agad", "🚫 No subscription"],
+    paymentNote: "Secure checkout · GCash accepted via Razorpay · No recurring charges",
+    trustPills: ["💚 GCash OK", "⚡ Link agad", "🚫 No subscription"],
   },
   occasions: [
     { emoji: "💕", label: "Monthsary", desc: "Para sa iyong mahal" },

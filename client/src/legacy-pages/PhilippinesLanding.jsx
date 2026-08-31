@@ -368,7 +368,7 @@ export default function PhilippinesLanding() {
             <CheckCircle2 size={16} color="#16a34a" /> No account or signup
           </span>
           <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-            <CheckCircle2 size={16} color="#16a34a" /> GCash & Maya ready
+            <CheckCircle2 size={16} color="#16a34a" /> GCash ready
           </span>
         </div>
       </section>
@@ -576,7 +576,7 @@ export default function PhilippinesLanding() {
           Petals & Words · Para sa mga Pilipino sa buong mundo 💕
         </p>
         <p style={{ margin: 0 }}>
-          GCash, Maya & International Cards accepted · All digital bouquets are delivered instantly via web link.
+          GCash & International Cards accepted · All digital bouquets are delivered instantly via web link.
         </p>
       </footer>
 

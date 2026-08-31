@@ -776,7 +776,7 @@ export default function Payment() {
             {!isDetectingCountry && (
               <div style={{ marginTop: "0.85rem", fontSize: "0.72rem", color: "#9e8f90", lineHeight: 1.6 }}>
                 {isPhilippines
-                  ? "Secure checkout · GCash & Maya accepted via Razorpay · Walang recurring charges"
+                  ? "Secure checkout · GCash accepted via Razorpay · Walang recurring charges"
                   : isIndia
                   ? "Secure checkout via Razorpay · Card, UPI & wallets · No recurring charges"
                   : "Secure checkout via Razorpay · International cards accepted · Charged in USD · No recurring charges"}

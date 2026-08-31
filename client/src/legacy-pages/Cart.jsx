@@ -594,7 +594,7 @@ export default function Cart() {
 
                 <div style={{ marginTop: "0.85rem", fontSize: "0.72rem", color: "#a65d5d", lineHeight: 1.5, textAlign: "center" }}>
                   {countryCode === "PH"
-                    ? "🇵🇭 GCash, Maya & Cards via Razorpay · Mabilis at Ligtas"
+                    ? "🇵🇭 GCash & Cards via Razorpay · Mabilis at Ligtas"
                     : countryCode === "IN"
                     ? "🇮🇳 UPI, Cards & NetBanking via Razorpay · Fast & Secure"
                     : "🔒 Secure checkout via Razorpay · International cards accepted"}

@@ -134,23 +134,41 @@ function useIntersectionOnce(ref) {
   return visible;
 }
 
-// Detect visitor country via lightweight IP geo API.
+// Detect visitor country via timezone/locale with lightweight IP geo API fallback.
 // Returns country code ("IN", "PH", etc.) or null while loading.
 function useCountry() {
-  const [country, setCountry] = useState(null);
-  useEffect(() => {
-    // Fast client-side hint before API call
+  const [country, setCountry] = useState(() => {
+    if (typeof window === "undefined") return null;
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-      if (tz === "Asia/Manila") setCountry("PH");
-      else if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta") setCountry("IN");
+      const locale = String(navigator?.language || "").toUpperCase();
+      if (tz === "Asia/Manila" || locale.includes("-PH")) return "PH";
+      if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta" || locale.includes("-IN")) return "IN";
+    } catch {}
+    return null;
+  });
+
+  useEffect(() => {
+    if (country === "PH") return;
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+      const locale = String(navigator?.language || "").toUpperCase();
+      if (tz === "Asia/Manila" || locale.includes("-PH")) {
+        setCountry("PH");
+        return;
+      } else if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta" || locale.includes("-IN")) {
+        setCountry("IN");
+      }
     } catch {}
 
     fetch("https://api.country.is/")
       .then(r => r.json())
-      .then(d => setCountry(d?.country ?? "XX"))
-      .catch(() => {}); // keep timezone-based guess on failure
-  }, []);
+      .then(d => {
+        if (d?.country) setCountry(d.country);
+      })
+      .catch(() => {});
+  }, [country]);
+
   return country;
 }
 
@@ -225,6 +243,16 @@ export default function HomeClient() {
 
   const featuredPosts = useMemo(() => blogPosts.slice(0, 3), []);
 
+  // Automatically redirect Philippine visitors to dedicated /ph landing page
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("global") === "1" || params.get("no_redirect") === "1") return;
+
+    if (isPH) {
+      router.replace("/ph");
+    }
+  }, [isPH, router]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -253,6 +281,30 @@ export default function HomeClient() {
   }, []);
 
   const handleGiftClick = useCallback((path) => router.push(path), [router]);
+
+  // If Philippines is detected, immediately show clean loading while redirecting to /ph
+  if (isPH && typeof window !== "undefined") {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("global") !== "1" && params.get("no_redirect") !== "1") {
+      return (
+        <div
+          suppressHydrationWarning
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "linear-gradient(160deg, #fdf6f0 0%, #f8edf0 55%, #fdf0f5 100%)",
+            color: "#7b5455",
+            fontFamily: "'Manrope', sans-serif",
+            fontSize: "0.9rem",
+          }}
+        >
+          Loading…
+        </div>
+      );
+    }
+  }
 
   return (
     <div style={{ position: "relative", width: "100%", minHeight: "100vh", overflowX: "hidden", background: "linear-gradient(160deg, #fdf6f0 0%, #f8edf0 50%, #fdf0f5 100%)", fontFamily: "'Montserrat', sans-serif" }}>
@@ -589,42 +641,6 @@ export default function HomeClient() {
             </div>
           </div>
         </header>
-
-        {isPH && (
-          <div style={{
-            width: "100%",
-            maxWidth: "1160px",
-            margin: "0 auto 0.75rem",
-            padding: "0 1rem",
-            zIndex: 20
-          }}>
-            <Link
-              href="/ph"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                background: "linear-gradient(90deg, #fff2f5 0%, #ffd9e2 100%)",
-                border: "1.5px solid rgba(228,141,156,0.35)",
-                borderRadius: "9999px",
-                padding: "0.5rem 1.25rem",
-                textDecoration: "none",
-                color: "#7c3f4f",
-                boxShadow: "0 4px 15px rgba(228,141,156,0.15)",
-                fontSize: "0.82rem",
-                fontWeight: 700
-              }}
-            >
-              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span>🇵🇭</span>
-                <span>Bisitahin ang aming bagong Dedicated Philippines Page!</span>
-              </span>
-              <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#a65d5d", textTransform: "uppercase", fontSize: "0.74rem", letterSpacing: "0.06em" }}>
-                Pumunta Dito →
-              </span>
-            </Link>
-          </div>
-        )}
 
         {/* Hero */}
         <main className="hw-hero-section" style={{ width: "100%", maxWidth: "900px", padding: "2rem 1.5rem 0", animation: "floatUp 0.8s ease both" }}>
