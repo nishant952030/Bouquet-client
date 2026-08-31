@@ -2,8 +2,8 @@ import { useEffect, useRef } from "react";
 import { Canvas, FabricImage } from "fabric";
 import { getCleanFlowerImageSrc } from "../lib/flowerImage";
 
-const CANVAS_WIDTH = 340;
-const CANVAS_HEIGHT = 440;
+const CANVAS_WIDTH = 370;
+const CANVAS_HEIGHT = 470;
 
 export default function RecipientBouquetCanvas({ stems }) {
   const canvasRef = useRef(null);
@@ -15,7 +15,7 @@ export default function RecipientBouquetCanvas({ stems }) {
       height: CANVAS_HEIGHT,
       selection: false,
     });
-    canvas.backgroundColor = "#fff8f2";
+    canvas.backgroundColor = "#fff9f4";
     canvas.renderAll();
 
     const loadFlowers = async () => {

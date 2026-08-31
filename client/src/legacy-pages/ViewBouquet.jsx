@@ -7,6 +7,7 @@ import RecipientBouquetCanvas from "../components/RecipientBouquetCanvas";
 import { db, isFirebaseConfigured } from "../lib/firebase";
 import { applySeo, seoKeywords } from "../lib/seo";
 import MusicPlayer from "../components/MusicPlayer";
+import VoiceNotePlayer from "../components/VoiceNotePlayer";
 
 /* ── helpers ── */
 function getSharedBouquetFromLocalStorage(id) {
@@ -73,9 +74,9 @@ const CSS = `
     backdrop-filter: blur(12px);
     position: relative;
     box-shadow: 0 20px 50px rgba(166, 93, 93, 0.14), 0 4px 12px rgba(166,93,93,0.08);
-    border: 1px solid rgba(255,255,255,0.85);
-    width: 340px;
-    max-width: 100%;
+    border: 1.5px solid rgba(255,255,255,0.9);
+    width: 370px;
+    max-width: 94vw;
     z-index: 1;
   }
 
@@ -514,15 +515,19 @@ export default function ViewBouquet() {
 
       try {
         if (isFirebaseConfigured && db) {
-          let snapshot;
+          let snapshot = null;
           try {
             snapshot = await getDocFromServer(doc(db, "bouquets", id));
           } catch (serverError) {
-            console.warn("Server fetch failed, falling back to cached Firestore read.", serverError);
-            snapshot = await getDoc(doc(db, "bouquets", id));
+            // Only retry offline cache if not a permission denied error
+            if (serverError?.code !== "permission-denied") {
+              try {
+                snapshot = await getDoc(doc(db, "bouquets", id));
+              } catch {}
+            }
           }
 
-          if (snapshot.exists()) {
+          if (snapshot && snapshot.exists()) {
             if (!cancelled) {
               setShared(snapshot.data());
               setIsLoading(false);
@@ -531,10 +536,9 @@ export default function ViewBouquet() {
           }
         }
 
-        // Firebase had no document — fall back to localStorage (paid links saved locally)
+        // Fallback to local storage (e.g. preview mode or local test)
         if (!cancelled) setShared(localData);
-      } catch (error) {
-        console.warn("Firebase read failed, using local data:", error.message);
+      } catch {
         if (!cancelled) setShared(localData);
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -638,6 +642,13 @@ export default function ViewBouquet() {
           </h1>
         </div>
 
+        {/* ── Personal Voice Note Banner (if sender recorded one) ── */}
+        {shared.voiceNote && (
+          <div className="envelope-reveal er-1" style={{ marginTop: "1.25rem", marginBottom: "-0.5rem" }}>
+            <VoiceNotePlayer src={shared.voiceNote} senderName={senderName} isPH={isPH} variant="banner" />
+          </div>
+        )}
+
         {/* ── Bouquet display with interactive gift tag ── */}
         <div
           className="vb-bouquet-card envelope-reveal er-2"
@@ -705,6 +716,13 @@ export default function ViewBouquet() {
                   ✕
                 </button>
               </div>
+
+              {/* Voice Note player inside the letter if present */}
+              {shared.voiceNote && (
+                <div style={{ marginBottom: "1rem" }}>
+                  <VoiceNotePlayer src={shared.voiceNote} senderName={senderName} isPH={isPH} variant="card" />
+                </div>
+              )}
 
               {/* Scrollable note text in clean readable serif font */}
               <div className="vb-card-body-scroll">

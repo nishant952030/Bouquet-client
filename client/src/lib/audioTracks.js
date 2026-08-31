@@ -36,16 +36,12 @@ export function getAudioInstance() {
   if (!globalAudio) {
     globalAudio = new Audio();
     globalAudio.loop = true;
-    globalAudio.crossOrigin = "anonymous";
     globalAudio.preload = "auto";
   }
   return globalAudio;
 }
 
 export function playTrack(trackId) {
-  const audio = getAudioInstance();
-  if (!audio) return;
-
   if (trackId === "none" || !trackId) {
     stopTrack();
     return;
@@ -54,7 +50,10 @@ export function playTrack(trackId) {
   const track = MUSIC_TRACKS.find((t) => t.id === trackId);
   if (!track || !track.url) return;
 
-  if (currentTrackId !== trackId) {
+  const audio = getAudioInstance();
+  if (!audio) return;
+
+  if (currentTrackId !== trackId || audio.src !== track.url) {
     audio.src = track.url;
     currentTrackId = trackId;
   }
@@ -71,8 +70,9 @@ export function playTrack(trackId) {
           })
           .catch((err) => {
             playPromise = null;
-            if (err.name !== "AbortError") {
-              console.warn("Autoplay blocked or audio notice:", err.message);
+            // NotAllowedError is standard browser autoplay policy before user interaction
+            if (err.name !== "AbortError" && err.name !== "NotAllowedError") {
+              console.warn("Audio notice:", err.message);
             }
           });
       }
@@ -82,29 +82,31 @@ export function playTrack(trackId) {
   };
 
   if (playPromise !== null) {
-    playPromise
-      .then(startPlay)
-      .catch(startPlay);
+    playPromise.then(startPlay).catch(startPlay);
   } else {
     startPlay();
   }
 }
 
 export function stopTrack() {
-  const audio = getAudioInstance();
-  if (audio) {
+  if (!globalAudio) {
+    currentTrackId = "none";
+    return;
+  }
+  const audio = globalAudio;
+  try {
     if (playPromise !== null) {
       playPromise
         .then(() => {
           audio.pause();
-          audio.currentTime = 0;
+          if (audio.src) audio.currentTime = 0;
         })
         .catch(() => {});
     } else {
       audio.pause();
-      audio.currentTime = 0;
+      if (audio.src) audio.currentTime = 0;
     }
-  }
+  } catch {}
   currentTrackId = "none";
 }
 
@@ -122,4 +124,11 @@ export function getMuteState() {
 
 export function getCurrentTrackId() {
   return currentTrackId;
+}
+
+export function duckMusic(ducked) {
+  const audio = getAudioInstance();
+  if (audio) {
+    audio.volume = ducked ? 0.18 : 1.0;
+  }
 }

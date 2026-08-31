@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public access to view and create gifts via share links
+    match /bouquets/{id} {
+      allow read: if true;
+      allow create, update: if true;
+    }
+    
+    match /cakes/{id} {
+      allow read: if true;
+      allow create, update: if true;
+    }
+    
+    match /greeting_cards/{id} {
+      allow read: if true;
+      allow create, update: if true;
+    }
+    
+    match /hug_cards/{id} {
+      allow read: if true;
+      allow create, update: if true;
+    }
+    
+    match /plushies/{id} {
+      allow read: if true;
+      allow create, update: if true;
+    }
+
+    match /pets/{id} {
+      allow read, write: if true;
+    }
+
+    // Default deny for everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

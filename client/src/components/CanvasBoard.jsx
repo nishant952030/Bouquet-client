@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import { Canvas, FabricImage } from "fabric";
 import { getCleanFlowerImageSrc } from "../lib/flowerImage";
 
-const MAX_CANVAS_WIDTH = 340;
-const MIN_CANVAS_WIDTH = 260;
-const CANVAS_RATIO = 440 / 340;
+const MAX_CANVAS_WIDTH = 370;
+const MIN_CANVAS_WIDTH = 280;
+const CANVAS_RATIO = 470 / 370;
 const CANVAS_STATE_STORAGE_KEY = "bouquet_canvas_state_v1";
 
 function writeStoredStems(stems) {
@@ -157,7 +157,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
       .then((img) => {
         if (cancelled || !fabricCanvas.current) return;
         const currentCanvas = fabricCanvas.current;
-        const baseWidth = Math.max(70, currentCanvas.width * 0.25);
+        const baseWidth = Math.max(130, currentCanvas.width * 0.44);
         img.scaleToWidth(baseWidth);
         img.set({
           left: currentCanvas.width * 0.5 + Math.random() * 60 - 30,

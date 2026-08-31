@@ -234,6 +234,7 @@ export default function Payment() {
   const note = location.state?.note ?? pendingCheckout?.note ?? checkoutDraft?.note ?? "";
   const initName = location.state?.senderName ?? pendingCheckout?.senderName ?? checkoutDraft?.senderName ?? "";
   const musicTrack = location.state?.musicTrack ?? pendingCheckout?.musicTrack ?? checkoutDraft?.musicTrack ?? "none";
+  const voiceNote = location.state?.voiceNote ?? pendingCheckout?.voiceNote ?? checkoutDraft?.voiceNote ?? null;
 
   const hasBouquetData = stems.length > 0 || countWords(note) > 0;
   const flowerCount = stems.length;
@@ -300,6 +301,7 @@ export default function Payment() {
       note,
       senderName: senderName.trim(),
       musicTrack,
+      voiceNote,
       plan: "preview",
       isPreview: true,
       createdAt: new Date().toISOString(),
@@ -321,7 +323,7 @@ export default function Payment() {
       } catch { /* ignore */ }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [previewId, hasBouquetData, musicTrack]);
+  }, [previewId, hasBouquetData, musicTrack, voiceNote]);
 
   /* -- Save bouquet & generate permanent link after payment (reuses previewId) -- */
   const generateShareLink = useCallback(async (provider = "") => {
@@ -335,6 +337,7 @@ export default function Payment() {
       note,
       senderName: senderName.trim(),
       musicTrack,
+      voiceNote,
       plan: "paid",
       isPreview: false,
       createdAt: new Date().toISOString(),

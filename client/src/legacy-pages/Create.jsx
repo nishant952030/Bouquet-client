@@ -9,6 +9,7 @@ import CanvasBoard from "../components/CanvasBoard";
 import FlowerPicker from "../components/FlowerPicker";
 import NoteCard from "../components/NoteCard";
 import MusicSelector from "../components/MusicSelector";
+import VoiceRecorder from "../components/VoiceRecorder";
 import { bouquetSuggestions, noteSuggestions, noteSuggestionsPH, occasionsPH } from "../data/bouquetSuggestions";
 import { flowers } from "../data/flowerCatalog";
 import { trackEvent } from "../lib/analytics";
@@ -355,6 +356,7 @@ export default function Create() {
   const [showMoreNotes, setShowMoreNotes] = useState(false);
   const [activeTab, setActiveTab] = useState("flowers");
   const [musicTrack, setMusicTrack] = useState("none");
+  const [voiceNote, setVoiceNote] = useState(null);
   const [isDesktop, setIsDesktop] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia("(min-width: 1024px)").matches;
@@ -399,7 +401,7 @@ export default function Create() {
       acc[key].items.push(flower);
       return acc;
     }, {});
-    const preferred = ["rose", "jasmine", "lily", "tulip", "sunflower", "marigold", "mixed"];
+    const preferred = ["peony", "sakura", "rose", "daisy", "baby's breath", "sampaguita", "lavender", "sunflower", "tulip", "hydrangea", "mixed"];
     return Object.values(byType).sort((a, b) => {
       const ai = preferred.indexOf(a.id), bi = preferred.indexOf(b.id);
       const av = ai === -1 ? 999 : ai, bv = bi === -1 ? 999 : bi;
@@ -465,11 +467,12 @@ export default function Create() {
     if (draft.note) setNote(draft.note);
     if (draft.senderName) setSenderName(draft.senderName);
     if (draft.musicTrack) setMusicTrack(draft.musicTrack);
+    if (draft.voiceNote) setVoiceNote(draft.voiceNote);
     if (Array.isArray(draft.stems) && draft.stems.length)
       setPresetRequest({ id: `draft_${Date.now()}`, stems: draft.stems });
   }, []);
 
-  useEffect(() => { saveCheckoutDraft({ stems, note, senderName, musicTrack }); }, [stems, note, senderName, musicTrack]);
+  useEffect(() => { saveCheckoutDraft({ stems, note, senderName, musicTrack, voiceNote }); }, [stems, note, senderName, musicTrack, voiceNote]);
 
   const handleCanvasStateChange = useCallback((nextStems) => {
     if (Array.isArray(nextStems)) setStems(nextStems);
@@ -481,41 +484,120 @@ export default function Create() {
   }, []);
 
   const generateMagicBouquet = useCallback(() => {
-    const shuffled = [...flowers].sort(() => 0.5 - Math.random());
-    const selectedFlowers = shuffled.slice(0, 2 + Math.floor(Math.random() * 3));
-    const newStems = [];
-    const numStems = 7 + Math.floor(Math.random() * 6);
-    for (let i = 0; i < numStems; i++) {
-      const isCenter = i >= numStems - 2;
-      const f = selectedFlowers[Math.floor(Math.random() * selectedFlowers.length)];
-      let r, theta;
-      if (isCenter) { r = Math.random() * 0.05; theta = Math.random() * Math.PI * 2; }
-      else { r = 0.08 + Math.random() * 0.14; theta = (i / (numStems - 2)) * Math.PI * 2 + (Math.random() * 0.5 - 0.25); }
-      const x = 0.5 + r * Math.cos(theta);
-      const y = 0.55 + Math.random() * 0.05 + r * Math.sin(theta);
-      newStems.push({
-        stemId: `magic_${Date.now()}_${i}`, src: f.src,
-        x: Math.max(0.15, Math.min(0.85, x)), y: Math.max(0.2, Math.min(0.85, y)),
-        width: (isCenter ? 0.35 : 0.25) * (0.85 + Math.random() * 0.3),
-        angle: (Math.random() * 50 - 25), zIndex: i,
-      });
-    }
+    const palettes = [
+      {
+        hero: ["peony", "rose_peach"],
+        accent: ["sakura", "rose_1"],
+        filler: ["babys_breath", "sampaguita"],
+      },
+      {
+        hero: ["sunflower_2", "sunflower_1"],
+        accent: ["daisy", "rose_peach"],
+        filler: ["babys_breath", "sampaguita"],
+      },
+      {
+        hero: ["peony", "rose_1"],
+        accent: ["lavender", "tulip_lilac"],
+        filler: ["babys_breath", "sakura"],
+      },
+      {
+        hero: ["sampaguita", "peony"],
+        accent: ["rose_peach", "daisy"],
+        filler: ["babys_breath", "sakura"],
+      },
+    ];
+
+    const chosenTheme = palettes[Math.floor(Math.random() * palettes.length)];
+    const findFlower = (keys) => {
+      for (const k of keys) {
+        const match = flowers.find((f) => f.id.toLowerCase().includes(k) || (f.type && f.type.toLowerCase().includes(k)));
+        if (match) return match.src;
+      }
+      return flowers[Math.floor(Math.random() * flowers.length)].src;
+    };
+
+    const heroSrc = findFlower(chosenTheme.hero);
+    const accentSrc1 = findFlower(chosenTheme.accent);
+    const accentSrc2 = findFlower([chosenTheme.accent[1] || chosenTheme.accent[0]]);
+    const fillerSrc = findFlower(chosenTheme.filler);
+
+    const newStems = [
+      // Back layer fillers (fanned wide, generous scale)
+      {
+        stemId: `magic_${Date.now()}_0`,
+        src: fillerSrc,
+        x: 0.35 + (Math.random() * 0.04 - 0.02),
+        y: 0.44 + (Math.random() * 0.03 - 0.015),
+        width: 0.44 + Math.random() * 0.03,
+        angle: -19 + (Math.random() * 6 - 3),
+        zIndex: 0,
+      },
+      {
+        stemId: `magic_${Date.now()}_1`,
+        src: fillerSrc,
+        x: 0.65 + (Math.random() * 0.04 - 0.02),
+        y: 0.44 + (Math.random() * 0.03 - 0.015),
+        width: 0.44 + Math.random() * 0.03,
+        angle: 19 + (Math.random() * 6 - 3),
+        zIndex: 1,
+      },
+      // Mid layer accent blooms
+      {
+        stemId: `magic_${Date.now()}_2`,
+        src: accentSrc1,
+        x: 0.40 + (Math.random() * 0.03 - 0.015),
+        y: 0.51 + (Math.random() * 0.03 - 0.015),
+        width: 0.47 + Math.random() * 0.03,
+        angle: -9 + (Math.random() * 4 - 2),
+        zIndex: 2,
+      },
+      {
+        stemId: `magic_${Date.now()}_3`,
+        src: accentSrc2,
+        x: 0.60 + (Math.random() * 0.03 - 0.015),
+        y: 0.51 + (Math.random() * 0.03 - 0.015),
+        width: 0.47 + Math.random() * 0.03,
+        angle: 9 + (Math.random() * 4 - 2),
+        zIndex: 3,
+      },
+      // Center top crown
+      {
+        stemId: `magic_${Date.now()}_4`,
+        src: accentSrc1,
+        x: 0.50 + (Math.random() * 0.02 - 0.01),
+        y: 0.40 + (Math.random() * 0.02 - 0.01),
+        width: 0.43 + Math.random() * 0.03,
+        angle: (Math.random() * 6 - 3),
+        zIndex: 4,
+      },
+      // Front Hero bloom (grand, lush, perfectly anchors the bouquet)
+      {
+        stemId: `magic_${Date.now()}_5`,
+        src: heroSrc,
+        x: 0.50,
+        y: 0.59 + (Math.random() * 0.02 - 0.01),
+        width: 0.56 + Math.random() * 0.03,
+        angle: (Math.random() * 4 - 2),
+        zIndex: 5,
+      },
+    ];
+
     setPresetRequest({ id: `magic_${Date.now()}`, stems: newStems });
   }, []);
 
   /* Mandatory payment gate before link generation */
   const goToShare = () => {
     if (!hasBouquetContent) return;
-    saveCheckoutDraft({ stems, note, senderName, musicTrack });
+    saveCheckoutDraft({ stems, note, senderName, musicTrack, voiceNote });
     track("share_page_open", { flowerCount, wordCount });
     trackEvent("share_page_open", { flowerCount, wordCount });
-    navigate("/payment", { state: { flowerCount, stems, note, senderName, musicTrack } });
+    navigate("/payment", { state: { flowerCount, stems, note, senderName, musicTrack, voiceNote } });
   };
 
   const addBouquetToCart = () => {
     if (!hasBouquetContent) return;
-    saveCheckoutDraft({ stems, note, senderName, musicTrack });
-    addGiftCartItem("bouquet", { stems, note, senderName, musicTrack });
+    saveCheckoutDraft({ stems, note, senderName, musicTrack, voiceNote });
+    addGiftCartItem("bouquet", { stems, note, senderName, musicTrack, voiceNote });
     track("gift_cart_add", { type: "bouquet", flowerCount, wordCount });
     trackEvent("gift_cart_add", { type: "bouquet", flowerCount, wordCount });
     setAdded(true);
@@ -859,6 +941,8 @@ export default function Create() {
             </div>
 
             <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} isPH={isPH} />
+
+            <VoiceRecorder voiceNote={voiceNote} onChange={setVoiceNote} isPH={isPH} />
 
             {/* WD note suggestions */}
             {wdActive && (

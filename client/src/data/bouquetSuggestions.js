@@ -1,8 +1,15 @@
 import { flowers } from "./flowerCatalog";
 
-function flowerAt(index) {
+function getFlower(query) {
   if (!flowers.length) return null;
-  return flowers[index % flowers.length].src;
+  const q = query.toLowerCase();
+  const match = flowers.find(
+    (f) =>
+      f.id.toLowerCase().includes(q) ||
+      (f.type && f.type.toLowerCase().includes(q)) ||
+      (f.label && f.label.toLowerCase().includes(q))
+  );
+  return match ? match.src : flowers[0].src;
 }
 
 function stem(src, x, y, width, angle, zIndex) {
@@ -17,182 +24,168 @@ function stem(src, x, y, width, angle, zIndex) {
   };
 }
 
-// ─── Bouquet Builders ────────────────────────────────────────────────────────
+// ─── Florist-Grade Radial Preset Builders ─────────────────────────────────────
 
-/** Classic gentle arc — 5 flowers */
+/** Blush Romance — Lush Peony hero with Peach Rose, Sakura & Baby's Breath */
 function romanticArc() {
-  const slots = [
-    [0.20, 0.72, 0.20, -9],
-    [0.35, 0.62, 0.22, -5],
-    [0.50, 0.56, 0.24, 0],
-    [0.65, 0.62, 0.22, 5],
-    [0.80, 0.72, 0.20, 9],
+  const peony = getFlower("peony");
+  const peachRose = getFlower("peach");
+  const rose = getFlower("rose_1") || getFlower("rose");
+  const babysBreath = getFlower("babys_breath") || getFlower("daisy");
+  const sakura = getFlower("sakura") || getFlower("tulip");
+
+  const list = [
+    [babysBreath, 0.35, 0.44, 0.44, -18, 0],
+    [sakura, 0.65, 0.44, 0.44, 18, 1],
+    [peachRose, 0.40, 0.52, 0.47, -9, 2],
+    [rose, 0.60, 0.52, 0.47, 9, 3],
+    [peony, 0.50, 0.59, 0.56, 0, 4],
   ];
-  return slots
-    .map(([x, y, width, angle], i) => {
-      const src = flowerAt(i);
-      return src ? stem(src, x, y, width, angle, i) : null;
-    })
-    .filter(Boolean);
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
 }
 
-/** Wide radial spread — 6 flowers */
+/** Sunshine Glow — Bright Golden Sunflower with Chamomile Daisies & Warm Peach */
 function sunshineBurst() {
-  const slots = [
-    [0.50, 0.44, 0.26, 0],
-    [0.32, 0.58, 0.20, -18],
-    [0.68, 0.58, 0.20, 18],
-    [0.25, 0.76, 0.17, -30],
-    [0.75, 0.76, 0.17, 30],
-    [0.50, 0.73, 0.18, 0],
+  const sunflower = getFlower("sunflower_2") || getFlower("sunflower");
+  const daisy = getFlower("daisy");
+  const peachRose = getFlower("peach") || getFlower("rose");
+  const sampaguita = getFlower("sampaguita") || getFlower("babys_breath");
+
+  const list = [
+    [daisy, 0.33, 0.46, 0.44, -22, 0],
+    [daisy, 0.67, 0.46, 0.44, 22, 1],
+    [peachRose, 0.41, 0.53, 0.47, -8, 2],
+    [sampaguita, 0.59, 0.53, 0.45, 8, 3],
+    [sunflower, 0.50, 0.58, 0.57, 0, 4],
   ];
-  return slots
-    .map(([x, y, width, angle], i) => {
-      const src = flowerAt(i + 2);
-      return src ? stem(src, x, y, width, angle, i) : null;
-    })
-    .filter(Boolean);
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
 }
 
-/** Clean three-flower statement */
+/** Minimal Trio — Clean, intentional, modern aesthetic */
 function minimalTrio() {
-  const slots = [
-    [0.38, 0.66, 0.22, -8],
-    [0.50, 0.56, 0.25, 0],
-    [0.62, 0.66, 0.22, 8],
+  const babysBreath = getFlower("babys_breath") || getFlower("daisy");
+  const daisy = getFlower("daisy");
+  const peony = getFlower("peony") || getFlower("rose");
+
+  const list = [
+    [babysBreath, 0.50, 0.43, 0.48, 0, 0],
+    [daisy, 0.39, 0.55, 0.45, -10, 1],
+    [peony, 0.61, 0.55, 0.52, 8, 2],
   ];
-  return slots
-    .map(([x, y, width, angle], i) => {
-      const src = flowerAt(i + 5);
-      return src ? stem(src, x, y, width, angle, i) : null;
-    })
-    .filter(Boolean);
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
 }
 
-/** Tall central stem flanked by two shorter side flowers — elegant & modern */
+/** Twilight Lavender — Fragrant English Lavender with Lilac & Violet Tulips */
 function cascadingWaterfall() {
-  const slots = [
-    [0.50, 0.42, 0.28, 0],  // tall center
-    [0.30, 0.60, 0.21, -14],  // mid left
-    [0.70, 0.60, 0.21, 14],  // mid right
-    [0.20, 0.78, 0.17, -25],  // low left
-    [0.80, 0.78, 0.17, 25],  // low right
-    [0.42, 0.70, 0.18, -6],  // inner left fill
-    [0.58, 0.70, 0.18, 6],  // inner right fill
+  const lavender = getFlower("lavender");
+  const lilac = getFlower("lilac") || getFlower("tulip");
+  const violet = getFlower("violet") || getFlower("tulip");
+  const babysBreath = getFlower("babys_breath") || getFlower("daisy");
+  const peachRose = getFlower("peach") || getFlower("rose");
+
+  const list = [
+    [lavender, 0.36, 0.42, 0.42, -18, 0],
+    [lavender, 0.64, 0.42, 0.42, 18, 1],
+    [lilac, 0.50, 0.39, 0.44, 0, 2],
+    [babysBreath, 0.41, 0.52, 0.45, -9, 3],
+    [violet, 0.59, 0.52, 0.45, 9, 4],
+    [peachRose, 0.50, 0.59, 0.55, 0, 5],
   ];
-  return slots
-    .map(([x, y, width, angle], i) => {
-      const src = flowerAt(i + 1);
-      return src ? stem(src, x, y, width, angle, i) : null;
-    })
-    .filter(Boolean);
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
 }
 
-/** Dense dome — full, rounded, lush. Classic florist's hand-tied look. */
+/** Sampaguita Dream — Philippine National Flower with Blush Peony & Sakura */
 function gardenDome() {
-  const slots = [
-    // Crown
-    [0.50, 0.45, 0.24, 0],
-    [0.38, 0.50, 0.22, -8],
-    [0.62, 0.50, 0.22, 8],
-    // Mid ring
-    [0.27, 0.60, 0.19, -16],
-    [0.50, 0.57, 0.20, 0],
-    [0.73, 0.60, 0.19, 16],
-    // Base ring
-    [0.20, 0.74, 0.16, -26],
-    [0.40, 0.72, 0.17, -8],
-    [0.60, 0.72, 0.17, 8],
-    [0.80, 0.74, 0.16, 26],
+  const sampaguita = getFlower("sampaguita");
+  const sakura = getFlower("sakura");
+  const babysBreath = getFlower("babys_breath");
+  const daisy = getFlower("daisy");
+  const peachRose = getFlower("peach") || getFlower("rose");
+  const peony = getFlower("peony");
+
+  const list = [
+    [sampaguita, 0.34, 0.44, 0.44, -20, 0],
+    [sakura, 0.66, 0.44, 0.44, 20, 1],
+    [babysBreath, 0.50, 0.41, 0.45, 0, 2],
+    [daisy, 0.37, 0.52, 0.45, -10, 3],
+    [peachRose, 0.63, 0.52, 0.47, 10, 4],
+    [peony, 0.50, 0.59, 0.56, 0, 5],
   ];
-  return slots
-    .map(([x, y, width, angle], i) => {
-      const src = flowerAt(i);
-      return src ? stem(src, x, y, width, angle, i) : null;
-    })
-    .filter(Boolean);
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
 }
 
-/** Asymmetric artisan style — off-center, natural, wild-gathered feel */
+/** Wild Meadow — Hand-gathered, natural countryside botanical blend */
 function wildMeadow() {
-  const slots = [
-    [0.60, 0.43, 0.25, 10],  // tall dominant right
-    [0.35, 0.54, 0.22, -5],  // mid center-left
-    [0.72, 0.60, 0.19, 20],  // leaning far right
-    [0.22, 0.66, 0.18, -22],  // leaning far left
-    [0.50, 0.64, 0.20, 3],  // center fill
-    [0.62, 0.74, 0.16, 14],  // low right
-    [0.33, 0.76, 0.15, -12],  // low left
+  const lavender = getFlower("lavender");
+  const daisy = getFlower("daisy");
+  const babysBreath = getFlower("babys_breath");
+  const sampaguita = getFlower("sampaguita");
+  const peachRose = getFlower("peach");
+  const peony = getFlower("peony");
+
+  const list = [
+    [lavender, 0.31, 0.44, 0.42, -22, 0],
+    [daisy, 0.69, 0.46, 0.45, 20, 1],
+    [babysBreath, 0.48, 0.43, 0.45, 4, 2],
+    [sampaguita, 0.39, 0.53, 0.45, -8, 3],
+    [peachRose, 0.59, 0.54, 0.48, 10, 4],
+    [peony, 0.48, 0.60, 0.56, -2, 5],
   ];
-  return slots
-    .map(([x, y, width, angle], i) => {
-      const src = flowerAt(i + 3);
-      return src ? stem(src, x, y, width, angle, i) : null;
-    })
-    .filter(Boolean);
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
 }
 
-/** Single standout stem — one perfect flower, centered */
+/** Solo Statement — One breathtaking blooming centerpiece */
 function soloStatement() {
-  const slots = [
-    [0.50, 0.50, 0.32, 0],
-  ];
-  return slots
-    .map(([x, y, width, angle], i) => {
-      const src = flowerAt(i);
-      return src ? stem(src, x, y, width, angle, i) : null;
-    })
-    .filter(Boolean);
+  const hero = getFlower("peony") || getFlower("sunflower_2") || getFlower("rose");
+  return [stem(hero, 0.50, 0.53, 0.60, 0, 0)];
 }
 
-/** Two mirrored stems leaning toward each other — intimate & symbolic */
+/** Lovely Pair — Two stems leaning lovingly together with delicate baby's breath */
 function lovelyPair() {
-  const slots = [
-    [0.35, 0.54, 0.26, -10],
-    [0.65, 0.54, 0.26, 10],
+  const babysBreath = getFlower("babys_breath");
+  const peony = getFlower("peony");
+  const peachRose = getFlower("peach") || getFlower("rose");
+
+  const list = [
+    [babysBreath, 0.50, 0.43, 0.46, 0, 0],
+    [peony, 0.40, 0.54, 0.52, -9, 1],
+    [peachRose, 0.60, 0.54, 0.52, 9, 2],
   ];
-  return slots
-    .map(([x, y, width, angle], i) => {
-      const src = flowerAt(i + 4);
-      return src ? stem(src, x, y, width, angle, i) : null;
-    })
-    .filter(Boolean);
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
 }
 
-/** Tall vertical column — architectural and dramatic */
+/** Vertical Tower — Architectural Sakura & Sampaguita arrangement */
 function verticalTower() {
-  const slots = [
-    [0.50, 0.38, 0.22, 0],
-    [0.44, 0.51, 0.20, -4],
-    [0.56, 0.51, 0.20, 4],
-    [0.50, 0.63, 0.18, 0],
-    [0.44, 0.75, 0.17, -4],
-    [0.56, 0.75, 0.17, 4],
+  const sakura = getFlower("sakura");
+  const babysBreath = getFlower("babys_breath");
+  const sampaguita = getFlower("sampaguita");
+  const peony = getFlower("peony");
+
+  const list = [
+    [sakura, 0.50, 0.35, 0.46, 0, 0],
+    [babysBreath, 0.41, 0.48, 0.44, -6, 1],
+    [sampaguita, 0.59, 0.48, 0.44, 6, 2],
+    [peony, 0.50, 0.58, 0.56, 0, 3],
   ];
-  return slots
-    .map(([x, y, width, angle], i) => {
-      const src = flowerAt(i + 6);
-      return src ? stem(src, x, y, width, angle, i) : null;
-    })
-    .filter(Boolean);
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
 }
 
-/** Crescent moon silhouette — curved, sweeping, theatrical */
+/** Sweet Dream Crescent — Sweeping crescent arc */
 function lunarCrescent() {
-  const slots = [
-    [0.30, 0.48, 0.24, -35],  // top of crescent
-    [0.22, 0.60, 0.21, -22],  // upper inner
-    [0.26, 0.72, 0.19, -10],  // lower inner
-    [0.38, 0.80, 0.17, 0],  // base
-    [0.52, 0.78, 0.16, 10],  // trailing right
-    [0.64, 0.70, 0.15, 20],  // far trailing
+  const sakura = getFlower("sakura");
+  const lavender = getFlower("lavender");
+  const babysBreath = getFlower("babys_breath");
+  const peachRose = getFlower("peach");
+  const daisy = getFlower("daisy");
+
+  const list = [
+    [sakura, 0.33, 0.40, 0.46, -26, 0],
+    [lavender, 0.31, 0.50, 0.42, -15, 1],
+    [babysBreath, 0.39, 0.58, 0.44, -5, 2],
+    [peachRose, 0.53, 0.60, 0.50, 6, 3],
+    [daisy, 0.65, 0.56, 0.44, 16, 4],
   ];
-  return slots
-    .map(([x, y, width, angle], i) => {
-      const src = flowerAt(i + 1);
-      return src ? stem(src, x, y, width, angle, i) : null;
-    })
-    .filter(Boolean);
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
 }
 
 // ─── Exports ──────────────────────────────────────────────────────────────────
@@ -200,44 +193,44 @@ function lunarCrescent() {
 export const bouquetSuggestions = [
   {
     id: "romantic-arc",
-    title: "Romantic Arc",
-    description: "A soft, balanced five-flower curve — timeless and tender.",
+    title: "Blush Romance",
+    description: "Lush pink Peony, Peach Rose & Sakura fanned with Baby's Breath.",
     build: romanticArc,
   },
   {
     id: "sunshine-burst",
-    title: "Sunshine Burst",
-    description: "Wide, radiant, and playful — a burst of joy for someone special.",
+    title: "Sunshine Glow",
+    description: "Golden Sunflower hero with Chamomile Daisies & sweet Sampaguita.",
     build: sunshineBurst,
   },
   {
     id: "minimal-trio",
-    title: "Minimal Trio",
+    title: "Modern Trio",
     description: "Three flowers. Clean. Intentional. Says everything without trying.",
     build: minimalTrio,
   },
   {
     id: "cascading-waterfall",
-    title: "Cascading Waterfall",
-    description: "A tall centrepiece flanked by gracefully falling stems — modern elegance.",
+    title: "Twilight Lavender",
+    description: "Fragrant English Lavender with Lilac & Violet Tulips — pure calm.",
     build: cascadingWaterfall,
   },
   {
     id: "garden-dome",
-    title: "Garden Dome",
-    description: "Full, rounded, and lush — the classic hand-tied bouquet, perfected.",
+    title: "Sampaguita Dream",
+    description: "Philippine Sampaguita paired with Blush Peony & fresh blossoms.",
     build: gardenDome,
   },
   {
     id: "wild-meadow",
-    title: "Wild Meadow",
-    description: "Loosely gathered, asymmetric, alive — like it was just picked from a field.",
+    title: "Wildflower Meadow",
+    description: "Loosely gathered, asymmetric, alive — like it was just handpicked.",
     build: wildMeadow,
   },
   {
     id: "solo-statement",
     title: "Solo Statement",
-    description: "One perfect flower. Because sometimes one is more than enough.",
+    description: "One perfect hero bloom. Because sometimes one is more than enough.",
     build: soloStatement,
   },
   {
@@ -248,8 +241,8 @@ export const bouquetSuggestions = [
   },
   {
     id: "vertical-tower",
-    title: "Vertical Tower",
-    description: "Tall, architectural, and striking — a dramatic centerpiece arrangement.",
+    title: "Sakura Tower",
+    description: "Graceful vertical Cherry Blossom and Sampaguita centerpiece.",
     build: verticalTower,
   },
   {
