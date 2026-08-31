@@ -4,11 +4,13 @@ const GROK_MODEL = process.env.VITE_GROK_MODEL || "grok-2-latest";
 const GROK_API_KEY = process.env.VITE_GROK_API_KEY;
 
 const GROQ_API_URL = process.env.VITE_GROQ_API_URL || "https://api.groq.com/openai/v1/chat/completions";
-const GROQ_MODEL = process.env.VITE_GROQ_MODEL || "llama-3.3-70b-versatile";
+const GROQ_MODEL = process.env.VITE_GROQ_MODEL || "gemma2-9b-it";
 const GROQ_API_KEY = process.env.VITE_GROQ_API_KEY;
 
 function extractText(responseJson) {
-  const content = responseJson?.choices?.[0]?.message?.content;
+  const msg = responseJson?.choices?.[0]?.message;
+  // Some Groq reasoning models return empty content with reasoning in a separate field
+  const content = msg?.content || msg?.reasoning || "";
   if (!content) return "";
   if (Array.isArray(content)) {
     return content
@@ -16,7 +18,8 @@ function extractText(responseJson) {
       .join(" ")
       .trim();
   }
-  return String(content).trim();
+  // Strip any <think>...</think> reasoning wrapper if present
+  return String(content).replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
 }
 
 export async function generateNoteWithGrok({ situation }) {
@@ -54,24 +57,34 @@ export async function generateNoteWithGrok({ situation }) {
     },
     body: JSON.stringify({
       model,
-      temperature: 0.8,
-      max_tokens: 160,
+      temperature: 0.9,
+      max_tokens: 180,
       messages: [
         {
           role: "system",
-          content:
-            "You write heartfelt short bouquet notes. Return only the final note. Keep it under 70 words, warm, human, and personal.",
+          content: `You write short, genuinely heartfelt notes that accompany digital flower bouquets.
+
+Rules you must follow:
+- Write in first person, from the sender to the recipient
+- Keep it between 40–70 words — never longer
+- Sound like a real human being wrote it, not an AI
+- Be specific and warm — reference the situation naturally, don't restate it robotically  
+- Never use: "may your day", "wishing you", "I hope this message finds you", "in this digital age", or any greeting-card clichés
+- No hashtags, no emojis, no sign-offs like "Warmly" or "With love"
+- Don't start with "I" — start with a different word or phrase
+- Return ONLY the note text. No quotes, no explanation, no title.`,
         },
         {
           role: "user",
-          content: `Write a bouquet note based on this situation:\n${situation.trim()}`,
+          content: `Write a bouquet note for this situation: ${situation.trim()}`,
         },
       ],
     }),
   });
 
   if (!response.ok) {
-    throw new Error(`AI request failed (${response.status}).`);
+    const errBody = await response.json().catch(() => ({}));
+    throw new Error(errBody?.error?.message || `AI request failed (${response.status}).`);
   }
 
   const data = await response.json();

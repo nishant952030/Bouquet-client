@@ -21,20 +21,39 @@ const ALL_GIFTS = [
   { title: "Virtual Hug Card", desc: "Pull-to-open interactive warm hug card.", icon: "🤗", path: "/create-hug-card", tag: "", color: "#fce4ec", accent: "#ef5350", indiaOnly: false },
 ];
 
+const TESTIMONIALS_PH = [
+  { quote: "Nagpadala ako ng bouquet sa aking Mama — niyakap niya ang screen niya! 😭 So worth it.", author: "Maria C.", city: "Quezon City", stars: 5 },
+  { quote: "My boyfriend is in Dubai. This made our Monthsary feel so real. He cried!", author: "Ria S.", city: "Cebu City", stars: 5 },
+  { quote: "Perfect for pasalubong without the expense! Sent it on Valentine's — she screenshotted it right away.", author: "Carlo D.", city: "Makati", stars: 5 },
+  { quote: "Ang cute ng animations! Ginamit ko for Pasko para sa Lola ko sa Davao. She loved it!", author: "Bea M.", city: "Davao City", stars: 5 },
+  { quote: "Ready in under 1 minute and free. No reason NOT to send your loved ones a surprise 🌸", author: "Ana T.", city: "Pasig", stars: 5 },
+];
+
 const TESTIMONIALS_IN = [
-  { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi", city: "Mumbai", stars: 5 },
-  { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "Rahul", city: "Bengaluru", stars: 5 },
-  { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Sneha", city: "Pune", stars: 5 },
-  { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Priya", city: "Hyderabad", stars: 5 },
-  { quote: "Got the share link in seconds. Sent it on WhatsApp and she loved it instantly.", author: "Neha", city: "Delhi", stars: 5 },
+  { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi S.", city: "Mumbai", stars: 5 },
+  { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "Rahul G.", city: "Bengaluru", stars: 5 },
+  { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Sneha P.", city: "Pune", stars: 5 },
+  { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Priya M.", city: "Hyderabad", stars: 5 },
+  { quote: "Got the share link in seconds. Sent it on WhatsApp and she loved it instantly.", author: "Neha K.", city: "Delhi", stars: 5 },
 ];
 
 const TESTIMONIALS_GLOBAL = [
-  { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Sarah", city: "New York", stars: 5 },
-  { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "James", city: "London", stars: 5 },
-  { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Emma", city: "Toronto", stars: 5 },
-  { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Lily", city: "Sydney", stars: 5 },
-  { quote: "Got the share link in seconds. Sent it on WhatsApp and she loved it instantly.", author: "Sofia", city: "Amsterdam", stars: 5 },
+  { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Sarah K.", city: "New York", stars: 5 },
+  { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "James L.", city: "London", stars: 5 },
+  { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Emma R.", city: "Toronto", stars: 5 },
+  { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Lily T.", city: "Sydney", stars: 5 },
+  { quote: "Got the share link in seconds. Sent it on WhatsApp and she loved it instantly.", author: "Sofia M.", city: "Amsterdam", stars: 5 },
+];
+
+const TICKER_PH = [
+  "💐 Maria just sent a bouquet to her Mama · 2m ago",
+  "🎂 Juan baked a Pasko cake for Lola · 5m ago",
+  "💌 Jasmine sent a love letter to Carlo · 8m ago",
+  "🤗 Bea sent a virtual hug to her Ate · 12m ago",
+  "💐 Ria made a bouquet for Monthsary · 15m ago",
+  "🎂 Diego baked a birthday cake for Ana · 18m ago",
+  "💐 Clara sent flowers to her best friend in Cebu · 21m ago",
+  "🤗 Kuya sent a hug card to his baby sister · 25m ago",
 ];
 
 const TICKER_IN = [
@@ -61,8 +80,14 @@ const TICKER_GLOBAL = [
 
 const HOW_IT_WORKS = [
   { step: "01", title: "Pick a gift", desc: "Choose from bouquets, cakes, cards, plushies & more.", icon: "🎁" },
-  { step: "02", title: "Personalise it", desc: "Add your name, a note, and customise the look.", icon: "✏️" },
-  { step: "03", title: "Share the link", desc: "Send via WhatsApp, iMessage, or copy the link. Done.", icon: "🔗" },
+  { step: "02", title: "Personalise it", desc: "Add your name, a heartfelt note, and customise the look.", icon: "✏️" },
+  { step: "03", title: "Share the link", desc: "Send via WhatsApp, Messenger, or Viber. Done in seconds.", icon: "🔗" },
+];
+
+const FEATURES_PH = [
+  "🌸 Sobrang cute na bouquet layouts", "🎨 Customize ng colors & themes", "💬 May personal note",
+  "📲 Share via Messenger or Viber", "🚀 Tapos sa 60 seconds", "🔒 No signup needed",
+  "🇵🇭 Para sa mga Pilipino", "💸 100% Libre forever",
 ];
 
 const FEATURES_IN = [
@@ -109,15 +134,22 @@ function useIntersectionOnce(ref) {
   return visible;
 }
 
-// Detect visitor country via lightweight IP geo API. Returns "IN" for India,
-// another ISO-3166-1 alpha-2 code for everywhere else, or null while loading.
+// Detect visitor country via lightweight IP geo API.
+// Returns country code ("IN", "PH", etc.) or null while loading.
 function useCountry() {
   const [country, setCountry] = useState(null);
   useEffect(() => {
+    // Fast client-side hint before API call
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+      if (tz === "Asia/Manila") setCountry("PH");
+      else if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta") setCountry("IN");
+    } catch {}
+
     fetch("https://api.country.is/")
       .then(r => r.json())
       .then(d => setCountry(d?.country ?? "XX"))
-      .catch(() => setCountry("XX")); // fail-open: treat as non-India
+      .catch(() => {}); // keep timezone-based guess on failure
   }, []);
   return country;
 }
@@ -171,12 +203,13 @@ export default function HomeClient() {
 
   const country = useCountry();
   const isIndia = country === "IN";
+  const isPH = country === "PH";
 
-  // Locale-aware data — all India-specific content hidden for non-India visitors
+  // Locale-aware data: Philippines, India, or Global
   const GIFTS      = useMemo(() => isIndia ? ALL_GIFTS : ALL_GIFTS.filter(g => !g.indiaOnly), [isIndia]);
-  const TESTIMONIALS = useMemo(() => isIndia ? TESTIMONIALS_IN : TESTIMONIALS_GLOBAL, [isIndia]);
-  const TICKER_ITEMS = useMemo(() => isIndia ? TICKER_IN : TICKER_GLOBAL, [isIndia]);
-  const FEATURES   = useMemo(() => isIndia ? FEATURES_IN : FEATURES_GLOBAL, [isIndia]);
+  const TESTIMONIALS = useMemo(() => isPH ? TESTIMONIALS_PH : isIndia ? TESTIMONIALS_IN : TESTIMONIALS_GLOBAL, [isIndia, isPH]);
+  const TICKER_ITEMS = useMemo(() => isPH ? TICKER_PH : isIndia ? TICKER_IN : TICKER_GLOBAL, [isIndia, isPH]);
+  const FEATURES   = useMemo(() => isPH ? FEATURES_PH : isIndia ? FEATURES_IN : FEATURES_GLOBAL, [isIndia, isPH]);
 
   const [activeIdx, setActiveIdx] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
@@ -557,6 +590,42 @@ export default function HomeClient() {
           </div>
         </header>
 
+        {isPH && (
+          <div style={{
+            width: "100%",
+            maxWidth: "1160px",
+            margin: "0 auto 0.75rem",
+            padding: "0 1rem",
+            zIndex: 20
+          }}>
+            <Link
+              href="/ph"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                background: "linear-gradient(90deg, #fff2f5 0%, #ffd9e2 100%)",
+                border: "1.5px solid rgba(228,141,156,0.35)",
+                borderRadius: "9999px",
+                padding: "0.5rem 1.25rem",
+                textDecoration: "none",
+                color: "#7c3f4f",
+                boxShadow: "0 4px 15px rgba(228,141,156,0.15)",
+                fontSize: "0.82rem",
+                fontWeight: 700
+              }}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span>🇵🇭</span>
+                <span>Bisitahin ang aming bagong Dedicated Philippines Page!</span>
+              </span>
+              <span style={{ display: "flex", alignItems: "center", gap: "4px", color: "#a65d5d", textTransform: "uppercase", fontSize: "0.74rem", letterSpacing: "0.06em" }}>
+                Pumunta Dito →
+              </span>
+            </Link>
+          </div>
+        )}
+
         {/* Hero */}
         <main className="hw-hero-section" style={{ width: "100%", maxWidth: "900px", padding: "2rem 1.5rem 0", animation: "floatUp 0.8s ease both" }}>
           {/* Eyebrow */}
@@ -579,27 +648,30 @@ export default function HomeClient() {
             fontSize: "4.2rem", fontWeight: 500, lineHeight: 1.1,
             color: "#3d3028", textAlign: "center", margin: "0 auto 1.5rem", maxWidth: "780px",
           }}>
-            Someone out there is<br />
-            waiting for a message{" "}
-            <em className="hw-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>from you.</em>
+            {isPH
+              ? <>{"Padalhan ng pagmamahal ang iyong"}<br />{"mga "}<em className="hw-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>{"mahal sa buhay."}</em></>
+              : <>Someone out there is<br />waiting for a message{" "}<em className="hw-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>from you.</em></>
+            }
           </h1>
 
           {/* Sub-headline */}
           <p className="hw-hero-sub" style={{ textAlign: "center", maxWidth: "520px", margin: "0 auto 2.25rem", fontSize: "1.05rem", color: "#5c4a40", lineHeight: 1.75, fontWeight: 400 }}>
-            Birthdays, rainy Tuesdays, anniversaries, Father's Day — or just because you thought of them.
-            Free digital gifts, ready in 60 seconds.
+            {isPH
+              ? "Valentine's, Monthsary, Pasko, Mother's Day — o basta gusto mong mag-surprise. Free, tapos sa 60 seconds."
+              : "Birthdays, rainy Tuesdays, anniversaries, Father's Day — or just because you thought of them. Free digital gifts, ready in 60 seconds."
+            }
           </p>
 
           {/* CTAs */}
           <div className="hw-cta-group" style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center", marginBottom: "2.5rem" }}>
-            <Link href="/create" className="hw-cta">💐 Make a Bouquet</Link>
+            <Link href="/create" className="hw-cta">{isPH ? "💐 Gumawa ng Bouquet" : "💐 Make a Bouquet"}</Link>
             <button className="hw-cta-ghost" onClick={() => document.getElementById("hw-gift-strip")?.scrollIntoView({ behavior: "smooth" })}>
-              See all gifts ↓
+              {isPH ? "Lahat ng gifts ↓" : "See all gifts ↓"}
             </button>
           </div>
 
           <p style={{ textAlign: "center", fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#a65d5d", opacity: 0.75, marginBottom: "3rem" }}>
-            No login · No credit card · Free forever
+            {isPH ? "Walang login · Walang bayad · Libre forever" : "No login · No credit card · Free forever"}
           </p>
         </main>
 

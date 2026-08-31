@@ -1,4 +1,5 @@
 import LegacyAppShell from "../[...slug]/LegacyAppShell";
+import { getBouquetMakerSchema } from "../../src/lib/seoSchemas";
 
 const BASE_URL = "https://www.petalsandwords.com";
 
@@ -27,7 +28,18 @@ export const metadata = {
   },
 };
 
-
 export default function CreatePage() {
-  return <LegacyAppShell />;
+  const schema = getBouquetMakerSchema("/create");
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(schema),
+        }}
+      />
+      <LegacyAppShell />
+    </>
+  );
 }

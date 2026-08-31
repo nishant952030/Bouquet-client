@@ -272,3 +272,24 @@ export const noteSuggestions = [
   "Sending this because you came to mind, and that's reason enough.",
   "For the person who never asks for anything — here's something just for you.",
 ];
+
+export const noteSuggestionsPH = [
+  "Kahit malayo ako ngayon, sana maramdaman mo ang yakap ko sa mga bulaklak na 'to. Ingat ka palagi! 💕",
+  "Happy Monthsary, my love! Bawat araw kasama ka, lalong sumasaya ang buhay ko. 🌸",
+  "Para sa pinakamalakas at mapagmahal na Mama — salamat po sa lahat. Mahal na mahal kita! 💐",
+  "Naisip lang kita bigla. Sana mapangiti ka nitong munting bouquet ko para sa'yo! ✨",
+  "Bati na tayo please? 🥺 Peace offering muna bago ako bumili ng favorite mong milk tea!",
+  "Walang okasyon, gusto ko lang ipaalala sa'yo kung gaano ka kahalaga sa akin. ❤️",
+  "Happy Birthday! Sobrang thankful ako kay Lord na dumating ka sa buhay ko. 🎂💐",
+  "Miss na miss na kita. Konting tiis na lang, magkakasama rin tayo ulit. Kapit lang! 🥺🌸",
+];
+
+export const occasionsPH = [
+  { emoji: "💖", label: "Monthsary", note: "Happy Monthsary, my love! Bawat araw kasama ka, lalong sumasaya ang buhay ko. 🌸" },
+  { emoji: "🌸", label: "Para kay Nanay", note: "Para sa pinakamalakas at mapagmahal kong Mama — salamat po sa lahat. Mahal na mahal kita! 💐" },
+  { emoji: "🥺", label: "Pang-suyo", note: "Bati na tayo please? 🥺 Peace offering muna bago ako bumili ng favorite mong milk tea!" },
+  { emoji: "✈️", label: "LDR / Miss You", note: "Kahit malayo ako, sana maramdaman mo ang yakap ko sa munting bouquet na 'to. Miss na miss na kita! 💕" },
+  { emoji: "🎂", label: "Birthday", note: "Happy Birthday! Wishing you all the love, happiness, and peace in the world today. 🎂💐" },
+  { emoji: "✨", label: "Just Because", note: "Naisip lang kita bigla. Sana mapangiti ka nitong munting bouquet ko para sa'yo! ✨" },
+];
+

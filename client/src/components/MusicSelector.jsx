@@ -2,7 +2,15 @@ import { useState, useEffect } from "react";
 import { Music, Play, Square } from "lucide-react";
 import { MUSIC_TRACKS, playTrack, stopTrack } from "../lib/audioTracks";
 
-export default function MusicSelector({ selectedTrackId, onChange }) {
+const PH_TRACK_NAMES = {
+  none: { name: "Walang Tugtog", desc: "Tahimik lang" },
+  acoustic: { name: "Gitara / Harana", desc: "Mainit at maaliwalas" },
+  piano: { name: "Sweet Piano", desc: "Malambing at madamdamin" },
+  lofi: { name: "Lofi Vibe", desc: "Chill at nakakarelaks" },
+  chiptune: { name: "Cute Chiptune", desc: "Makulit at masigla" },
+};
+
+export default function MusicSelector({ selectedTrackId, onChange, isPH = false }) {
   const [previewingId, setPreviewingId] = useState(null);
 
   const handleSelect = (trackId) => {
@@ -53,18 +61,22 @@ export default function MusicSelector({ selectedTrackId, onChange }) {
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
         <Music size={16} style={{ color: "#7b5455" }} />
         <h3 style={{ fontSize: "0.82rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7b5455", margin: 0 }}>
-          Background Music
+          {isPH ? "Tugtuging Pang-Background" : "Background Music"}
         </h3>
       </div>
       
       <p style={{ fontSize: "0.75rem", color: "#705f58", margin: "0 0 0.85rem", lineHeight: 1.4 }}>
-        Choose a track to play when the receiver opens your gift. Tap to preview.
+        {isPH
+          ? "Pumili ng tugtog na maririnig kapag binuksan ang iyong regalo. I-tap para pakinggan."
+          : "Choose a track to play when the receiver opens your gift. Tap to preview."}
       </p>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
         {MUSIC_TRACKS.map((track) => {
           const isSelected = selectedTrackId === track.id;
           const isPreviewing = previewingId === track.id;
+          const displayName = (isPH && PH_TRACK_NAMES[track.id]?.name) || track.name;
+          const displayDesc = (isPH && PH_TRACK_NAMES[track.id]?.desc) || track.desc;
           
           return (
             <div
@@ -106,7 +118,7 @@ export default function MusicSelector({ selectedTrackId, onChange }) {
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
                 <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#312722" }}>
-                  {track.name}
+                  {displayName}
                 </span>
                 
                 {track.id !== "none" && (
@@ -127,7 +139,7 @@ export default function MusicSelector({ selectedTrackId, onChange }) {
                       padding: 0,
                       transition: "all 0.15s",
                     }}
-                    title={isPreviewing ? "Stop Preview" : "Preview Track"}
+                    title={isPreviewing ? (isPH ? "Itigil ang tugtog" : "Stop Preview") : (isPH ? "Pakinggan ang tugtog" : "Preview Track")}
                   >
                     {isPreviewing ? <Square size={8} fill="currentColor" /> : <Play size={8} fill="currentColor" />}
                   </button>
@@ -135,7 +147,7 @@ export default function MusicSelector({ selectedTrackId, onChange }) {
               </div>
               
               <span style={{ fontSize: "0.65rem", color: "#8a7670", marginTop: "0.2rem", lineHeight: 1.2 }}>
-                {track.desc}
+                {displayDesc}
               </span>
             </div>
           );

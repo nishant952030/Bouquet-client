@@ -20,14 +20,14 @@ function getSharedBouquetFromLocalStorage(id) {
 
 /* ── CSS ── */
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Manrope:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   .vb-root {
     font-family: 'Manrope', sans-serif;
     min-height: 100vh;
-    background: #faf9f6;
+    background: linear-gradient(160deg, #fdf6f0 0%, #f8edf0 55%, #fdf0f5 100%);
     color: #1b1c1a;
     overflow-x: hidden;
     position: relative;
@@ -35,11 +35,12 @@ const CSS = `
 
   /* ─── Envelope reveal ─── */
   @keyframes envelopeOpen {
-    0%   { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0%   { opacity: 0; transform: translateY(22px) scale(0.97); }
+    70%  { transform: translateY(-4px) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
   }
   .envelope-reveal {
-    animation: envelopeOpen 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    animation: envelopeOpen 0.65s cubic-bezier(0.34,1.3,0.64,1) forwards;
     opacity: 0;
   }
   .er-1 { animation-delay: 0.1s; }
@@ -66,11 +67,13 @@ const CSS = `
     align-items: center;
   }
   .vb-canvas-wrap {
-    border-radius: 1.5rem;
+    border-radius: 1.75rem;
     overflow: hidden;
-    background: #fff8f2;
+    background: rgba(255,248,242,0.85);
+    backdrop-filter: blur(12px);
     position: relative;
-    box-shadow: 0 16px 40px rgba(120, 85, 94, 0.08);
+    box-shadow: 0 20px 50px rgba(166, 93, 93, 0.14), 0 4px 12px rgba(166,93,93,0.08);
+    border: 1px solid rgba(255,255,255,0.85);
     width: 340px;
     max-width: 100%;
     z-index: 1;
@@ -106,8 +109,8 @@ const CSS = `
   }
   .vb-hanging-tag-container {
     position: absolute;
-    bottom: -2.5rem; /* much lower so it does not hide the bouquet */
-    right: -1rem;    /* pushed to the side */
+    bottom: -2.5rem;
+    right: -1rem;
     z-index: 120;
     transform-origin: top center;
     transform: translateZ(0);
@@ -123,26 +126,27 @@ const CSS = `
     z-index: -1;
   }
   .vb-hanging-tag {
-    background: #faf9f6;
-    border: 1px solid rgba(211,195,197, 0.4);
-    border-radius: 12px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(200,130,140,0.18);
+    border-radius: 14px;
     padding: 1.25rem 1rem;
-    box-shadow: 0 10px 24px rgba(120, 85, 94, 0.08);
+    box-shadow: 0 12px 28px rgba(166, 93, 93, 0.12);
     position: relative;
     z-index: 121;
     text-align: left;
   }
   .vb-tag-hole {
     width: 6px; height: 6px;
-    background: #e9e5df;
+    background: rgba(200,130,140,0.25);
     border-radius: 50%;
     position: absolute;
     top: 6px; left: 50%; transform: translateX(-50%);
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
   }
   .vb-note-text {
-    font-family: 'Noto Serif', serif;
-    font-size: 0.95rem; line-height: 1.5;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem; line-height: 1.6;
     color: #3E2723;
     font-style: italic;
     word-break: break-word;
@@ -155,13 +159,12 @@ const CSS = `
     margin-top: 1rem;
     position: relative; z-index: 1;
   }
-  .vb-sender-line {
-    font-size: 0.8rem; color: #6b5e5f;
-  }
+  .vb-sender-line { font-size: 0.8rem; color: #6b5e5f; }
   .vb-sender-name {
-    font-weight: 700; color: #7b5455;
-    font-family: 'Noto Serif', serif;
+    font-weight: 700; color: #a65d5d;
+    font-family: 'Cormorant Garamond', serif;
     font-style: italic;
+    font-size: 1.05rem;
   }
 
   /* ─── CTA ─── */
@@ -170,24 +173,26 @@ const CSS = `
     position: relative; z-index: 1;
     margin-top: 3.5rem;
   }
+  @keyframes pw-pulse {
+    0%, 100% { box-shadow: 0 14px 34px rgba(124,63,79,0.28); }
+    50%       { box-shadow: 0 14px 34px rgba(124,63,79,0.48), 0 0 0 10px rgba(124,63,79,0); }
+  }
   .vb-cta-btn {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: linear-gradient(135deg, #7b5455 0%, #ffd9d8 180%);
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: linear-gradient(135deg, #a65d5d 0%, #7c3f4f 100%);
     color: #ffffff;
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     font-size: 0.85rem; font-weight: 700;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em; text-transform: uppercase;
     border: none; border-radius: 9999px;
-    padding: 1rem 2rem;
+    padding: 0 2rem; min-height: 54px;
     cursor: pointer;
     text-decoration: none;
-    box-shadow: 0 12px 30px rgba(123,84,85,0.18);
-    transition: all 0.2s ease;
+    animation: pw-pulse 2.5s infinite;
+    transition: transform 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
   }
-  .vb-cta-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 16px 36px rgba(123,84,85,0.25);
-  }
+  .vb-cta-btn:hover { transform: translateY(-2px) scale(1.02); }
   .vb-cta-btn:active { transform: scale(0.98); }
   .vb-cta-sub {
     font-size: 0.75rem; color: #b8a9aa;
@@ -201,10 +206,10 @@ const CSS = `
     margin-top: 2rem;
   }
   .vb-branding-logo {
-    font-family: 'Noto Serif', serif;
-    font-size: 0.85rem; font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.9rem; font-style: italic;
     color: #9e8f90;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
   }
 
   /* ─── Floating decorations ─── */
@@ -252,8 +257,8 @@ const CSS = `
   @keyframes spin { to { transform: rotate(360deg); } }
   .vb-spinner {
     width: 44px; height: 44px;
-    border: 3px solid #f5f3ef;
-    border-top-color: #7b5455;
+    border: 3px solid rgba(200,130,140,0.15);
+    border-top-color: #a65d5d;
     border-radius: 50%;
     margin: 0 auto 1rem;
     animation: spin 0.8s linear infinite;
@@ -340,6 +345,17 @@ export default function ViewBouquet() {
         return;
       }
 
+      // Check localStorage first — preview bouquets (isPreview: true) are only
+      // stored locally, so we skip Firebase entirely to avoid permission errors.
+      const localData = getSharedBouquetFromLocalStorage(id);
+      if (localData?.isPreview) {
+        if (!cancelled) {
+          setShared(localData);
+          setIsLoading(false);
+        }
+        return;
+      }
+
       try {
         if (isFirebaseConfigured && db) {
           let snapshot;
@@ -359,11 +375,11 @@ export default function ViewBouquet() {
           }
         }
 
-        const localData = getSharedBouquetFromLocalStorage(id);
+        // Firebase had no document — fall back to localStorage (paid links saved locally)
         if (!cancelled) setShared(localData);
       } catch (error) {
-        console.error("Unable to read shared bouquet", error);
-        if (!cancelled) setShared(getSharedBouquetFromLocalStorage(id));
+        console.warn("Firebase read failed, using local data:", error.message);
+        if (!cancelled) setShared(localData);
       } finally {
         if (!cancelled) setIsLoading(false);
       }
@@ -373,6 +389,15 @@ export default function ViewBouquet() {
     return () => { cancelled = true; };
   }, [id]);
 
+  const [country] = useState(() => {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz === "Asia/Manila") return "PH";
+    } catch {}
+    return "GLOBAL";
+  });
+  const isPH = country === "PH";
+
   /* ── Loading ── */
   if (isLoading) {
     return (
@@ -381,11 +406,11 @@ export default function ViewBouquet() {
         <FloatingDecorations />
         <div className="vb-state-card envelope-reveal er-1">
           <div className="vb-spinner" />
-          <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.25rem", fontWeight: 400, color: "#3E2723" }}>
-            {t("viewBouquet.unwrapping", "Unwrapping your bouquet…")}
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", fontWeight: 500, color: "#3d3028" }}>
+            {isPH ? "Binubuksan ang iyong bouquet…" : t("viewBouquet.unwrapping", "Unwrapping your bouquet…")}
           </p>
-          <p style={{ fontSize: "0.78rem", color: "#9e8f90", marginTop: "0.5rem" }}>
-            {t("viewBouquet.someoneSpecialMade", "Someone special made this for you ✨")}
+          <p style={{ fontSize: "0.82rem", color: "#a65d5d", marginTop: "0.5rem" }}>
+            {isPH ? "May espesyal na taong gumawa nito para sa'yo ✨" : t("viewBouquet.someoneSpecialMade", "Someone special made this for you ✨")}
           </p>
         </div>
       </main>
@@ -399,22 +424,22 @@ export default function ViewBouquet() {
         <style>{CSS}</style>
         <div className="vb-state-card envelope-reveal er-1">
           <p style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>🥀</p>
-          <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.3rem", fontWeight: 400, color: "#3E2723", marginBottom: "0.5rem" }}>
-            {t("viewBouquet.bouquetNotFound", "Bouquet not found")}
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.6rem", fontWeight: 500, color: "#3d3028", marginBottom: "0.5rem" }}>
+            {isPH ? "Hindi nahanap ang bouquet" : t("viewBouquet.bouquetNotFound", "Bouquet not found")}
           </p>
-          <p style={{ fontSize: "0.82rem", color: "#6b5e5f", marginBottom: "1.25rem", lineHeight: 1.6 }}>
-            {t("viewBouquet.invalidLink", "This link may be invalid or expired.")}<br />
-            {t("viewBouquet.createFresh", "But you can always create a fresh one!")}
+          <p style={{ fontSize: "0.82rem", color: "#705f58", marginBottom: "1.25rem", lineHeight: 1.6 }}>
+            {isPH ? "Maaaring expired o mali ang link na ito." : t("viewBouquet.invalidLink", "This link may be invalid or expired.")}<br />
+            {isPH ? "Ngunit maaari kang gumawa ng bago!" : t("viewBouquet.createFresh", "But you can always create a fresh one!")}
           </p>
           <Link to="/" className="vb-cta-btn" style={{ display: "inline-flex" }}>
-            {t("viewBouquet.createBouquet", "Create a Bouquet 💐")}
+            {isPH ? "Gumawa ng Bouquet 💐" : t("viewBouquet.createBouquet", "Create a Bouquet 💐")}
           </Link>
         </div>
       </main>
     );
   }
 
-  const senderName = shared.senderName?.trim() || t("viewBouquet.someoneSpecial", "someone special");
+  const senderName = shared.senderName?.trim() || (isPH ? "isang espesyal na tao" : t("viewBouquet.someoneSpecial", "someone special"));
 
   /* ── Main view ── */
   return (
@@ -431,15 +456,18 @@ export default function ViewBouquet() {
         </div>
         <div className="vb-header envelope-reveal er-1">
           <h1 style={{
-            fontFamily: "'Noto Serif', serif",
-            fontSize: "1.65rem",
-            fontWeight: 400,
-            lineHeight: 1.3,
-            marginTop: "1.5rem",
-            color: "#3E2723",
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: "2.3rem",
+            fontWeight: 500,
+            lineHeight: 1.15,
+            marginTop: "1.25rem",
+            color: "#3d3028",
           }}>
-            {t("viewBouquet.someoneSentYouPrefix", "Someone sent you")}<br />
-            <em style={{ color: "#7b5455" }}>{t("viewBouquet.flowers", "flowers")}</em> 🌸
+            {isPH ? (
+              <>May nagpadala sa'yo ng<br /><em className="wd-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>bulaklak</em> 🌸</>
+            ) : (
+              <>{t("viewBouquet.someoneSentYouPrefix", "Someone sent you")}<br /><em className="wd-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>{t("viewBouquet.flowers", "flowers")}</em> 🌸</>
+            )}
           </h1>
         </div>
 
@@ -468,7 +496,9 @@ export default function ViewBouquet() {
           {/* ── Sender attribution ── */}
           <div className="vb-sender envelope-reveal er-4">
             <p className="vb-sender-line">
-              {t("viewBouquet.craftedWith", "Crafted with ")} <span style={{ color: "#e25555", margin: "0 3px" }}>♥</span> {t("viewBouquet.by", "by")}{" "}
+              {isPH ? "Ginawa nang may " : t("viewBouquet.craftedWith", "Crafted with ")}
+              <span style={{ color: "#e25555", margin: "0 3px" }}>♥</span>
+              {isPH ? " ni " : ` ${t("viewBouquet.by", "by")} `}
               <span className="vb-sender-name">{senderName}</span>
             </p>
           </div>
@@ -478,14 +508,14 @@ export default function ViewBouquet() {
         <div className="vb-cta-section envelope-reveal er-5">
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "center" }}>
             <Link to="/create?ref=bouquet_receiver" className="vb-cta-btn" style={{ width: "100%", maxWidth: "280px" }}>
-              {t("viewBouquet.makeBouquet", "Make a bouquet for someone 💐")}
+              {isPH ? "Gumawa ng bouquet para sa iba 💐" : t("viewBouquet.makeBouquet", "Make a bouquet for someone 💐")}
             </Link>
             <Link to="/create-cake?ref=bouquet_receiver" className="vb-cta-btn" style={{ width: "100%", maxWidth: "280px", background: "linear-gradient(135deg, #d94a78 0%, #f0a23f 180%)" }}>
-              {t("viewBouquet.makeCake", "Send a 3D Birthday Cake 🎂")}
+              {isPH ? "Magpadala ng 3D Birthday Cake 🎂" : t("viewBouquet.makeCake", "Send a 3D Birthday Cake 🎂")}
             </Link>
           </div>
           <p className="vb-cta-sub">
-            {t("viewBouquet.itsFree", "It's free, fun, and makes people smile ✨")}
+            {isPH ? "100% Libre, masaya, at nagpapangiti ✨" : t("viewBouquet.itsFree", "It's free, fun, and makes people smile ✨")}
           </p>
         </div>
 

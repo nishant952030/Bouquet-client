@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { flowers } from "../data/flowerCatalog";
 import { getCleanFlowerImageSrc } from "../lib/flowerImage";
 
-export default function FlowerPicker({ onPick, selectedFlower, layout = "row" }) {
+export default function FlowerPicker({ onPick, selectedFlower, layout = "row", isPH = false }) {
   const { t } = useTranslation();
   const isColumn = layout === "column";
   const [cleanedSrcMap, setCleanedSrcMap] = useState({});
@@ -25,18 +25,20 @@ export default function FlowerPicker({ onPick, selectedFlower, layout = "row" })
       <div className="mb-3 flex items-center gap-2">
         <span className="text-lg">🌸</span>
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-500">{t("create.step1Label", "Step 1")}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-rose-500">
+            {isPH ? "HAKBANG 1" : t("create.step1Label", "Step 1")}
+          </p>
           <p
             className="text-base font-light text-stone-800 leading-tight"
             style={{ fontFamily: '"Cormorant Garamond", serif' }}
           >
-            {t("create.pickYourStems", "Pick your stems")}
+            {isPH ? "Piliin ang iyong mga bulaklak" : t("create.pickYourStems", "Pick your stems")}
           </p>
         </div>
       </div>
 
       {flowers.length === 0 ? (
-        <p className="text-sm text-stone-500">{t("create.noFlowersFound", "No flower assets found.")}</p>
+        <p className="text-sm text-stone-500">{isPH ? "Walang nahanap na bulaklak." : t("create.noFlowersFound", "No flower assets found.")}</p>
       ) : (
         <div
           className={[
@@ -82,7 +84,9 @@ export default function FlowerPicker({ onPick, selectedFlower, layout = "row" })
       )}
 
       <p className="mt-2.5 text-[11px] text-stone-400 leading-relaxed">
-        {t("create.flowerHelpText", "Tap a flower to place it on your canvas. Tap again to add more.")}
+        {isPH
+          ? "I-tap ang bulaklak para ilagay sa canvas. I-tap ulit para magdagdag pa."
+          : t("create.flowerHelpText", "Tap a flower to place it on your canvas. Tap again to add more.")}
       </p>
     </div>
   );

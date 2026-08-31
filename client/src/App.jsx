@@ -28,6 +28,7 @@ import ViewPlushie from "./legacy-pages/ViewPlushie.jsx";
 import CreateShagun from "./legacy-pages/CreateShagun.jsx";
 import ShagunSuccess from "./legacy-pages/ShagunSuccess.jsx";
 import ClaimShagun from "./legacy-pages/ClaimShagun.jsx";
+import PhilippinesLanding from "./legacy-pages/PhilippinesLanding.jsx";
 
 import useDirection from "./hooks/useDirection.js";
 
@@ -64,6 +65,8 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/ph" element={<PhilippinesLanding />} />
+        <Route path="/philippines" element={<PhilippinesLanding />} />
         <Route path="/shagun" element={<CreateShagun />} />
         <Route path="/shagun/success/:id" element={<ShagunSuccess />} />
         <Route path="/claim/:id" element={<ClaimShagun />} />

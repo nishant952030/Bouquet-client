@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import ClientProviders from "./client-providers";
+import { getOrganizationAndWebsiteSchema } from "../src/lib/seoSchemas";
 
 export const metadata = {
   metadataBase: new URL("https://www.petalsandwords.com"),
@@ -41,9 +42,37 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const orgSchema = getOrganizationAndWebsiteSchema();
+
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var clean = function() {
+                    var el = document.querySelectorAll('[bis_skin_checked]');
+                    for (var i = 0; i < el.length; i++) el[i].removeAttribute('bis_skin_checked');
+                  };
+                  if (typeof MutationObserver !== 'undefined') {
+                    new MutationObserver(function(mutations) {
+                      for (var i = 0; i < mutations.length; i++) {
+                        var m = mutations[i];
+                        if (m.type === 'attributes' && m.attributeName === 'bis_skin_checked') {
+                          m.target.removeAttribute('bis_skin_checked');
+                        }
+                      }
+                    }).observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['bis_skin_checked'] });
+                  }
+                  clean();
+                  window.addEventListener('DOMContentLoaded', clean);
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
         {/* Preconnect to Font domains for zero-render blocking on 3G/4G */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -53,8 +82,16 @@ export default function RootLayout({ children }) {
         />
         {/* Preload critical visual logo asset with fetchpriority="high" */}
         <link rel="preload" href="/logo-transparent.png" as="image" fetchPriority="high" />
+
+        {/* Global Organization & WebSite JSON-LD Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(orgSchema),
+          }}
+        />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <ClientProviders>
           {children}
         </ClientProviders>

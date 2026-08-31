@@ -74,12 +74,12 @@ export default function MusicPlayer({ trackId }) {
       audio.pause();
       setIsPlaying(false);
     } else {
-      // Unmute if muted when clicking play, to ensure sound is heard
       if (audio.muted) {
         setMuteState(false);
         setIsMuted(false);
       }
-      audio.play().then(() => setIsPlaying(true)).catch(() => {});
+      playTrack(trackId);
+      setIsPlaying(true);
     }
   };
 

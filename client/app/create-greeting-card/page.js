@@ -1,4 +1,5 @@
 import LegacyAppShell from "../[...slug]/LegacyAppShell";
+import { getGreetingCardSchema } from "../../src/lib/seoSchemas";
 
 const BASE_URL = "https://www.petalsandwords.com";
 
@@ -27,7 +28,18 @@ export const metadata = {
   },
 };
 
-
 export default function CreateGreetingCardPage() {
-  return <LegacyAppShell />;
+  const schema = getGreetingCardSchema();
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(schema),
+        }}
+      />
+      <LegacyAppShell />
+    </>
+  );
 }

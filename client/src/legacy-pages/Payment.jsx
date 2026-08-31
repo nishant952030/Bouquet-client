@@ -59,31 +59,33 @@ function apiUrl(path) {
 
 /* -- CSS -- */
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Manrope:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; }
 
   .tip-root {
     font-family: 'Manrope', sans-serif;
     min-height: 100vh;
-    background: #fbf9f5;
+    background: linear-gradient(160deg, #fdf6f0 0%, #f8edf0 55%, #fdf0f5 100%);
     color: #3E2723;
   }
 
-  /* Header glass */
+  /* Glassmorphism header */
   .tip-header {
     position: sticky; top: 0; z-index: 40;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    background: rgba(251,249,245,0.88);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+    background: rgba(253,246,240,0.88);
+    border-bottom: 1px solid rgba(200,130,140,0.10);
+    box-shadow: 0 2px 20px rgba(200,100,120,0.06);
   }
 
   /* Animations */
   @keyframes fadeUp {
-    from { opacity:0; transform:translateY(18px); }
-    to   { opacity:1; transform:translateY(0); }
+    from { opacity:0; transform:translateY(18px) scale(0.97); }
+    to   { opacity:1; transform:translateY(0) scale(1); }
   }
-  .au   { animation: fadeUp .45s ease forwards; }
+  .au   { animation: fadeUp .5s cubic-bezier(0.34,1.3,0.64,1) forwards; }
   .au-1 { animation-delay:.05s; opacity:0; }
   .au-2 { animation-delay:.15s; opacity:0; }
   .au-3 { animation-delay:.25s; opacity:0; }
@@ -97,28 +99,31 @@ const CSS = `
   }
   .check-pop { animation: checkPop .5s cubic-bezier(.34,1.56,.64,1) forwards; }
 
-  /* Cards */
+  /* Glass cards */
   .vv-card {
-    background: #ffffff;
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.85);
     border-radius: 1.5rem;
-    box-shadow: 0 8px 32px rgba(27,28,26,0.06), 0 2px 6px rgba(27,28,26,0.04);
+    box-shadow: 0 8px 32px rgba(200,130,140,0.10), 0 2px 8px rgba(200,100,100,0.06);
     overflow: hidden;
   }
-  .vv-card-low { background: #f5f3ef; border-radius: 1.5rem; }
+  .vv-card-low { background: rgba(255,243,240,0.6); backdrop-filter: blur(12px); border-radius: 1.5rem; }
 
   .vv-label {
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.68rem; font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.65rem; font-weight: 800;
     letter-spacing: 0.22em; text-transform: uppercase;
-    color: #7b5455;
+    color: #a65d5d;
   }
 
   /* Tip amount buttons */
   .tip-btn {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     gap: 4px;
-    background: #f5f3ef;
-    border: 2px solid transparent;
+    background: rgba(255,255,255,0.7);
+    border: 2px solid rgba(200,130,140,0.18);
     border-radius: 1rem;
     padding: 0.85rem 0.5rem;
     cursor: pointer;
@@ -127,79 +132,77 @@ const CSS = `
     min-width: 0;
     flex: 1;
   }
-  .tip-btn:hover { border-color: #d2c3c4; background: #ffd9d8; }
-  .tip-btn.selected { border-color: #7b5455; background: #fff5f4; }
+  .tip-btn:hover { border-color: rgba(166,93,93,0.4); background: #fff5f4; transform: translateY(-1px); }
+  .tip-btn.selected { border-color: #a65d5d; background: #fff5f4; box-shadow: 0 0 0 3px rgba(166,93,93,0.12); }
   .tip-btn .tip-emoji { font-size: 1.3rem; line-height: 1; }
   .tip-btn .tip-amount { font-size: 0.92rem; font-weight: 700; color: #3E2723; }
 
-  /* Send tip button */
+  /* Shimmer send button — matches landing page */
+  @keyframes pw-pulse {
+    0%, 100% { box-shadow: 0 14px 34px rgba(124,63,79,0.28); }
+    50%       { box-shadow: 0 14px 34px rgba(124,63,79,0.48), 0 0 0 10px rgba(124,63,79,0); }
+  }
   .tip-cta {
-    width: 100%; min-height: 52px;
+    width: 100%; min-height: 54px;
     border-radius: 9999px;
-    background: linear-gradient(135deg, #7b5455 0%, #ffd9d8 160%);
+    background: linear-gradient(135deg, #a65d5d 0%, #7c3f4f 100%);
     color: #ffffff;
     border: none;
-    font-family: 'Manrope', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     font-size: 0.88rem; font-weight: 700;
     letter-spacing: 0.08em; text-transform: uppercase;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    transition: all 0.18s ease;
-    box-shadow: 0 12px 36px rgba(123,84,85,0.22);
+    transition: transform 0.18s ease;
+    animation: pw-pulse 2.5s infinite;
   }
-  .tip-cta:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 18px 44px rgba(123,84,85,0.3);
-  }
+  .tip-cta:hover:not(:disabled) { transform: translateY(-2px); }
   .tip-cta:active:not(:disabled) { transform: scale(0.98); }
-  .tip-cta:disabled { background: #e4e2de; color: #9e8f90; cursor: not-allowed; box-shadow: none; }
-  @keyframes tipSpin {
-    to { transform: rotate(360deg); }
-  }
+  .tip-cta:disabled { background: #e4e2de; color: #9e8f90; cursor: not-allowed; box-shadow: none; animation: none; }
+  @keyframes tipSpin { to { transform: rotate(360deg); } }
   .tip-spinner {
-    width: 15px;
-    height: 15px;
+    width: 15px; height: 15px;
     border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.45);
-    border-top-color: #ffffff;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
     animation: tipSpin 0.8s linear infinite;
   }
 
-  /* Success share card */
+  /* Share URL box */
   .share-url-box {
-    background: #f5f3ef; border: none;
+    background: rgba(255,243,240,0.7); border: none;
     border-radius: 0.875rem; padding: 12px 16px;
     word-break: break-all; font-size: 13px;
     color: #7b5455; line-height: 1.5;
     font-family: 'Manrope', monospace;
   }
 
-  /* Copy / WhatsApp buttons */
+  /* Share buttons */
   .share-btn {
     flex: 1; border-radius: 0.875rem; padding: 0.75rem;
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.78rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.08em;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.75rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
     border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: all 0.15s;
+    transition: all 0.18s;
   }
   .share-btn:active { transform: scale(0.97); }
+  .share-btn:hover { transform: translateY(-1px); }
 
   /* Ghost btn */
   .vv-btn-ghost {
     display: inline-flex; align-items: center; gap: 6px;
-    background: transparent;
-    color: #7b5455;
-    font-family: 'Manrope', sans-serif;
+    background: rgba(255,255,255,0.7);
+    color: #7c4343;
+    font-family: 'Montserrat', sans-serif;
     font-size: 0.78rem; font-weight: 600;
-    border: 1.5px solid rgba(210,195,196,0.5);
-    border-radius: 9999px;
+    border: 1.5px solid rgba(124,67,67,0.22); border-radius: 9999px;
     padding: 0.35rem 0.9rem;
-    cursor: pointer; transition: background 0.15s, border-color 0.15s;
+    cursor: pointer; transition: all 0.15s;
     text-decoration: none;
   }
-  .vv-btn-ghost:hover { background: #ffd9d8; border-color: #7b5455; }
+  .vv-btn-ghost:hover { background: #ffd9d8; border-color: #7c4343; transform: translateY(-1px); }
 
   /* Thank-you pop */
   @keyframes thankYouPop {
@@ -230,6 +233,7 @@ export default function Payment() {
   const stems = location.state?.stems ?? pendingCheckout?.stems ?? checkoutDraft?.stems ?? [];
   const note = location.state?.note ?? pendingCheckout?.note ?? checkoutDraft?.note ?? "";
   const initName = location.state?.senderName ?? pendingCheckout?.senderName ?? checkoutDraft?.senderName ?? "";
+  const musicTrack = location.state?.musicTrack ?? pendingCheckout?.musicTrack ?? checkoutDraft?.musicTrack ?? "none";
 
   const hasBouquetData = stems.length > 0 || countWords(note) > 0;
   const flowerCount = stems.length;
@@ -242,6 +246,9 @@ export default function Payment() {
   const [statusMsg, setStatusMsg] = useState("");
   const [showAnonModal, setShowAnonModal] = useState(false);
 
+  /* -- Stable preview ID: generated once, reused for the real share URL after payment -- */
+  const previewId = useMemo(() => `${Date.now()}${Math.random().toString(36).slice(2, 8)}`, []);
+
   /* Tip jar state */
   const [countryCode, setCountryCode] = useState(() => getLikelyCountryFromClient());
   const [isDetectingCountry, setIsDetectingCountry] = useState(true);
@@ -252,6 +259,7 @@ export default function Payment() {
 
   const razorpayKeyId = process.env.VITE_RAZORPAY_KEY_ID;
   const isIndia = countryCode === "IN";
+  const isPhilippines = countryCode === "PH";
   const currentTip = isIndia ? TIP_PRESET_INR : TIP_PRESET_USD;
 
   /* -- Detect country -- */
@@ -284,41 +292,76 @@ export default function Payment() {
     });
   }, []);
 
-  /* -- Save bouquet & generate link only after payment -- */
+  /* -- Write preview payload to localStorage as soon as bouquet data is available -- */
+  useEffect(() => {
+    if (!hasBouquetData) return;
+    const previewPayload = {
+      stems,
+      note,
+      senderName: senderName.trim(),
+      musicTrack,
+      plan: "preview",
+      isPreview: true,
+      createdAt: new Date().toISOString(),
+    };
+    try {
+      localStorage.setItem(`bouquet_share_${previewId}`, JSON.stringify(previewPayload));
+    } catch { /* localStorage full */ }
+
+    // Cleanup: remove the preview entry when user leaves without paying
+    return () => {
+      // Only remove if payment hasn't happened (shareUrl stays empty)
+      // We use a ref-like trick: read directly from storage
+      try {
+        const stored = localStorage.getItem(`bouquet_share_${previewId}`);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed?.isPreview) localStorage.removeItem(`bouquet_share_${previewId}`);
+        }
+      } catch { /* ignore */ }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewId, hasBouquetData, musicTrack]);
+
+  /* -- Save bouquet & generate permanent link after payment (reuses previewId) -- */
   const generateShareLink = useCallback(async (provider = "") => {
     if (!hasBouquetData || shareUrl) return false;
     setIsSaving(true);
-    const id = `${Date.now()}${Math.random().toString(36).slice(2, 8)}`;
+
+    // Upgrade the preview entry to a paid entry using the same ID
+    // so the URL the user already previewed becomes the real share link
     const payload = {
       stems,
       note,
       senderName: senderName.trim(),
+      musicTrack,
       plan: "paid",
+      isPreview: false,
       createdAt: new Date().toISOString(),
     };
 
     // Firebase save is best-effort (non-blocking)
     if (isFirebaseConfigured && db) {
-      setDoc(doc(db, "bouquets", id), payload).catch((err) => {
+      setDoc(doc(db, "bouquets", previewId), payload).catch((err) => {
         console.warn("Firebase save failed (non-fatal):", err.message);
       });
     }
 
-    // Always save locally and generate the share link
+    // Upgrade localStorage entry from preview → paid
     try {
-      localStorage.setItem(`bouquet_share_${id}`, JSON.stringify(payload));
+      localStorage.setItem(`bouquet_share_${previewId}`, JSON.stringify(payload));
       localStorage.removeItem(PENDING_KEY);
       clearCheckoutDraft();
     } catch {
       // localStorage full edge case
     }
 
-    const url = `${window.location.origin}/view/${id}`;
+    const url = `${window.location.origin}/view/${previewId}`;
     setShareUrl(url);
     setIsSaving(false);
     trackEv("bouquet_shared_paid", { flowerCount, wordCount, provider });
     return true;
-  }, [flowerCount, hasBouquetData, note, senderName, shareUrl, stems, wordCount]);
+  }, [flowerCount, hasBouquetData, note, previewId, senderName, shareUrl, stems, wordCount]);
 
   /* -- Copy link -- */
   const copyLink = async () => {
@@ -505,11 +548,15 @@ export default function Payment() {
               }}>
                 ✓
               </div>
-              <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.65rem", fontWeight: 400, lineHeight: 1.25, marginBottom: "0.4rem" }}>
-                {t("payment.liveHeadlinePrefix", "Your bouquet is ")} <em style={{ color: "#7b5455" }}>{t("payment.liveHeadlineSuffix", "live!")}</em>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.1rem", fontWeight: 500, lineHeight: 1.2, marginBottom: "0.4rem", color: "#3d3028" }}>
+                {isPhilippines ? (
+                  <>Handa na ang iyong <em className="wd-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>bouquet!</em></>
+                ) : (
+                  <>{t("payment.liveHeadlinePrefix", "Your bouquet is ")} <em className="wd-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>{t("payment.liveHeadlineSuffix", "live!")}</em></>
+                )}
               </h1>
-              <p style={{ fontSize: "0.85rem", color: "#6b5e5f" }}>
-                {t("payment.liveDesc", "Share your bouquet link below")}
+              <p style={{ fontSize: "0.85rem", color: "#705f58" }}>
+                {isPhilippines ? "I-share ang link sa iyong minamahal sa ibaba" : t("payment.liveDesc", "Share your bouquet link below")}
               </p>
             </div>
 
@@ -517,27 +564,42 @@ export default function Payment() {
             <div className="vv-card au au-2" style={{ padding: "1.25rem", marginBottom: "1rem" }}>
               <p className="vv-label" style={{ marginBottom: "0.6rem" }}>{t("payment.yourShareLink", "Your share link")}</p>
               <div className="share-url-box" style={{ marginBottom: "0.75rem" }}>{shareUrl}</div>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                 <button onClick={copyLink} className="share-btn" style={{
-                  background: copied ? "#166534" : "#7b5455",
-                  color: "#fff",
+                  background: copied ? "#166534" : "linear-gradient(135deg, #a65d5d, #7c3f4f)",
+                  color: "#fff", flex: "1 1 120px", minHeight: "44px",
                 }}>
-                  {copied ? t("common.copied", "Copied") : t("common.copyLink", "Copy link")}
+                  {copied ? (isPhilippines ? "Na-copy na! ✓" : t("common.copied", "Copied")) : (isPhilippines ? "Kopyahin ang Link" : t("common.copyLink", "Copy link"))}
                 </button>
                 <a
                   href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
-                    `Here's a bouquet I made for you ${shareUrl}`
+                    isPhilippines ? `May munting bouquet akong ginawa para sa'yo! 🌸 ${shareUrl}` : `Here's a bouquet I made for you ${shareUrl}`
                   )}`}
                   target="_blank" rel="noreferrer"
                   className="share-btn"
-                  style={{ background: "#25D366", color: "#fff", textDecoration: "none" }}
+                  style={{ background: "#25D366", color: "#fff", textDecoration: "none", flex: "1 1 120px", minHeight: "44px" }}
                 >
                   <svg style={{ width: 16, height: 16 }} viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                     <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.527 5.845L.057 23.272a.75.75 0 00.914.914l5.427-1.47A11.953 11.953 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.713 9.713 0 01-5.2-1.501l-.373-.221-3.87 1.048 1.048-3.834-.241-.385A9.713 9.713 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z" />
                   </svg>
-                  {t("payment.whatsapp", "WhatsApp")}
+                  {isPhilippines ? "WhatsApp" : t("payment.whatsapp", "WhatsApp")}
                 </a>
+                {typeof navigator !== "undefined" && typeof navigator.share === "function" && (
+                  <button
+                    onClick={() => {
+                      navigator.share({
+                        title: "Petals & Words",
+                        text: isPhilippines ? "May munting bouquet akong ginawa para sa'yo! 🌸" : "Here's a bouquet I made for you 🌸",
+                        url: shareUrl,
+                      }).catch(() => {});
+                    }}
+                    className="share-btn"
+                    style={{ background: "linear-gradient(135deg, #0084FF, #00C6FF)", color: "#fff", flex: "1 1 100%", minHeight: "42px" }}
+                  >
+                    💬 {isPhilippines ? "I-share sa Messenger / Apps" : "Share via Apps"}
+                  </button>
+                )}
               </div>
 
               {/* ── Anonymous Delivery CTA ── */}
@@ -567,7 +629,7 @@ export default function Payment() {
                 onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
                 onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
               >
-                🕵️ Send Anonymously to Their WhatsApp — ₹49
+                🕵️ Send Anonymously to Their WhatsApp — {currentTip.display}
               </button>
             </div>
           </>
@@ -575,17 +637,22 @@ export default function Payment() {
           <div className="au au-1" style={{ textAlign: "center", marginBottom: "1.25rem" }}>
             <div style={{
               width: 64, height: 64, borderRadius: "9999px", margin: "0 auto 1rem",
-              background: "linear-gradient(135deg, #fef3c7, #fde68a)",
+              background: "linear-gradient(135deg, #fff5f4, #ffd9d8)",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: "1.75rem",
+              boxShadow: "0 8px 24px rgba(123,84,85,0.15)",
             }}>
-              🔒
+              💌
             </div>
-            <h1 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.65rem", fontWeight: 400, lineHeight: 1.25, marginBottom: "0.4rem" }}>
-              {t("payment.readyHeadlinePrefix", "Your bouquet is ")} <em style={{ color: "#7b5455" }}>{t("payment.readyHeadlineSuffix", "ready!")}</em>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.2rem", fontWeight: 500, lineHeight: 1.2, marginBottom: "0.4rem", color: "#3d3028" }}>
+              {isPhilippines ? (
+                <>Napakaganda ng <em className="wd-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>bouquet mo!</em></>
+              ) : (
+                <>Your bouquet is <em className="wd-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>beautiful!</em></>
+              )}
             </h1>
-            <p style={{ fontSize: "0.85rem", color: "#6b5e5f" }}>
-              {t("payment.completePayment")}
+            <p style={{ fontSize: "0.85rem", color: "#705f58" }}>
+              {isPhilippines ? "Isang hakbang na lang para makuha ang iyong share link" : "One last step to get your shareable link"}
             </p>
           </div>
         )}
@@ -620,31 +687,66 @@ export default function Payment() {
         {/* -- Mandatory payment card -- */}
         {!tipDone ? (
           <div className="vv-card au au-4" style={{ padding: "1.5rem 1.25rem", marginBottom: "1rem", textAlign: "center" }}>
-            {/* Payment icon */}
-            <div style={{ position: "relative", display: "inline-block", marginBottom: "0.5rem" }}>
-              <span style={{ fontSize: "2.2rem" }}>🔒</span>
+            {/* Celebration icon — NOT a padlock */}
+            <div style={{ position: "relative", display: "inline-block", marginBottom: "0.75rem" }}>
+              <span style={{ fontSize: "2.5rem" }}>💐</span>
             </div>
-            <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.25rem", fontWeight: 400, marginBottom: "0.3rem" }}>
-              {t("payment.completePaymentHeading", "Complete Payment")}
+            <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.3rem", fontWeight: 400, marginBottom: "0.3rem", color: "#3E2723" }}>
+              {isPhilippines ? "Kaunti na lang — gawing totoo" : "Almost there — make it real"}
             </h2>
-            <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.8rem" }}>
-              <a href="https://razorpay.com/" target="_blank" rel="noreferrer">
-                <img
-                  referrerPolicy="origin"
-                  src="https://badges.razorpay.com/badge-dark.png"
-                  style={{ height: 45, width: 113 }}
-                  alt="Razorpay | Payment Gateway | Neobank"
-                  loading="lazy"
-                />
-              </a>
-            </div>
-            <p style={{ fontSize: "0.82rem", color: "#6b5e5f", lineHeight: 1.6, marginBottom: "1.25rem" }}>
-              {t("payment.paySmallAmount", "Pay a small amount to generate your unique share link.")}<br />
-              {t("payment.savedAfterPayment", "Your bouquet will be saved after payment.")}
+            <p style={{ fontSize: "0.82rem", color: "#6b5e5f", lineHeight: 1.65, marginBottom: "1.25rem", maxWidth: 300, margin: "0 auto 1.25rem" }}>
+              {isPhilippines
+                ? "Ang maliit na suporta ay nagpapanatili sa serbisyong ito at nag-aunlock ng iyong permanenteng share link — handang ipadala sa Messenger o WhatsApp!"
+                : "A small contribution keeps this platform alive and unlocks your permanent share link — ready to send in seconds."}
             </p>
 
+            {/* Trust pills */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center", marginBottom: "1.25rem" }}>
+              {(isPhilippines
+                ? ["🔒 Isang beses lang", "⚡ Handa agad ang link", "📵 Walang subscription"]
+                : ["🔒 One-time only", "⚡ Link ready instantly", "📵 No subscription"]
+              ).map(pill => (
+                <span key={pill} style={{
+                  fontSize: "0.7rem", fontWeight: 700, color: "#7b5455",
+                  background: "#fff5f4", border: "1px solid #ffd9d8",
+                  borderRadius: "9999px", padding: "0.25rem 0.75rem",
+                  letterSpacing: "0.04em"
+                }}>{pill}</span>
+              ))}
+            </div>
 
-            {/* Pay button — Razorpay for all countries */}
+            {/* 👁 Free preview link */}
+            {hasBouquetData && (
+              <div style={{ marginBottom: "1rem" }}>
+                <a
+                  href={`/view/${previewId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => trackEv("preview_opened", { previewId })}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "6px",
+                    fontSize: "0.8rem", fontWeight: 600,
+                    color: "#7b5455",
+                    background: "#fff5f4",
+                    border: "1.5px solid #ffd9d8",
+                    borderRadius: "9999px",
+                    padding: "0.45rem 1.1rem",
+                    textDecoration: "none",
+                    transition: "background 0.15s, border-color 0.15s",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "#ffd9d8"; e.currentTarget.style.borderColor = "#7b5455"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "#fff5f4"; e.currentTarget.style.borderColor = "#ffd9d8"; }}
+                >
+                  {isPhilippines ? "👁 Silipin ang kanilang makikita →" : "👁 Preview what they'll see →"}
+                </a>
+                <p style={{ fontSize: "0.68rem", color: "#b8a9aa", marginTop: "0.4rem" }}>
+                  {isPhilippines ? "Magbubukas sa bagong tab — walang bayad" : "Opens in a new tab — no payment needed"}
+                </p>
+              </div>
+            )}
+
+            {/* Pay button */}
             {isDetectingCountry ? (
               <p style={{ fontSize: "0.78rem", color: "#9e8f90" }}>{t("payment.loadingPayment", "Loading payment option...")}</p>
             ) : (
@@ -657,10 +759,12 @@ export default function Payment() {
                 {isTipping ? (
                   <>
                     <span className="tip-spinner" />
-                    {t("payment.processingPayment", "Processing payment...")}
+                    {isPhilippines ? "Pinoproseso ang pagbabayad..." : t("payment.processingPayment", "Processing payment...")}
                   </>
                 ) : (
-                  t("payment.payButton", "Pay {{amount}} to get link", { amount: currentTip.display })
+                  <>
+                    ✨ {isPhilippines ? `Magbayad ng ${currentTip.display} para makuha ang link` : t("payment.payButton", "Pay {{amount}} to get link", { amount: currentTip.display })}
+                  </>
                 )}
               </button>
             )}
@@ -670,16 +774,14 @@ export default function Payment() {
             )}
 
             {!isDetectingCountry && (
-              <div style={{ marginTop: "0.75rem", fontSize: "0.74rem", color: "#7b5455", lineHeight: 1.5 }}>
-                {isIndia
-                  ? t("payment.trustedCheckoutIn", "Trusted checkout via Razorpay. Card, UPI, and wallets supported.")
-                  : t("payment.trustedCheckoutOther", "Trusted checkout via Razorpay. International cards are supported and charged in USD.")}
+              <div style={{ marginTop: "0.85rem", fontSize: "0.72rem", color: "#9e8f90", lineHeight: 1.6 }}>
+                {isPhilippines
+                  ? "Secure checkout · GCash & Maya accepted via Razorpay · Walang recurring charges"
+                  : isIndia
+                  ? "Secure checkout via Razorpay · Card, UPI & wallets · No recurring charges"
+                  : "Secure checkout via Razorpay · International cards accepted · Charged in USD · No recurring charges"}
               </div>
             )}
-
-            <p style={{ fontSize: "0.7rem", color: "#c4b5b6", marginTop: "0.75rem" }}>
-              {t("payment.paymentRequired", "Payment is required to unlock your share link")}
-            </p>
           </div>
         ) : (
           /* -- Thank you state -- */
@@ -689,11 +791,12 @@ export default function Payment() {
           }}>
             <span style={{ fontSize: "2.5rem", display: "block", marginBottom: "0.5rem" }}>💖</span>
             <h2 style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.35rem", fontWeight: 400, marginBottom: "0.3rem", color: "#7b5455" }}>
-              {t("payment.thankYouHeadline", "Thank you so much!")}
+              {isPhilippines ? "Maraming salamat!" : t("payment.thankYouHeadline", "Thank you so much!")}
             </h2>
             <p style={{ fontSize: "0.85rem", color: "#6b5e5f", lineHeight: 1.6 }}>
-              {t("payment.supportMeansWorld", "Your support means the world to me.")}<br />
-              {t("payment.enjoySpreadingLove", "Enjoy spreading love with your bouquets.")}
+              {isPhilippines
+                ? "Napakalaking tulong ng iyong suporta sa amin. Enjoy sa pagpapadala ng pagmamahal gamit ang iyong mga bouquet!"
+                : `${t("payment.supportMeansWorld", "Your support means the world to me.")} ${t("payment.enjoySpreadingLove", "Enjoy spreading love with your bouquets.")}`}
             </p>
           </div>
         )}
@@ -712,17 +815,19 @@ export default function Payment() {
         {tipDone && (
           <div className="au au-5 vv-card" style={{ padding: "1.25rem", marginBottom: "1rem", textAlign: "center", background: "linear-gradient(135deg, #fff 0%, #fef5f5 100%)", border: "1px solid #ffd9d8" }}>
             <h3 style={{ margin: "0 0 0.5rem 0", color: "#7b5455", fontFamily: "'Noto Serif', serif", fontSize: "1.1rem" }}>
-              Also celebrating a birthday? 🎂
+              {isPhilippines ? "May nagbi-birthday ba? 🎂" : "Also celebrating a birthday? 🎂"}
             </h3>
             <p style={{ fontSize: "0.82rem", color: "#6b5e5f", marginBottom: "1rem" }}>
-              Send them a custom 3D Virtual Cake with a special message.
+              {isPhilippines
+                ? "Padalhan sila ng customized 3D Virtual Cake na may espesyal na mensahe."
+                : "Send them a custom 3D Virtual Cake with a special message."}
             </p>
             <Link to="/create-cake" style={{
               display: "inline-block", background: "linear-gradient(135deg, #d94a78 0%, #f0a23f 180%)", color: "#fff",
               padding: "0.6rem 1.25rem", borderRadius: "99px", textDecoration: "none",
               fontWeight: 600, fontSize: "0.85rem", boxShadow: "0 4px 12px rgba(217, 74, 120, 0.2)"
             }}>
-              Build a Cake
+              {isPhilippines ? "Gumawa ng Cake" : "Build a Cake"}
             </Link>
           </div>
         )}
@@ -730,7 +835,7 @@ export default function Payment() {
         {/* -- Back to create -- */}
         <div className="au au-5" style={{ textAlign: "center", paddingTop: "0.5rem" }}>
           <Link to="/create" style={{ fontSize: "0.78rem", color: "#9e8f90", textDecoration: "underline", textUnderlineOffset: "3px" }}>
-            {t("payment.createAnother", "Create another bouquet")}
+            {isPhilippines ? "Gumawa ng isa pang bouquet" : t("payment.createAnother", "Create another bouquet")}
           </Link>
         </div>
 

@@ -19,6 +19,7 @@ export default function ClientProviders({ children }) {
   if (!i18nReady) {
     return (
       <div
+        suppressHydrationWarning
         style={{
           minHeight: "100vh",
           display: "flex",
@@ -38,6 +39,7 @@ export default function ClientProviders({ children }) {
     <Suspense
       fallback={
         <div
+          suppressHydrationWarning
           style={{
             minHeight: "100vh",
             display: "flex",

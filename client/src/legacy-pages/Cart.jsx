@@ -34,81 +34,95 @@ import { applySeo } from "../lib/seo";
 const API_BASE_URL = String(process.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
 
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
   *,*::before,*::after{box-sizing:border-box}
-  .cart-root{min-height:100vh;background:#fbf9f5;color:#2f2824;font-family:'Manrope',sans-serif}
-  .cart-header{position:sticky;top:0;z-index:30;background:rgba(251,249,245,.9);backdrop-filter:blur(18px);border-bottom:1px solid rgba(97,75,61,.08)}
+
+  .cart-root{min-height:100vh;background:linear-gradient(160deg,#fdf6f0 0%,#f8edf0 55%,#fdf0f5 100%);color:#3E2723;font-family:'Manrope',sans-serif}
+
+  .cart-header{position:sticky;top:0;z-index:30;background:rgba(253,246,240,0.88);backdrop-filter:blur(22px);border-bottom:1px solid rgba(200,130,140,0.10);box-shadow:0 2px 20px rgba(200,100,120,0.06)}
   .cart-header-inner{max-width:980px;margin:0 auto;padding:.75rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
-  .cart-logo{height:30px;width:auto}
+  .cart-logo{height:32px;width:auto}
   .cart-header-actions{display:flex;align-items:center;gap:.6rem}
+
   .cart-shell{max-width:980px;margin:0 auto;padding:1.25rem 1rem 7rem}
   .cart-top{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin:1.2rem 0 1rem}
-  .cart-kicker{display:inline-flex;align-items:center;gap:.4rem;color:#7b5455;font-size:.72rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-bottom:.35rem}
-  .cart-title{font-family:'Noto Serif',serif;font-size:clamp(1.7rem,4vw,2.45rem);line-height:1.1;font-weight:500;margin:0;color:#312722}
+  .cart-kicker{display:inline-flex;align-items:center;gap:.4rem;color:#a65d5d;font-family:'Montserrat',sans-serif;font-size:.7rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;margin-bottom:.35rem}
+  .cart-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4.5vw,2.7rem);line-height:1.15;font-weight:500;margin:0;color:#3d3028}
   .cart-copy{font-size:.9rem;color:#705f58;margin:.45rem 0 0;max-width:560px;line-height:1.6}
-  .cart-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:1rem;align-items:start}
-  .cart-panel,.cart-item,.cart-empty{background:#fff;border:1px solid rgba(97,75,61,.09);border-radius:8px;box-shadow:0 10px 28px rgba(46,35,28,.05)}
+
+  .cart-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:1.25rem;align-items:start}
+  .cart-panel,.cart-item,.cart-empty{background:rgba(255,255,255,0.82);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.85);border-radius:1.5rem;box-shadow:0 8px 32px rgba(200,130,140,0.10)}
   .cart-list{display:flex;flex-direction:column;gap:.75rem}
-  .cart-item{padding:1rem;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.85rem;align-items:center}
-  .cart-icon{width:44px;height:44px;border-radius:8px;background:#fff3e7;color:#7b5455;display:grid;place-items:center;flex:none}
-  .cart-item h2{font-size:.98rem;margin:0;color:#312722;line-height:1.3}
-  .cart-item p{font-size:.78rem;margin:.25rem 0 0;color:#7b6b64;line-height:1.45}
-  .cart-price{font-size:.86rem;font-weight:800;color:#7b5455;white-space:nowrap;text-align:right}
-  .cart-remove{width:38px;height:38px;border:1px solid rgba(127,86,80,.16);border-radius:8px;background:#fff;color:#9a4b4b;display:grid;place-items:center;cursor:pointer}
-  .cart-remove:hover{background:#fff3f1}
-  .cart-summary{padding:1rem;position:sticky;top:78px;display:block}
-  .cart-summary h2{font-family:'Noto Serif',serif;font-size:1.25rem;font-weight:500;margin:0 0 .85rem}
-  .cart-row{display:flex;justify-content:space-between;gap:1rem;font-size:.86rem;color:#6b5e58;padding:.5rem 0;border-bottom:1px solid rgba(97,75,61,.08)}
+  .cart-item{padding:1.25rem;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:1rem;align-items:center}
+  .cart-icon{width:48px;height:48px;border-radius:1rem;background:linear-gradient(135deg,#fff5f4,#ffd9d8);color:#a65d5d;display:grid;place-items:center;flex:none;font-size:1.4rem}
+  .cart-item h2{font-family:'Montserrat',sans-serif;font-size:.95rem;font-weight:700;margin:0;color:#3d3028;line-height:1.3}
+  .cart-item p{font-size:.8rem;margin:.25rem 0 0;color:#705f58;line-height:1.45}
+  .cart-price{font-family:'Montserrat',sans-serif;font-size:.92rem;font-weight:800;color:#a65d5d;white-space:nowrap;text-align:right}
+  .cart-remove{width:36px;height:36px;border:1px solid rgba(166,93,93,0.2);border-radius:50%;background:rgba(255,255,255,0.8);color:#a65d5d;display:grid;place-items:center;cursor:pointer;transition:all .18s}
+  .cart-remove:hover{background:#ffd9d8;transform:scale(1.05)}
+
+  .cart-summary{padding:1.5rem;position:sticky;top:78px;display:block}
+  .cart-summary h2{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:500;margin:0 0 .85rem;color:#3d3028}
+  .cart-row{display:flex;justify-content:space-between;gap:1rem;font-size:.86rem;color:#705f58;padding:.5rem 0;border-bottom:1px solid rgba(200,130,140,0.12)}
   .cart-total{display:flex;justify-content:space-between;gap:1rem;align-items:flex-end;padding:1rem 0 .85rem}
-  .cart-total span{font-size:.78rem;color:#7b6b64;text-transform:uppercase;letter-spacing:.12em;font-weight:800}
-  .cart-total strong{font-size:1.55rem;color:#312722}
-  .cart-btn{min-height:44px;border:0;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-family:'Manrope',sans-serif;font-size:.88rem;font-weight:800;cursor:pointer;text-decoration:none;transition:transform .16s ease,box-shadow .16s ease}
+  .cart-total span{font-family:'Montserrat',sans-serif;font-size:.72rem;color:#a65d5d;text-transform:uppercase;letter-spacing:.14em;font-weight:800}
+  .cart-total strong{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;color:#7c3f4f}
+
+  @keyframes pw-pulse {
+    0%, 100% { box-shadow: 0 14px 34px rgba(124,63,79,0.28); }
+    50%       { box-shadow: 0 14px 34px rgba(124,63,79,0.48), 0 0 0 10px rgba(124,63,79,0); }
+  }
+  .cart-btn{min-height:50px;border:0;border-radius:9999px;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:transform .18s ease}
   .cart-btn:active{transform:scale(.98)}
-  .cart-btn-primary{width:100%;background:#7b5455;color:#fff;box-shadow:0 14px 30px rgba(123,84,85,.2)}
-  .cart-btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 18px 38px rgba(123,84,85,.26)}
-  .cart-btn-primary:disabled{background:#d8ccca;color:#8d817e;cursor:not-allowed;box-shadow:none}
-  .cart-btn-ghost{border:1px solid rgba(123,84,85,.18);background:#fff;color:#7b5455;padding:.55rem .85rem}
-  .cart-btn-soft{background:#fff3e7;color:#7b5455;padding:.7rem .9rem;width:100%;border:1px solid rgba(123,84,85,.12)}
+  .cart-btn-primary{width:100%;background:linear-gradient(135deg,#a65d5d 0%,#7c3f4f 100%);color:#fff;animation:pw-pulse 2.5s infinite}
+  .cart-btn-primary:hover:not(:disabled){transform:translateY(-2px)}
+  .cart-btn-primary:disabled{background:#e4e2de;color:#9e8f90;cursor:not-allowed;box-shadow:none;animation:none}
+  .cart-btn-ghost{border:1.5px solid rgba(124,67,67,0.22);background:rgba(255,255,255,0.7);color:#7c4343;padding:.4rem .9rem;border-radius:9999px;font-size:.78rem;font-weight:600}
+  .cart-btn-ghost:hover{background:#ffd9d8;border-color:#7c4343}
+  .cart-btn-soft{background:#fff5f4;color:#a65d5d;padding:.7rem .9rem;width:100%;border:1px solid rgba(200,130,140,0.2);border-radius:9999px}
   .cart-add-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;margin-top:1rem}
-  .cart-status{border-radius:8px;background:#fff5ef;color:#7b5455;padding:.75rem .85rem;font-size:.8rem;line-height:1.5;margin-top:.75rem}
-  .cart-empty{padding:2rem 1.25rem;text-align:center}
-  .cart-empty-icon{width:58px;height:58px;margin:0 auto .9rem;border-radius:8px;background:#fff3e7;color:#7b5455;display:grid;place-items:center}
-  .cart-empty h1{font-family:'Noto Serif',serif;font-size:1.45rem;font-weight:500;margin:0 0 .35rem}
-  .cart-empty p{font-size:.86rem;color:#6b5e58;line-height:1.6;margin:0 auto 1rem;max-width:360px}
+  .cart-status{border-radius:.875rem;background:#fff5f4;color:#a65d5d;padding:.75rem .85rem;font-size:.8rem;line-height:1.5;margin-top:.75rem;border:1px solid rgba(200,130,140,0.2)}
+  .cart-empty{padding:2.5rem 1.5rem;text-align:center}
+  .cart-empty-icon{width:64px;height:64px;margin:0 auto 1rem;border-radius:1.25rem;background:linear-gradient(135deg,#fff5f4,#ffd9d8);color:#a65d5d;display:grid;place-items:center;font-size:1.8rem}
+  .cart-empty h1{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:500;margin:0 0 .35rem;color:#3d3028}
+  .cart-empty p{font-size:.86rem;color:#705f58;line-height:1.6;margin:0 auto 1.25rem;max-width:360px}
   .cart-success{max-width:560px;margin:2rem auto 0;text-align:center}
-  .cart-share-box{background:#fff;border:1px solid rgba(97,75,61,.1);border-radius:8px;box-shadow:0 10px 28px rgba(46,35,28,.05);padding:1rem;text-align:left;margin:1rem 0}
-  .cart-url{background:#f7f0ea;border-radius:8px;color:#6f4748;word-break:break-all;padding:.8rem;font-size:.82rem;line-height:1.45;margin:.7rem 0}
+  .cart-share-box{background:rgba(255,255,255,0.85);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.85);border-radius:1.5rem;box-shadow:0 8px 32px rgba(200,130,140,0.10);padding:1.25rem;text-align:left;margin:1rem 0}
+  .cart-url{background:rgba(255,243,240,0.7);border-radius:.875rem;color:#7b5455;word-break:break-all;padding:.85rem 1rem;font-size:.84rem;line-height:1.5;margin:.75rem 0;font-family:'Manrope',monospace}
   .cart-share-actions{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
   .cart-spinner{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;animation:cartSpin .8s linear infinite}
   @keyframes cartSpin{to{transform:rotate(360deg)}}
+
   /* --- Add another gift panel --- */
-  .cart-add-panel{background:#fff;border:1px solid rgba(97,75,61,.09);border-radius:8px;box-shadow:0 10px 28px rgba(46,35,28,.05);padding:1.1rem 1rem;margin-top:.85rem}
-  .cart-add-panel-heading{display:flex;align-items:center;gap:.5rem;font-size:.78rem;font-weight:800;color:#7b5455;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem}
-  .cart-add-products{display:grid;grid-template-columns:repeat(2,1fr);gap:.55rem}
-  .cart-add-product{display:flex;flex-direction:column;align-items:flex-start;gap:.18rem;background:#faf7f4;border:1.5px solid rgba(123,84,85,.1);border-radius:8px;padding:.7rem .75rem;text-decoration:none;color:#2f2824;transition:border-color .18s,background .18s,transform .15s}
-  .cart-add-product:hover{border-color:#7b5455;background:#fff3e7;transform:translateY(-1px)}
-  .cart-add-product-icon{width:34px;height:34px;border-radius:6px;background:#fff3e7;color:#7b5455;display:grid;place-items:center;margin-bottom:.3rem;flex:none}
-  .cart-add-product-label{font-size:.82rem;font-weight:800;color:#312722;line-height:1.2}
-  .cart-add-product-desc{font-size:.7rem;color:#8a7670;line-height:1.35}
-  .cart-add-product-plus{width:20px;height:20px;border-radius:50%;background:#7b5455;color:#fff;display:grid;place-items:center;margin-left:auto;margin-top:.25rem;align-self:flex-end;flex:none}
+  .cart-add-panel{background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.85);border-radius:1.5rem;box-shadow:0 8px 32px rgba(200,130,140,0.10);padding:1.25rem;margin-top:1rem}
+  .cart-add-panel-heading{display:flex;align-items:center;gap:.5rem;font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:800;color:#a65d5d;letter-spacing:.14em;text-transform:uppercase;margin-bottom:.85rem}
+  .cart-add-products{display:grid;grid-template-columns:repeat(2,1fr);gap:.65rem}
+  .cart-add-product{display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;background:rgba(255,255,255,0.75);border:1.5px solid rgba(200,130,140,0.15);border-radius:1rem;padding:.75rem .85rem;text-decoration:none;color:#3d3028;transition:all .18s}
+  .cart-add-product:hover{border-color:#a65d5d;background:#fff5f4;transform:translateY(-2px)}
+  .cart-add-product-icon{width:36px;height:36px;border-radius:.75rem;background:#fff5f4;color:#a65d5d;display:grid;place-items:center;margin-bottom:.3rem;flex:none}
+  .cart-add-product-label{font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:700;color:#3d3028;line-height:1.2}
+  .cart-add-product-desc{font-size:.72rem;color:#705f58;line-height:1.35}
+  .cart-add-product-plus{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#a65d5d,#7c3f4f);color:#fff;display:grid;place-items:center;margin-left:auto;margin-top:.25rem;align-self:flex-end;flex:none}
+
   /* Tier selector */
-  .tier-selector { display: flex; gap: 4px; background: #f5f3ef; padding: 4px; border-radius: 8px; margin-top: 12px; }
-  .tier-btn { flex: 1; border: none; background: transparent; padding: 8px 4px; font-size: 0.75rem; font-weight: 600; color: #7b6b64; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-  .tier-btn:hover { background: rgba(123, 84, 85, 0.08); }
-  .tier-btn.active { background: #fff; color: #7b5455; box-shadow: 0 2px 8px rgba(123, 84, 85, 0.15); }
-  .tier-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
-  .tier-price { font-size: 0.8rem; font-weight: 800; }
+  .tier-selector { display: flex; gap: 4px; background: rgba(200,130,140,0.1); padding: 4px; border-radius: 9999px; margin-top: 12px; }
+  .tier-btn { flex: 1; border: none; background: transparent; padding: 6px 4px; font-size: 0.72rem; font-weight: 600; color: #705f58; border-radius: 9999px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 1px; font-family:'Montserrat',sans-serif }
+  .tier-btn:hover { background: rgba(255,255,255,0.6); }
+  .tier-btn.active { background: #fff; color: #7c3f4f; font-weight: 700; box-shadow: 0 2px 8px rgba(124,63,79,0.15); }
+  .tier-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .tier-price { font-size: 0.78rem; font-weight: 800; }
+
   /* Fixed payment bar */
-  .cart-pay-bar{position:fixed;inset:auto 0 0;z-index:40;background:rgba(251,249,245,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(97,75,61,.1);padding:.75rem 1rem 1.1rem;display:none}
+  .cart-pay-bar{position:fixed;inset:auto 0 0;z-index:40;background:rgba(253,246,240,0.96);backdrop-filter:blur(22px);border-top:1px solid rgba(200,130,140,0.12);padding:.75rem 1rem 1.1rem;display:none}
   .cart-pay-bar-inner{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:.85rem}
   .cart-pay-bar-meta{flex:1;min-width:0}
-  .cart-pay-bar-label{font-size:.68rem;font-weight:800;color:#7b6b64;letter-spacing:.12em;text-transform:uppercase}
-  .cart-pay-bar-total{font-size:1.3rem;font-weight:800;color:#312722;line-height:1.15}
-  .cart-pay-bar-sub{font-size:.72rem;color:#9a8880;margin-top:.1rem}
-  .cart-pay-bar-btn{flex:none;min-height:48px;padding:0 1.4rem;border-radius:8px;background:#7b5455;color:#fff;border:0;font-family:'Manrope',sans-serif;font-size:.9rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;box-shadow:0 10px 28px rgba(123,84,85,.22);transition:transform .16s,box-shadow .16s}
-  .cart-pay-bar-btn:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 16px 36px rgba(123,84,85,.3)}
-  .cart-pay-bar-btn:disabled{background:#d8ccca;color:#8d817e;cursor:not-allowed;box-shadow:none}
-  .cart-pay-bar-status{font-size:.76rem;color:#7b5455;background:#fff5ef;border-radius:6px;padding:.45rem .7rem;margin-top:.5rem;max-width:980px;margin-left:auto;margin-right:auto}
+  .cart-pay-bar-label{font-family:'Montserrat',sans-serif;font-size:.65rem;font-weight:800;color:#a65d5d;letter-spacing:.12em;text-transform:uppercase}
+  .cart-pay-bar-total{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:700;color:#3d3028;line-height:1.15}
+  .cart-pay-bar-sub{font-size:.72rem;color:#705f58;margin-top:.1rem}
+  .cart-pay-bar-btn{flex:none;min-height:50px;padding:0 1.6rem;border-radius:9999px;background:linear-gradient(135deg,#a65d5d,#7c3f4f);color:#fff;border:0;font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;display:inline-flex;align-items:center;gap:.5rem;animation:pw-pulse 2.5s infinite}
+  .cart-pay-bar-btn:disabled{background:#e4e2de;color:#9e8f90;cursor:not-allowed;box-shadow:none;animation:none}
+  .cart-pay-bar-status{font-size:.76rem;color:#a65d5d;background:#fff5f4;border-radius:.75rem;padding:.45rem .7rem;margin-top:.5rem;max-width:980px;margin-left:auto;margin-right:auto}
+
   @media(max-width:780px){
     .cart-top{align-items:flex-start;flex-direction:column}
     .cart-grid{grid-template-columns:1fr}
@@ -153,10 +167,11 @@ function getLikelyCountryFromClient() {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
     const locale = String(navigator?.language || "").toUpperCase();
+    if (tz === "Asia/Manila" || locale.includes("-PH")) return "PH";
     if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta" || locale.includes("-IN")) return "IN";
     return "OTHER";
   } catch {
-    return "IN";
+    return "OTHER";
   }
 }
 
@@ -453,17 +468,17 @@ export default function Cart() {
       <div className="cart-shell">
         <div className="cart-top">
           <div>
-            <span className="cart-kicker"><ShoppingCart size={15} /> Gift cart</span>
-            <h1 className="cart-title">Build your gift bundle</h1>
-            <p className="cart-copy">Add multiple gifts, pay once, and send a single link to the receiver.</p>
+            <span className="cart-kicker"><ShoppingCart size={15} /> {countryCode === "PH" ? "Cart ng mga Regalo" : "Gift cart"}</span>
+            <h1 className="cart-title">{countryCode === "PH" ? "Bumuo ng iyong Gift Bundle" : "Build your gift bundle"}</h1>
+            <p className="cart-copy">{countryCode === "PH" ? "Magdagdag ng iba't ibang regalo, magbayad nang minsanan, at mag-send ng iisang link sa receiver." : "Add multiple gifts, pay once, and send a single link to the receiver."}</p>
           </div>
         </div>
 
         {!items.length ? (
           <section className="cart-empty">
             <div className="cart-empty-icon"><ShoppingCart size={26} /></div>
-            <h1>Your gift cart is empty</h1>
-            <p>Create a bouquet, cake, card, or hug first. Each one can be added here as an individual product.</p>
+            <h1>{countryCode === "PH" ? "Walang laman ang iyong gift cart" : "Your gift cart is empty"}</h1>
+            <p>{countryCode === "PH" ? "Gumawa muna ng bouquet, cake, greeting card, o virtual hug bago mag-checkout." : "Create a bouquet, cake, card, or hug first. Each one can be added here as an individual product."}</p>
             <div className="cart-add-grid" style={{ maxWidth: 520, margin: "0 auto" }}>
               {Object.entries({
                 bouquet: "/create",
@@ -488,7 +503,7 @@ export default function Cart() {
                   <article className="cart-item" key={item.cartItemId}>
                     <div className="cart-icon"><Gift size={20} /></div>
                     <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-                      <h2>Gift {index + 1}: {getGiftItemTitle(item)}</h2>
+                      <h2>{countryCode === "PH" ? "Regalo" : "Gift"} {index + 1}: {getGiftItemTitle(item)}</h2>
                       <p>{getGiftItemSubtitle(item)}</p>
                       <p>{meta?.label}</p>
                       
@@ -532,11 +547,11 @@ export default function Cart() {
             {/* Right column: Checkout on top, Add another gift below */}
             <div style={{ display: "flex", flexDirection: "column", gap: ".85rem", alignItems: "stretch" }}>
               <aside className="cart-panel cart-summary" style={{ position: "sticky", top: "78px" }}>
-                <h2>Checkout</h2>
-                <div className="cart-row"><span>Products</span><strong>{totals.itemCount}</strong></div>
-                <div className="cart-row"><span>Currency</span><strong>{currency}</strong></div>
+                <h2>{countryCode === "PH" ? "Pagbabayad (Checkout)" : "Checkout"}</h2>
+                <div className="cart-row"><span>{countryCode === "PH" ? "Mga Regalo" : "Products"}</span><strong>{totals.itemCount}</strong></div>
+                <div className="cart-row"><span>{countryCode === "PH" ? "Pera" : "Currency"}</span><strong>{currency}</strong></div>
                 <div className="cart-total">
-                  <span>Total</span>
+                  <span>{countryCode === "PH" ? "KABUUAN" : "Total"}</span>
                   <strong>{formatCartMoney(totals.totalMinor, currency)}</strong>
                 </div>
 
@@ -558,15 +573,17 @@ export default function Cart() {
                     >
                       {paying || generating ? (
                         <>
-                          <span className="cart-spinner" /> Processing
+                          <span className="cart-spinner" /> {countryCode === "PH" ? "Pinoproseso..." : "Processing"}
                         </>
                       ) : totals.totalMinor > 0 ? (
                         <>
-                          {pleasePrefix}Pay {formatCartMoney(totals.totalMinor, currency)} <ArrowRight size={16} />
+                          {countryCode === "PH"
+                            ? `Magbayad ng ${formatCartMoney(totals.totalMinor, currency)}`
+                            : `${pleasePrefix}Pay ${formatCartMoney(totals.totalMinor, currency)}`} <ArrowRight size={16} />
                         </>
                       ) : (
                         <>
-                          Create bundle link <ArrowRight size={16} />
+                          {countryCode === "PH" ? "Gumawa ng bundle link" : "Create bundle link"} <ArrowRight size={16} />
                         </>
                       )}
                     </button>
@@ -574,7 +591,16 @@ export default function Cart() {
                 })()}
 
                 {statusMsg && <div className="cart-status">{statusMsg}</div>}
+
+                <div style={{ marginTop: "0.85rem", fontSize: "0.72rem", color: "#a65d5d", lineHeight: 1.5, textAlign: "center" }}>
+                  {countryCode === "PH"
+                    ? "🇵🇭 GCash, Maya & Cards via Razorpay · Mabilis at Ligtas"
+                    : countryCode === "IN"
+                    ? "🇮🇳 UPI, Cards & NetBanking via Razorpay · Fast & Secure"
+                    : "🔒 Secure checkout via Razorpay · International cards accepted"}
+                </div>
               </aside>
+
 
               {/* Add another gift to this bundle */}
               <div className="cart-add-panel">
@@ -608,7 +634,11 @@ export default function Cart() {
         <div className="cart-pay-bar" role="region" aria-label="Checkout summary">
           <div className="cart-pay-bar-inner">
             <div className="cart-pay-bar-meta">
-              <div className="cart-pay-bar-label">Total · {totals.itemCount} gift{totals.itemCount !== 1 ? "s" : ""}</div>
+              <div className="cart-pay-bar-label">
+                {countryCode === "PH"
+                  ? `Kabuuan · ${totals.itemCount} regalo`
+                  : `Total · ${totals.itemCount} gift${totals.itemCount !== 1 ? "s" : ""}`}
+              </div>
               <div className="cart-pay-bar-total">{formatCartMoney(totals.totalMinor, currency)}</div>
               {statusMsg && <div className="cart-pay-bar-sub">{statusMsg}</div>}
             </div>
@@ -619,18 +649,19 @@ export default function Cart() {
               type="button"
             >
               {paying || generating ? (
-                <><span className="cart-spinner" /> Processing</>
+                <><span className="cart-spinner" /> {countryCode === "PH" ? "Pinoproseso..." : "Processing"}</>
               ) : totals.totalMinor > 0 ? (
                 <>
-                  {totals.totalMinor > (currency === "INR" ? 5900 : 299)
-                    ? "Please Please "
-                    : totals.totalMinor > (currency === "INR" ? 2900 : 199)
-                    ? "Please "
-                    : ""}
-                  Pay {formatCartMoney(totals.totalMinor, currency)} <ArrowRight size={16} />
+                  {countryCode === "PH"
+                    ? `Magbayad ng ${formatCartMoney(totals.totalMinor, currency)}`
+                    : `${totals.totalMinor > (currency === "INR" ? 5900 : 299)
+                        ? "Please Please "
+                        : totals.totalMinor > (currency === "INR" ? 2900 : 199)
+                        ? "Please "
+                        : ""}Pay ${formatCartMoney(totals.totalMinor, currency)}`} <ArrowRight size={16} />
                 </>
               ) : (
-                <>Create link <ArrowRight size={16} /></>
+                <>{countryCode === "PH" ? "Gumawa ng link" : "Create link"} <ArrowRight size={16} /></>
               )}
             </button>
           </div>
