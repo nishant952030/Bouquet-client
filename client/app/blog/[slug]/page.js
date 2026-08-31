@@ -17,7 +17,7 @@ export async function generateMetadata({ params }) {
 
   const url = `${BASE_URL}/blog/${post.slug}`;
   return {
-    title: post.title,
+    title: `${post.title} | Petals & Words`,
     description: post.description,
     keywords: post.keywords.join(", "),
     alternates: { canonical: url },
@@ -25,16 +25,17 @@ export async function generateMetadata({ params }) {
       title: post.title,
       description: post.description,
       url,
-      siteName: "Petals and Words",
+      siteName: "Petals & Words",
       type: "article",
       publishedTime: post.publishedAt,
       modifiedTime: post.updatedAt || post.publishedAt,
-      images: [{ url: `${BASE_URL}/logo-transparent.png`, width: 512, height: 512 }],
+      images: [{ url: `${BASE_URL}/logo-transparent.png`, width: 512, height: 512, alt: post.title }],
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: post.title,
       description: post.description,
+      images: [`${BASE_URL}/logo-transparent.png`],
     },
   };
 }
@@ -60,7 +61,7 @@ export default async function BlogPostPage({ params }) {
   const relatedPosts = getRelatedPosts(post);
   const postUrl = `${BASE_URL}/blog/${post.slug}`;
   const wordCount = post.sections.reduce(
-    (acc, s) => acc + s.paragraphs.join(" ").split(/\s+/).length,
+    (acc, s) => acc + (s.paragraphs ? s.paragraphs.join(" ").split(/\s+/).length : 0),
     0
   );
 
@@ -74,15 +75,15 @@ export default async function BlogPostPage({ params }) {
         datePublished: post.publishedAt,
         dateModified: post.updatedAt || post.publishedAt,
         mainEntityOfPage: { "@type": "WebPage", "@id": postUrl },
-        author: { "@type": "Organization", name: "Petals and Words", url: BASE_URL },
+        author: { "@type": "Organization", name: "Petals & Words", url: BASE_URL },
         publisher: {
           "@type": "Organization",
-          name: "Petals and Words",
+          name: "Petals & Words",
           logo: { "@type": "ImageObject", url: `${BASE_URL}/logo-transparent.png` },
         },
         image: `${BASE_URL}/logo-transparent.png`,
         wordCount,
-        articleSection: "Flower Gifting",
+        articleSection: post.category || "Relationship & Gifting",
         inLanguage: "en-US",
         keywords: post.keywords.join(", "),
       },
@@ -96,6 +97,32 @@ export default async function BlogPostPage({ params }) {
       },
     ],
   };
+
+  if (post.faqs?.length) {
+    jsonLd["@graph"].push({
+      "@type": "FAQPage",
+      mainEntity: post.faqs.map((faq) => ({
+        "@type": "Question",
+        name: faq.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: faq.answer,
+        },
+      })),
+    });
+  }
+
+  if (post.itemList?.length) {
+    jsonLd["@graph"].push({
+      "@type": "ItemList",
+      itemListElement: post.itemList.map((item, idx) => ({
+        "@type": "ListItem",
+        position: idx + 1,
+        name: typeof item === "string" ? item : item.name,
+        description: typeof item === "string" ? undefined : item.description,
+      })),
+    });
+  }
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-3xl px-4 py-8 sm:py-12">
@@ -178,16 +205,75 @@ export default async function BlogPostPage({ params }) {
               >
                 {section.heading}
               </h2>
-              <div className="mt-2 space-y-3">
-                {section.paragraphs.map((para, i) => (
-                  <p key={i} className="text-[15px] leading-relaxed text-stone-700">
-                    {para}
-                  </p>
-                ))}
-              </div>
+              {section.paragraphs && (
+                <div className="mt-2 space-y-3">
+                  {section.paragraphs.map((para, i) => (
+                    <p key={i} className="text-[15px] leading-relaxed text-stone-700">
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              )}
+              {section.list && (
+                <ul className="mt-3 space-y-2 pl-5 text-[15px] text-stone-700 list-disc">
+                  {section.list.map((item, idx) => (
+                    <li key={idx} className="leading-relaxed">
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {section.callout && (
+                <div className="mt-4 rounded-2xl border border-rose-200/80 bg-gradient-to-r from-rose-50/80 to-amber-50/50 p-4 sm:p-5 shadow-sm">
+                  <div className="flex items-start gap-3">
+                    <span className="text-xl">{section.callout.emoji || "✨"}</span>
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm text-stone-900 mb-1">
+                        {section.callout.title}
+                      </p>
+                      <p className="text-xs sm:text-sm text-stone-600 leading-relaxed mb-3">
+                        {section.callout.text}
+                      </p>
+                      {section.callout.link && (
+                        <Link
+                          href={section.callout.link}
+                          className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-rose-600 hover:text-rose-700 underline underline-offset-4"
+                        >
+                          {section.callout.linkText || "Try it free →"}
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </section>
           ))}
         </div>
+
+        {/* FAQs Section */}
+        {post.faqs?.length > 0 && (
+          <section className="mt-10 border-t border-rose-100 pt-8" id="frequently-asked-questions">
+            <h2
+              className="text-2xl text-stone-900 mb-4"
+              style={{ fontFamily: '"Cormorant Garamond", serif' }}
+            >
+              Frequently Asked Questions
+            </h2>
+            <div className="space-y-4">
+              {post.faqs.map((faq, i) => (
+                <div key={i} className="rounded-xl border border-stone-200/70 bg-stone-50/50 p-4">
+                  <h3 className="text-sm font-bold text-stone-900 mb-1.5 flex items-start gap-2">
+                    <span className="text-rose-500 font-bold">Q:</span>
+                    <span>{faq.question}</span>
+                  </h3>
+                  <p className="text-xs sm:text-sm text-stone-600 leading-relaxed pl-5">
+                    {faq.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* CTA */}
         <div className="mt-10 rounded-2xl border border-rose-100 bg-rose-50/60 p-5 text-center">

@@ -102,61 +102,206 @@ const CSS = `
     animation: floatSparkle 3s ease-in-out infinite 0.5s;
   }
 
-  /* ─── Hanging Tag ─── */
-  @keyframes gentleSway {
-    0%, 100% { transform: rotate(-3deg); }
-    50%      { transform: rotate(1deg); }
+  /* ─── Interactive Gift Tag on Bouquet ─── */
+  @keyframes tagBob {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50%      { transform: translateY(-5px) rotate(1deg); }
   }
-  .vb-hanging-tag-container {
+  @keyframes tagGlow {
+    0%, 100% { box-shadow: 0 4px 14px rgba(228, 141, 156, 0.35); }
+    50%      { box-shadow: 0 8px 24px rgba(228, 141, 156, 0.65); }
+  }
+  .vb-interactive-tag {
     position: absolute;
-    bottom: -2.5rem;
-    right: -1rem;
-    z-index: 120;
-    transform-origin: top center;
-    transform: translateZ(0);
-    animation: gentleSway 6s ease-in-out infinite;
-    display: flex;
-    flex-direction: column;
+    bottom: 14px;
+    right: 14px;
+    z-index: 15;
+    background: linear-gradient(135deg, #ffffff 0%, #fff2f5 100%);
+    border: 1.5px solid rgba(228, 141, 156, 0.55);
+    border-radius: 9999px;
+    padding: 0.45rem 0.95rem;
+    display: inline-flex;
     align-items: center;
-    max-width: 160px;
+    gap: 7px;
+    cursor: pointer;
+    animation: tagBob 4s ease-in-out infinite, tagGlow 3s ease-in-out infinite;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 6px 18px rgba(166, 93, 93, 0.16);
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
   }
-  .vb-tag-string {
-    position: absolute;
-    top: -45px;
-    z-index: -1;
+  .vb-interactive-tag:hover {
+    transform: scale(1.06) rotate(0deg);
   }
-  .vb-hanging-tag {
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(200,130,140,0.18);
-    border-radius: 14px;
-    padding: 1.25rem 1rem;
-    box-shadow: 0 12px 28px rgba(166, 93, 93, 0.12);
+  .vb-interactive-tag:active {
+    transform: scale(0.95);
+  }
+  .vb-tag-emoji {
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+  .vb-tag-label {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: #7c3f4f;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+  }
+  .vb-tag-sparkle {
+    font-size: 0.82rem;
+    color: #f59e0b;
+  }
+
+  /* ─── Envelope / Card Reveal Modal (Spring Unfold) ─── */
+  .vb-card-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 250;
+    background: rgba(38, 24, 27, 0.48);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+    animation: fadeInBackdrop 0.25s ease both;
+  }
+  @keyframes fadeInBackdrop {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .vb-unfolded-card {
+    width: 100%;
+    max-width: 400px;
+    background: linear-gradient(180deg, #ffffff 0%, #fffdfa 55%, #fff7f4 100%);
+    border: 1.5px solid rgba(228, 141, 156, 0.45);
+    border-radius: 1.75rem;
+    padding: 1.6rem 1.4rem 1.4rem;
+    box-shadow: 0 24px 60px rgba(124, 63, 79, 0.28), 0 4px 16px rgba(0,0,0,0.06);
     position: relative;
-    z-index: 121;
-    text-align: left;
+    box-sizing: border-box;
+    animation: unfoldCard 0.35s cubic-bezier(0.34, 1.25, 0.64, 1) both;
+    transform-origin: bottom center;
   }
-  .vb-tag-hole {
-    width: 6px; height: 6px;
-    background: rgba(200,130,140,0.25);
+  @keyframes unfoldCard {
+    from {
+      opacity: 0;
+      transform: translateY(40px) scale(0.9) rotate(-1.5deg);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1) rotate(0deg);
+    }
+  }
+
+  .vb-card-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px dashed rgba(228, 141, 156, 0.35);
+  }
+  .vb-card-seal-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .vb-card-seal {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #ffd9d8 0%, #ffcad4 100%);
     border-radius: 50%;
-    position: absolute;
-    top: 6px; left: 50%; transform: translateX(-50%);
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    box-shadow: 0 3px 8px rgba(166, 93, 93, 0.15);
   }
-  .vb-note-text {
+  .vb-card-seal-text {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: #7c3f4f;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .vb-card-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(200, 130, 140, 0.12);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #7c3f4f;
+    font-size: 0.95rem;
+    transition: background 0.15s, transform 0.15s;
+    outline: none;
+  }
+  .vb-card-close-btn:hover {
+    background: rgba(200, 130, 140, 0.25);
+    transform: scale(1.08);
+  }
+
+  .vb-card-body-scroll {
+    max-height: min(52vh, 380px);
+    overflow-y: auto;
+    padding: 0.25rem 0.5rem;
+    margin: 0 -0.25rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(200, 130, 140, 0.35) transparent;
+  }
+  .vb-card-note-text {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 0.95rem; line-height: 1.6;
-    color: #3E2723;
+    font-size: 1.25rem;
+    line-height: 1.75;
+    color: #382425;
     font-style: italic;
     word-break: break-word;
-    margin-top: 0.2rem;
+    white-space: pre-wrap;
+    text-align: center;
+    margin: 0;
+  }
+
+  .vb-card-signature {
+    margin-top: 1.15rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(228, 141, 156, 0.25);
+    text-align: center;
+  }
+
+  .vb-card-return-btn {
+    width: 100%;
+    margin-top: 0.85rem;
+    background: linear-gradient(135deg, #a65d5d 0%, #7c3f4f 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 9999px;
+    padding: 0.7rem 1.25rem;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(124, 63, 79, 0.25);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .vb-card-return-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(124, 63, 79, 0.35);
   }
 
   /* ─── Sender ─── */
   .vb-sender {
     text-align: center;
-    margin-top: 1rem;
     position: relative; z-index: 1;
   }
   .vb-sender-line { font-size: 0.8rem; color: #6b5e5f; }
@@ -321,6 +466,17 @@ export default function ViewBouquet() {
   const id = rawId ? rawId.match(/^[a-z0-9]+/i)?.[0] || rawId : rawId;
   const [shared, setShared] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isNoteOpen, setIsNoteOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") setIsNoteOpen(false);
+    };
+    if (isNoteOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [isNoteOpen]);
 
   useEffect(() => {
     applySeo({
@@ -398,6 +554,11 @@ export default function ViewBouquet() {
   });
   const isPH = country === "PH";
 
+  const isPreview = Boolean(
+    shared?.isPreview ||
+    (typeof window !== "undefined" && new URLSearchParams(window.location.search).get("preview") === "1")
+  );
+
   /* ── Loading ── */
   if (isLoading) {
     return (
@@ -407,10 +568,14 @@ export default function ViewBouquet() {
         <div className="vb-state-card envelope-reveal er-1">
           <div className="vb-spinner" />
           <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", fontWeight: 500, color: "#3d3028" }}>
-            {isPH ? "Binubuksan ang iyong bouquet…" : t("viewBouquet.unwrapping", "Unwrapping your bouquet…")}
+            {isPreview
+              ? (isPH ? "Inihahanda ang preview ng iyong bouquet…" : "Preparing your bouquet preview…")
+              : (isPH ? "Binubuksan ang iyong bouquet…" : t("viewBouquet.unwrapping", "Unwrapping your bouquet…"))}
           </p>
           <p style={{ fontSize: "0.82rem", color: "#a65d5d", marginTop: "0.5rem" }}>
-            {isPH ? "May espesyal na taong gumawa nito para sa'yo ✨" : t("viewBouquet.someoneSpecialMade", "Someone special made this for you ✨")}
+            {isPreview
+              ? (isPH ? "Silipin ang makikita ng iyong recipient ✨" : "See what your recipient will experience ✨")
+              : (isPH ? "May espesyal na taong gumawa nito para sa'yo ✨" : t("viewBouquet.someoneSpecialMade", "Someone special made this for you ✨"))}
           </p>
         </div>
       </main>
@@ -463,7 +628,9 @@ export default function ViewBouquet() {
             marginTop: "1.25rem",
             color: "#3d3028",
           }}>
-            {isPH ? (
+            {isPreview ? (
+              <>{isPH ? "Preview ng iyong" : "Preview of your"}<br /><em className="wd-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>bouquet</em> 🌸</>
+            ) : isPH ? (
               <>May nagpadala sa'yo ng<br /><em className="wd-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>bulaklak</em> 🌸</>
             ) : (
               <>{t("viewBouquet.someoneSentYouPrefix", "Someone sent you")}<br /><em className="wd-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>{t("viewBouquet.flowers", "flowers")}</em> 🌸</>
@@ -471,53 +638,145 @@ export default function ViewBouquet() {
           </h1>
         </div>
 
-        {/* ── Bouquet display with hanging tag ── */}
-        <div className="vb-bouquet-card envelope-reveal er-2" style={{ marginTop: "1.5rem", marginBottom: "1rem" }}>
-          
+        {/* ── Bouquet display with interactive gift tag ── */}
+        <div
+          className="vb-bouquet-card envelope-reveal er-2"
+          style={{
+            marginTop: "1.5rem",
+            transition: "transform 0.35s ease, filter 0.35s ease, opacity 0.35s ease",
+            transform: isNoteOpen ? "scale(0.95)" : "scale(1)",
+            filter: isNoteOpen ? "blur(3px) brightness(0.9)" : "none",
+            opacity: isNoteOpen ? 0.6 : 1,
+          }}
+        >
           <div className="vb-canvas-wrap">
             <RecipientBouquetCanvas stems={shared.stems} />
-          </div>
 
-          {/* ── Note card hanging gracefully ── */}
-          {shared.note?.trim() && (
-            <div className="vb-hanging-tag-container" style={{ animationDelay: "0.5s" }}>
-              <svg className="vb-tag-string" width="40" height="60" viewBox="0 0 40 60" fill="none">
-                 <path d="M 20 0 Q 30 20, 20 60" stroke="rgba(123,84,85,0.2)" strokeWidth="1.5" strokeDasharray="3 3" />
-              </svg>
-              <div className="vb-hanging-tag">
-                <div className="vb-tag-hole"></div>
-                <p className="vb-note-text">
+            {/* Gift tag attached to the bouquet */}
+            {shared.note?.trim() && (
+              <button
+                type="button"
+                className="vb-interactive-tag"
+                onClick={() => setIsNoteOpen(true)}
+                title={isPH ? "Pindutin para basahin ang sulat" : "Tap to read personal note"}
+              >
+                <span className="vb-tag-emoji">💌</span>
+                <span className="vb-tag-label">{isPH ? "Basahin ang sulat" : "Read your note"}</span>
+                <span className="vb-tag-sparkle">✨</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Sender attribution below canvas in closed state ── */}
+        <div className="vb-sender envelope-reveal er-4" style={{ marginTop: "1.25rem", marginBottom: "1.25rem" }}>
+          <p className="vb-sender-line">
+            {isPH ? "Ginawa nang may " : t("viewBouquet.craftedWith", "Crafted with ")}
+            <span style={{ color: "#e25555", margin: "0 3px" }}>♥</span>
+            {isPH ? " ni " : ` ${t("viewBouquet.by", "by")} `}
+            <span className="vb-sender-name">{senderName}</span>
+          </p>
+        </div>
+
+        {/* ── Envelope / Card Reveal Metaphor (Spring-Unfolded Note Card) ── */}
+        {isNoteOpen && shared.note?.trim() && (
+          <div
+            className="vb-card-modal-backdrop"
+            onClick={() => setIsNoteOpen(false)}
+          >
+            <div
+              className="vb-unfolded-card"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Top bar with seal & close button */}
+              <div className="vb-card-topbar">
+                <div className="vb-card-seal-group">
+                  <div className="vb-card-seal">💌</div>
+                  <span className="vb-card-seal-text">
+                    {isPH ? "Liham para sa'yo" : "A Note for You"}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="vb-card-close-btn"
+                  onClick={() => setIsNoteOpen(false)}
+                  aria-label="Close note"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Scrollable note text in clean readable serif font */}
+              <div className="vb-card-body-scroll">
+                <p className="vb-card-note-text">
                   "{shared.note}"
                 </p>
               </div>
-            </div>
-          )}
 
-          {/* ── Sender attribution ── */}
-          <div className="vb-sender envelope-reveal er-4">
-            <p className="vb-sender-line">
-              {isPH ? "Ginawa nang may " : t("viewBouquet.craftedWith", "Crafted with ")}
-              <span style={{ color: "#e25555", margin: "0 3px" }}>♥</span>
-              {isPH ? " ni " : ` ${t("viewBouquet.by", "by")} `}
-              <span className="vb-sender-name">{senderName}</span>
+              {/* Sender signature */}
+              <div className="vb-card-signature">
+                <p className="vb-sender-line" style={{ margin: 0 }}>
+                  {isPH ? "Ginawa nang may " : t("viewBouquet.craftedWith", "Crafted with ")}
+                  <span style={{ color: "#e25555", margin: "0 3px" }}>♥</span>
+                  {isPH ? " ni " : ` ${t("viewBouquet.by", "by")} `}
+                  <span className="vb-sender-name">{senderName}</span>
+                </p>
+              </div>
+
+              {/* Return to bouquet action */}
+              <button
+                type="button"
+                className="vb-card-return-btn"
+                onClick={() => setIsNoteOpen(false)}
+              >
+                🌸 {isPH ? "Tingnan ang Bouquet muli" : "Back to Bouquet"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Bottom Section: Edit Button in Preview Mode, Viral CTAs in Recipient Mode ── */}
+        {isPreview ? (
+          <div className="vb-cta-section envelope-reveal er-5" style={{ textAlign: "center", marginTop: "2.5rem" }}>
+            <Link
+              to="/create"
+              className="vb-cta-btn"
+              style={{
+                width: "100%",
+                maxWidth: "280px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                background: "linear-gradient(135deg, #a65d5d 0%, #7c3f4f 100%)",
+                boxShadow: "0 10px 28px rgba(124,63,79,0.3)",
+              }}
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              {isPH ? "I-edit ang Bouquet" : "Edit Bouquet"}
+            </Link>
+            <p className="vb-cta-sub" style={{ marginTop: "0.75rem", fontSize: "0.76rem", color: "#8a7670" }}>
+              {isPH ? "✨ Preview Mode — Pindutin para baguhin ang mga bulaklak o note" : "✨ Preview Mode — Tap to change flowers or message"}
             </p>
           </div>
-        </div>
-
-        {/* ── Viral CTA ── */}
-        <div className="vb-cta-section envelope-reveal er-5">
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "center" }}>
-            <Link to="/create?ref=bouquet_receiver" className="vb-cta-btn" style={{ width: "100%", maxWidth: "280px" }}>
-              {isPH ? "Gumawa ng bouquet para sa iba 💐" : t("viewBouquet.makeBouquet", "Make a bouquet for someone 💐")}
-            </Link>
-            <Link to="/create-cake?ref=bouquet_receiver" className="vb-cta-btn" style={{ width: "100%", maxWidth: "280px", background: "linear-gradient(135deg, #d94a78 0%, #f0a23f 180%)" }}>
-              {isPH ? "Magpadala ng 3D Birthday Cake 🎂" : t("viewBouquet.makeCake", "Send a 3D Birthday Cake 🎂")}
-            </Link>
+        ) : (
+          <div className="vb-cta-section envelope-reveal er-5">
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "center" }}>
+              <Link to="/create?ref=bouquet_receiver" className="vb-cta-btn" style={{ width: "100%", maxWidth: "280px" }}>
+                {isPH ? "Gumawa ng bouquet para sa iba 💐" : t("viewBouquet.makeBouquet", "Make a bouquet for someone 💐")}
+              </Link>
+              <Link to="/create-cake?ref=bouquet_receiver" className="vb-cta-btn" style={{ width: "100%", maxWidth: "280px", background: "linear-gradient(135deg, #d94a78 0%, #f0a23f 180%)" }}>
+                {isPH ? "Magpadala ng 3D Birthday Cake 🎂" : t("viewBouquet.makeCake", "Send a 3D Birthday Cake 🎂")}
+              </Link>
+            </div>
+            <p className="vb-cta-sub">
+              {isPH ? "100% Libre, masaya, at nagpapangiti ✨" : t("viewBouquet.itsFree", "It's free, fun, and makes people smile ✨")}
+            </p>
           </div>
-          <p className="vb-cta-sub">
-            {isPH ? "100% Libre, masaya, at nagpapangiti ✨" : t("viewBouquet.itsFree", "It's free, fun, and makes people smile ✨")}
-          </p>
-        </div>
+        )}
 
         {/* ── Branding ── */}
         <div className="vb-branding envelope-reveal er-5">

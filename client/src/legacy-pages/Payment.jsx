@@ -719,7 +719,7 @@ export default function Payment() {
             {hasBouquetData && (
               <div style={{ marginBottom: "1rem" }}>
                 <a
-                  href={`/view/${previewId}`}
+                  href={`/view/${previewId}?preview=1`}
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => trackEv("preview_opened", { previewId })}
