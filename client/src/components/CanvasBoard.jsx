@@ -101,6 +101,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
       height: canvasSize.height,
       selection: false,
       preserveObjectStacking: true,
+      allowTouchScrolling: true,
     });
     canvas.backgroundColor = "#fff8f2";
     canvas.targetFindTolerance = 10;
@@ -238,7 +239,7 @@ export default function CanvasBoard({ selectedFlower, onCanvasStateChange, prese
       {/* Canvas wrapper â€” warm card */}
       <div
         className="relative overflow-hidden rounded-2xl border border-rose-100 bg-[#fff8f2] shadow-lg shadow-rose-100/50"
-        style={{ touchAction: "none" }}
+        style={{ touchAction: "pan-y" }}
       >
         <canvas ref={canvasRef} className="mx-auto block rounded-2xl" />
       </div>

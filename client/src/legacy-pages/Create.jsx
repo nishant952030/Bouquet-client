@@ -327,6 +327,53 @@ const CSS = `
   @keyframes linkPulse { 0%,100% { opacity: 0.6; } 50% { opacity: 1; } }
   .link-status-pulse { animation: linkPulse 1.5s ease-in-out infinite; }
 
+  /* Split-Screen Studio Grid */
+  .cr-studio-grid {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 2rem;
+    align-items: start;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 1.25rem 1.5rem 6rem;
+  }
+  .cr-sticky-canvas {
+    position: sticky;
+    top: 76px;
+    z-index: 20;
+  }
+  .cr-studio-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 0;
+  }
+  .cr-studio-step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 9999px;
+    background: #7c3f4f;
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 800;
+    font-family: 'Montserrat', sans-serif;
+    flex-shrink: 0;
+  }
+  @media (max-width: 1023px) {
+    .cr-studio-grid {
+      display: flex;
+      flex-direction: column;
+      max-width: 680px;
+      padding: 1rem 1.25rem 8rem;
+    }
+    .cr-sticky-canvas {
+      position: static;
+    }
+  }
+
   /* Fixed bottom bar */
   .cr-bottom {
     position: fixed; inset: auto 0 0;
@@ -585,6 +632,11 @@ export default function Create() {
     setPresetRequest({ id: `magic_${Date.now()}`, stems: newStems });
   }, []);
 
+  const clearCanvas = useCallback(() => {
+    setPresetRequest({ id: `clear_${Date.now()}`, stems: [] });
+    setStems([]);
+  }, []);
+
   /* Mandatory payment gate before link generation */
   const goToShare = () => {
     if (!hasBouquetContent) return;
@@ -663,311 +715,178 @@ export default function Create() {
         </div>
       </header>
 
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "1rem 1.25rem" }}>
-
-        {/* WD Banner */}
-        {wdActive && (
-          <div className="fs1" style={{ marginBottom: "1rem" }}>
-            <div style={{ borderRadius: "1.5rem", overflow: "hidden", background: "linear-gradient(135deg, #3E2723 0%, #7b5455 100%)", padding: "1rem 1.25rem", position: "relative" }}>
-              <DoodleWreathLeft className="absolute left-0 top-0 h-full w-10 opacity-35" />
-              <DoodleWreathRight className="absolute right-0 top-0 h-full w-10 opacity-35" />
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", position: "relative" }}>
+      {/* ── DESKTOP SPLIT-SCREEN STUDIO (1024px+) ── */}
+      {isDesktop ? (
+        <div className="cr-studio-grid">
+          {/* Left Column: Sticky Studio Canvas */}
+          <div className="cr-sticky-canvas">
+            <section className="vv-card" style={{ padding: "1.25rem", position: "relative", boxShadow: "0 16px 40px rgba(166,93,93,0.12)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.85rem" }}>
                 <div>
-                  <p className="vv-label" style={{ color: "#ecbaba" }}>{t("create.wdLabel", "March 8 · Women's Day")}</p>
-                  <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1.2rem", fontWeight: 400, color: "#fbf9f5", lineHeight: 1.3, marginTop: "0.2rem" }}>{t("create.wdHappy", "Happy Women's Day 🌸")}</p>
-                  <p style={{ fontSize: "0.75rem", color: "rgba(251,249,245,0.7)", marginTop: "0.2rem" }}>{t("create.wdOffer", "This offer disappears at midnight")}</p>
+                  <p className="vv-label" style={{ fontSize: "0.68rem" }}>{isPH ? "🌸 IYONG CANVAS" : "🌸 STUDIO CANVAS"}</p>
+                  <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.3rem", fontWeight: 600, color: "#3d3028", lineHeight: 1.2 }}>
+                    {isPH ? "Ayusin ang Bouquet" : "Live Bouquet Canvas"}
+                  </p>
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "0.25rem", flexShrink: 0 }}>
-                  <p className="vv-label" style={{ color: "#ecbaba" }}>{t("create.wdEndsIn", "Ends in")}</p>
-                  <MidnightCountdown />
+                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                  <span className="count-pill" style={{ background: "#ffd9d8", color: "#7b5455" }}>
+                    🌸 {flowerCount}{isPH ? " bulaklak" : " stems"}
+                  </span>
+                  <span className="count-pill" style={{ background: "#fef9ec", color: "#b45309" }}>
+                    ✍️ {wordCount}{isPH ? " salita" : "w"}
+                  </span>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* ── Page heading ── */}
-        <div className="fs2" style={{ marginBottom: "1rem", textAlign: "center" }}>
-          {wdActive ? (
-            <>
-              <p className="vv-label" style={{ marginBottom: "0.4rem" }}>{t("create.wdBuilderLabel", "Women's Day Bouquet Builder")}</p>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem, 6vw, 2.7rem)", fontWeight: 500, lineHeight: 1.15, margin: 0, color: "#3d3028" }}>
-                {t("create.wdBuilderHeadline", "Build a bouquet")} <em className="wd-shimmer">{t("create.wdBuilderHeadlineEm", "she'll treasure forever")}</em>
-              </h1>
-              <p style={{ fontSize: "0.82rem", color: "#705f58", lineHeight: 1.6, marginTop: "0.5rem" }}>
-                {t("create.wdBuilderSub", "Pick flowers · write her words · share in 60 seconds")}
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="vv-label" style={{ marginBottom: "0.4rem" }}>{isPH ? "🌸 Gumawa ng Digital Bouquet" : t("create.label")}</p>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem, 6vw, 2.7rem)", fontWeight: 500, lineHeight: 1.15, margin: 0, color: "#3d3028" }}>
-                {isPH ? (
-                  <>
-                    Gumawa ng bouquet <em className="wd-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>para sa iyong minamahal.</em>
-                  </>
-                ) : (
-                  <>
-                    {t("create.headline")} <em className="wd-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>{t("create.headlineEmphasis")}</em>
-                  </>
-                )}
-              </h1>
-              {isPH && (
-                <p style={{ fontSize: "0.82rem", color: "#705f58", lineHeight: 1.6, marginTop: "0.4rem" }}>
-                  Pumili ng bulaklak · maglagay ng sweet message · i-share sa Messenger o WhatsApp!
-                </p>
-              )}
-            </>
-          )}
-          <div style={{ maxWidth: 280, margin: "0.75rem auto 0" }}>
-            <div className="prog-track"><div className="prog-fill" style={{ width: `${progress}%` }} /></div>
-          </div>
-        </div>
-
-        {/* ── Philippines Occasion Chips ── */}
-        {isPH && (
-          <div className="fs3" style={{ marginBottom: "1.25rem" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.45rem", padding: "0 0.25rem" }}>
-              <span className="vv-label" style={{ fontSize: "0.68rem" }}>🌸 Piliin ang Okasyon</span>
-              <span style={{ fontSize: "0.7rem", color: "#a65d5d", opacity: 0.85, fontWeight: 600 }}>1-tap sweet notes ↓</span>
-            </div>
-            <div style={{ display: "flex", gap: "0.5rem", overflowX: "auto", paddingBottom: "0.4rem", scrollbarWidth: "none" }}>
-              {occasionsPH.map((occ) => {
-                const isSelected = note === occ.note;
-                return (
-                  <button
-                    key={occ.label}
-                    type="button"
-                    onClick={() => {
-                      setNote(occ.note);
-                      if (activeTab !== "note" && !isDesktop) setActiveTab("note");
-                    }}
-                    style={{
-                      flexShrink: 0,
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      background: isSelected ? "#fff5f4" : "rgba(255,255,255,0.85)",
-                      border: `1.5px solid ${isSelected ? "#a65d5d" : "rgba(200,130,140,0.2)"}`,
-                      borderRadius: "9999px",
-                      padding: "0.45rem 0.95rem",
-                      fontSize: "0.78rem",
-                      fontWeight: 700,
-                      fontFamily: "'Montserrat', sans-serif",
-                      color: isSelected ? "#7c3f4f" : "#5c4a40",
-                      cursor: "pointer",
-                      boxShadow: isSelected ? "0 4px 14px rgba(166,93,93,0.18)" : "0 2px 8px rgba(0,0,0,0.03)",
-                      transition: "all 0.18s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "translateY(-1px)";
-                      e.currentTarget.style.borderColor = "#a65d5d";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "translateY(0)";
-                      if (!isSelected) e.currentTarget.style.borderColor = "rgba(200,130,140,0.2)";
-                    }}
-                  >
-                    <span style={{ fontSize: "0.95rem" }}>{occ.emoji}</span>
-                    <span>{occ.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* WD occasion chips */}
-        {wdActive && (
-          <div className="fs3" style={{ marginBottom: "1rem", display: "flex", gap: "0.5rem", overflowX: "auto", scrollbarWidth: "none", paddingBottom: "0.25rem" }}>
-            {WD_OCCASIONS.map((item) => (
-              <button key={item.label} type="button"
-                onClick={() => setNote((n) => n || t("create.wdDefaultNote", "Happy Women's Day! {{emoji}}", { emoji: item.emoji }))}
-                style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: "0.5rem", background: "#ffffff", borderRadius: "0.875rem", border: "1.5px solid #ede8e9", padding: "0.5rem 0.75rem", cursor: "pointer", transition: "all 0.15s" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "#7b5455"; e.currentTarget.style.background = "#ffd9d8"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "#ede8e9"; e.currentTarget.style.background = "#ffffff"; }}
-              >
-                <span style={{ fontSize: "1.1rem", lineHeight: 1 }}>{item.emoji}</span>
-                <div style={{ textAlign: "left" }}>
-                  <p style={{ fontSize: "0.78rem", fontWeight: 600, color: "#3E2723", lineHeight: 1 }}>{t(`create.occasion_${item.label}`, item.label)}</p>
-                  <p style={{ fontSize: "0.68rem", color: "#9e8f90", lineHeight: 1.3, marginTop: "0.1rem" }}>{t(`create.occasion_desc_${item.label}`, item.desc)}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* ── CANVAS CARD ── */}
-        <section className="fs3 vv-card" style={{ marginBottom: "1rem", padding: "1rem", position: "relative" }}>
-          {wdActive && (
-            <>
-              <DoodleBow className="absolute -top-2 left-1/2 h-9 w-20 -translate-x-1/2 opacity-55" />
-              <DoodleFlower className="absolute -right-2 -top-2 h-11 w-11 opacity-22 fp2" />
-              <DoodleFlower className="absolute -left-2 -top-2 h-11 w-11 opacity-18 fp3" style={{ transform: "scaleX(-1)" }} />
-            </>
-          )}
-
-          {/* Canvas header row */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem", marginBottom: "0.875rem", paddingTop: wdActive ? "0.5rem" : 0 }}>
-            <div>
-              <p className="vv-label">{wdActive ? t("create.wdHerBouquet", "Her bouquet") : (isPH ? "IYONG CANVAS" : t("create.yourCanvas"))}</p>
-              <p style={{ fontFamily: "'Noto Serif', serif", fontSize: "1rem", fontWeight: 400, color: "#3E2723", lineHeight: 1.3, marginTop: "0.15rem" }}>
-                {wdActive ? t("create.wdArrange", "Arrange with love") : (isPH ? "Ayusin ang iyong bouquet" : t("create.arrangeBouquet"))}
-              </p>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <button type="button" className="magic-btn" onClick={generateMagicBouquet}>{isPH ? "✨ Kusang Ayusin" : t("create.autoGenerate")}</button>
-              <span className="count-pill" style={{ background: "#ffd9d8", color: "#7b5455" }}>🌸 {flowerCount}{isPH ? " bulaklak" : ""}</span>
-              <span className="count-pill" style={{ background: "#fef9ec", color: "#b45309" }}>✍️ {wordCount}{isPH ? " salita" : "w"}</span>
-            </div>
-          </div>
-
-          {/* Canvas area - desktop or mobile */}
-          {isDesktop ? (
-            <div style={{ display: "grid", gridTemplateColumns: "156px 1fr 156px", gap: "0.75rem" }}>
-              {/* Left: flower types */}
-              <aside className="vv-card-low" style={{ padding: "0.75rem" }}>
-                <p className="vv-label" style={{ marginBottom: "0.5rem" }}>{isPH ? "URI NG BULAKLAK" : t("create.flowerType")}</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
-                  {desktopFlowerGroups.map((group) => (
-                    <button key={group.id} type="button"
-                      className={`flower-type-btn ${selectedFlowerType === group.id ? "active" : "inactive"}`}
-                      onClick={() => setSelectedFlowerType(group.id)}>
-                      {isPH ? (PH_FLOWER_NAMES[group.id] || group.label) : group.label}
-                      <span style={{ marginLeft: "4px", fontSize: "0.68rem", fontWeight: 400, color: "#9e8f90" }}>({group.items.length})</span>
-                    </button>
-                  ))}
-                </div>
-              </aside>
-
-              {/* Center: canvas */}
-              <div style={{ display: "flex", justifyContent: "center" }}>
+              {/* Canvas Area */}
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "0.85rem" }}>
                 <CanvasBoard selectedFlower={selectedFlower} onCanvasStateChange={handleCanvasStateChange} presetRequest={presetRequest} />
               </div>
 
-              {/* Right: flowers for type */}
-              <aside className="vv-card-low" style={{ padding: "0.75rem" }}>
-                <p className="vv-label" style={{ marginBottom: "0.5rem" }}>{isPH ? "MGA BULAKLAK" : t("create.flowers")}</p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem", maxHeight: 360, overflowY: "auto" }}>
-                  {desktopFlowersForType.map((flower) => (
-                    <button key={flower.id} type="button"
-                      className={`flower-tile ${selectedFlower === flower.src ? "selected" : ""}`}
-                      onClick={() => setSelectedFlower(flower.src)} title={flower.label}>
-                      <img src={flower.src} alt={flower.label} style={{ height: 56, width: "100%", objectFit: "contain" }} loading="lazy" />
-                    </button>
-                  ))}
-                </div>
-              </aside>
-            </div>
-          ) : (
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <CanvasBoard selectedFlower={selectedFlower} onCanvasStateChange={handleCanvasStateChange} presetRequest={presetRequest} />
-            </div>
-          )}
-        </section>
-
-        {/* ── TAB BAR (mobile only) ── */}
-        {!isDesktop && (
-          <div className="fs4" style={{ marginBottom: "1rem" }}>
-            <div style={{ display: "flex", gap: "0.5rem", background: "#f5f3ef", borderRadius: "1.25rem", padding: "0.4rem" }}>
-              {[
-                { id: "flowers", label: isPH ? "🌸 Bulaklak" : t("create.tabFlowers"), sub: isPH ? "Pumili ng bulaklak" : t("create.tabFlowersSub") },
-                { id: "note", label: isPH ? "✍️ Mensahe" : t("create.tabNote"), sub: isPH ? "Sumulat ng mensahe" : t("create.tabNoteSub") },
-              ].map((tab) => (
-                <button key={tab.id} type="button" onClick={() => setActiveTab(tab.id)}
-                  className={`cr-tab-${activeTab === tab.id ? "on" : "off"}`}
-                  style={{ flex: 1, borderRadius: "0.875rem", padding: "0.6rem 0.5rem", border: "none", cursor: "pointer", fontFamily: "'Manrope', sans-serif", transition: "all 0.18s" }}>
-                  <div style={{ fontSize: "0.82rem", fontWeight: 700, lineHeight: 1 }}>{tab.label}</div>
-                  <div style={{ fontSize: "0.68rem", marginTop: "0.2rem", opacity: 0.65, lineHeight: 1 }}>{tab.sub}</div>
+              {/* Quick action bar */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem", paddingTop: "0.6rem", borderTop: "1px solid rgba(228, 141, 156, 0.2)" }}>
+                <button type="button" className="magic-btn" onClick={generateMagicBouquet} style={{ padding: "0.45rem 1rem", fontSize: "0.78rem" }}>
+                  {isPH ? "✨ Kusang Ayusin" : "✨ Magic Compose"}
                 </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ── FLOWERS TAB ── */}
-        {activeTab === "flowers" && (
-          <div className="fs5" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {/* Mobile flower picker */}
-            {!isDesktop && <FlowerPicker onPick={setSelectedFlower} selectedFlower={selectedFlower} isPH={isPH} />}
-
-            {/* Bouquet presets */}
-            <div className="vv-card" style={{ padding: "1rem" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
-                <p className="vv-label">{wdActive ? "Women's Day styles" : (isPH ? "Mga Estilo ng Bouquet" : t("create.bouquetPresets"))}</p>
-                {bouquetSuggestions.length > 4 && (
-                  <button type="button" className="vv-btn-ghost" onClick={() => setShowMoreBouquets(v => !v)}>
-                    {showMoreBouquets ? (isPH ? "Mas Kaunti" : t("create.less")) : (isPH ? "Tingnan Lahat" : t("create.seeAll"))}
+                {flowerCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearCanvas}
+                    style={{
+                      background: "rgba(255,255,255,0.8)",
+                      border: "1px solid rgba(200,130,140,0.3)",
+                      borderRadius: "9999px",
+                      padding: "0.4rem 0.85rem",
+                      fontSize: "0.72rem",
+                      color: "#9e8f90",
+                      cursor: "pointer",
+                      transition: "all 0.15s ease"
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.color = "#e11d48"; e.currentTarget.style.borderColor = "#fecdd3"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.color = "#9e8f90"; e.currentTarget.style.borderColor = "rgba(200,130,140,0.3)"; }}
+                  >
+                    {isPH ? "🗑️ I-clear" : "🗑️ Clear Canvas"}
                   </button>
                 )}
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
-                {visibleBouquets.map((s) => (
-                  <button key={s.id} type="button" className="preset-card" onClick={() => applyBouquet(s)}>
-                    <p style={{ fontSize: "0.82rem", fontWeight: 700, color: "#3E2723", lineHeight: 1.3 }}>{t(`create.presetTitle_${s.id}`, s.title)}</p>
-                    <p style={{ fontSize: "0.72rem", color: "#6b5e5f", lineHeight: 1.4, marginTop: "0.2rem" }}>{t(`create.presetDesc_${s.id}`, s.description)}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
+
+              <p style={{ textAlign: "center", fontSize: "0.7rem", color: "#a65d5d", opacity: 0.8, marginTop: "0.5rem" }}>
+                {isPH ? "Pumili ng bulaklak sa kanan para ilagay sa canvas" : "Pick flowers on the right to place on canvas"}
+              </p>
+            </section>
           </div>
-        )}
 
-        {/* ── NOTE TAB ── */}
-        {activeTab === "note" && (
-          <div className="fs5" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <NoteCard text={note} setText={setNote} isPH={isPH} />
-
-            <div className="vv-card" style={{ padding: "1rem" }}>
-              <label htmlFor="senderNameInput" className="vv-label" style={{ display: "block", marginBottom: "0.4rem" }}>
-                {isPH ? "GALING KANINO?" : t("create.whoIsItFrom")}
-              </label>
-              <input
-                id="senderNameInput"
-                type="text"
-                placeholder={isPH ? "Iyong Pangalan (Halimbawa: Juan, Maria, Carlo)" : t("create.namePlaceholder")}
-                value={senderName}
-                onChange={(e) => setSenderName(e.target.value)}
-                style={{
-                  width: "100%", padding: "0.75rem 1rem",
-                  borderRadius: "0.875rem", border: "1.5px solid #ede8e9",
-                  fontFamily: "'Manrope', sans-serif", fontSize: "0.9rem",
-                  color: "#3E2723", background: "#fbf9f5",
-                  outline: "none", transition: "border-color 0.2s"
-                }}
-                onFocus={(e) => e.target.style.borderColor = "#7b5455"}
-                onBlur={(e) => e.target.style.borderColor = "#ede8e9"}
-              />
+          {/* Right Column: Scrollable Studio Panels */}
+          <div className="cr-studio-panel">
+            {/* Header */}
+            <div>
+              <p className="vv-label" style={{ marginBottom: "0.3rem" }}>{isPH ? "🌸 Gumawa ng Digital Bouquet" : t("create.label")}</p>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.5rem", fontWeight: 600, lineHeight: 1.15, margin: 0, color: "#3d3028" }}>
+                {isPH ? "Gumawa ng bouquet para sa minamahal." : "Create something beautiful."}
+              </h1>
+              <p style={{ fontSize: "0.85rem", color: "#705f58", lineHeight: 1.6, marginTop: "0.35rem" }}>
+                {isPH ? "Pumili ng bulaklak · maglagay ng note · mag-record ng boses." : "Handpick flowers · write your personal letter · record your voice memo."}
+              </p>
             </div>
 
-            <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} isPH={isPH} />
+            {/* Step 1: Flowers & Presets */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+              <FlowerPicker onPick={setSelectedFlower} selectedFlower={selectedFlower} isPH={isPH} />
 
-            <VoiceRecorder voiceNote={voiceNote} onChange={setVoiceNote} isPH={isPH} />
-
-            {/* WD note suggestions */}
-            {wdActive && (
-              <div className="vv-card" style={{ padding: "1rem" }}>
-                <p className="vv-label" style={{ marginBottom: "0.25rem" }}>{t("create.wdMessagesLabel", "Women's Day messages")}</p>
-                <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginBottom: "0.75rem" }}>{t("create.wdMessagesSub", "Tap to use · edit freely")}</p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                  {WD_NOTE_SUGGESTIONS.map((s) => {
-                    const translatedNote = t(`create.wdNote_${s.replace(/\s+/g, '').substring(0, 10)}`, s);
-                    return (
-                      <button key={s} type="button"
-                        className={`w-full text-left px-3 py-3 rounded-xl border transition-all active:scale-[.98] ${note === translatedNote ? "note-chip-on" : "note-chip-off"}`}
-                        onClick={() => setNote(translatedNote)}
-                        style={{ fontFamily: "'Noto Serif', serif", fontSize: "0.88rem", color: "#3E2723", lineHeight: 1.65, cursor: "pointer" }}>
-                        {translatedNote}
-                      </button>
-                    );
-                  })}
+              <div className="vv-card" style={{ padding: "1.25rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.85rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <span style={{ fontSize: "1.1rem" }}>💐</span>
+                    <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.2rem", fontWeight: 600, color: "#3d3028" }}>
+                      {isPH ? "Mga Estilo ng Bouquet" : "Florist Presets"}
+                    </p>
+                  </div>
+                  {bouquetSuggestions.length > 4 && (
+                    <button type="button" className="vv-btn-ghost" onClick={() => setShowMoreBouquets(v => !v)}>
+                      {showMoreBouquets ? (isPH ? "Mas Kaunti" : "Less") : (isPH ? "Tingnan Lahat" : "See all")}
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "0.65rem" }}>
+                  {visibleBouquets.map((s) => (
+                    <button key={s.id} type="button" className="preset-card" onClick={() => applyBouquet(s)} style={{ padding: "0.85rem" }}>
+                      <p style={{ fontSize: "0.85rem", fontWeight: 700, color: "#3E2723", lineHeight: 1.3 }}>{t(`create.presetTitle_${s.id}`, s.title)}</p>
+                      <p style={{ fontSize: "0.72rem", color: "#6b5e5f", lineHeight: 1.4, marginTop: "0.25rem" }}>{t(`create.presetDesc_${s.id}`, s.description)}</p>
+                    </button>
+                  ))}
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* Regular note suggestions */}
-            {!wdActive && (
-              <div className="vv-card" style={{ padding: "1rem" }}>
+            {/* Step 2: Note & Sender */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+              {isPH && (
+                <div className="vv-card" style={{ padding: "1.1rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                    <span className="vv-label" style={{ fontSize: "0.68rem" }}>🌸 Piliin ang Okasyon</span>
+                    <span style={{ fontSize: "0.7rem", color: "#a65d5d", fontWeight: 600 }}>1-tap sweet notes ↓</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "0.5rem", overflowX: "auto", paddingBottom: "0.4rem", scrollbarWidth: "none" }}>
+                    {occasionsPH.map((occ) => {
+                      const isSelected = note === occ.note;
+                      return (
+                        <button
+                          key={occ.label}
+                          type="button"
+                          onClick={() => setNote(occ.note)}
+                          style={{
+                            flexShrink: 0,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            background: isSelected ? "#fff5f4" : "rgba(255,255,255,0.85)",
+                            border: `1.5px solid ${isSelected ? "#a65d5d" : "rgba(200,130,140,0.2)"}`,
+                            borderRadius: "9999px",
+                            padding: "0.45rem 0.95rem",
+                            fontSize: "0.78rem",
+                            fontWeight: 700,
+                            fontFamily: "'Montserrat', sans-serif",
+                            color: isSelected ? "#7c3f4f" : "#5c4a40",
+                            cursor: "pointer",
+                            transition: "all 0.18s ease",
+                          }}
+                        >
+                          <span style={{ fontSize: "0.95rem" }}>{occ.emoji}</span>
+                          <span>{occ.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="vv-card" style={{ padding: "1.25rem" }}>
+                <NoteCard text={note} setText={setNote} isPH={isPH} />
+                <div style={{ marginTop: "1rem", paddingTop: "1rem", borderTop: "1px solid rgba(228, 141, 156, 0.2)" }}>
+                  <label htmlFor="senderNameInput" className="vv-label" style={{ display: "block", marginBottom: "0.4rem" }}>
+                    {isPH ? "GALING KANINO?" : t("create.whoIsItFrom")}
+                  </label>
+                  <input
+                    id="senderNameInput"
+                    type="text"
+                    placeholder={isPH ? "Iyong Pangalan (Halimbawa: Juan, Maria, Carlo)" : t("create.namePlaceholder")}
+                    value={senderName}
+                    onChange={(e) => setSenderName(e.target.value)}
+                    style={{
+                      width: "100%", padding: "0.75rem 1rem",
+                      borderRadius: "0.875rem", border: "1.5px solid #ede8e9",
+                      fontFamily: "'Manrope', sans-serif", fontSize: "0.9rem",
+                      color: "#3E2723", background: "#fbf9f5",
+                      outline: "none", transition: "border-color 0.2s"
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = "#7b5455"}
+                    onBlur={(e) => e.target.style.borderColor = "#ede8e9"}
+                  />
+                </div>
+              </div>
+
+              {/* Note suggestions */}
+              <div className="vv-card" style={{ padding: "1.25rem" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
                   <p className="vv-label">{isPH ? "MGA SWEET NA IDEYA SA MENSAHE" : t("create.noteIdeas")}</p>
                   {noteSuggestions.length > 4 && (
@@ -980,88 +899,315 @@ export default function Create() {
                   {visibleNotes.map((s) => {
                     const translatedNote = t(`create.noteIdea_${s.replace(/\s+/g, '').substring(0, 10)}`, s);
                     return (
-                      <button key={s} type="button"
+                      <button
+                        key={s}
+                        type="button"
                         className={note === translatedNote ? "note-chip-on" : "note-chip-off"}
                         onClick={() => setNote(translatedNote)}
-                        style={{ width: "100%", textAlign: "left", padding: "0.65rem 0.875rem", borderRadius: "0.875rem", border: "1.5px solid", fontFamily: "'Noto Serif', serif", fontSize: "0.9rem", color: "#3E2723", lineHeight: 1.6, cursor: "pointer", transition: "all 0.15s" }}>
+                        style={{
+                          width: "100%", textAlign: "left", padding: "0.65rem 0.875rem",
+                          borderRadius: "0.875rem", border: "1.5px solid",
+                          fontFamily: "'Noto Serif', serif", fontSize: "0.9rem",
+                          color: "#3E2723", lineHeight: 1.6, cursor: "pointer", transition: "all 0.15s"
+                        }}
+                      >
                         {translatedNote}
                       </button>
                     );
                   })}
                 </div>
               </div>
-            )}
-          </div>
-        )}
+            </div>
 
-        {/* WD countdown strip */}
-        {wdActive && (
-          <div className="fs6" style={{ marginTop: "1rem" }}>
-            <div style={{ borderRadius: "1.5rem", overflow: "hidden", background: "linear-gradient(135deg, #3E2723, #7b5455)", padding: "1rem 1.25rem" }}>
-              <DoodleLeaf className="absolute -right-1 bottom-0 h-14 w-12 rotate-12 opacity-20" />
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
-                <div>
-                  <p className="vv-label" style={{ color: "#ecbaba" }}>{t("create.wdOfferMid", "Offer disappears at midnight")}</p>
-                  <p style={{ fontSize: "0.82rem", color: "#fbf9f5", marginTop: "0.2rem" }}>
-                    {/* Pricing removed */}
-                  </p>
+            {/* Step 3: Voice Note & Music */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+              <div className="vv-card" style={{ padding: "1.25rem" }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                  <VoiceRecorder voiceNote={voiceNote} onChange={setVoiceNote} isPH={isPH} />
+                  <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} isPH={isPH} />
                 </div>
-                <MidnightCountdown />
+              </div>
+            </div>
+
+            {/* Step 4: Ready to Share */}
+            <div className="vv-card" style={{ padding: "1.5rem", background: "linear-gradient(135deg, #ffffff 0%, #fff4f6 100%)", border: "1.5px solid rgba(228, 141, 156, 0.45)", boxShadow: "0 12px 36px rgba(166,93,93,0.12)" }}>
+              <button
+                type="button"
+                onClick={goToShare}
+                disabled={!hasBouquetContent}
+                className={`vv-btn-primary ${hasBouquetContent ? "cta-glow" : ""}`}
+                style={{ width: "100%", fontSize: "0.95rem", minHeight: "56px" }}
+              >
+                {hasBouquetContent ? (
+                  <>
+                    {isPH ? "💐 I-SHARE NANG MAY PAGMAMAHAL" : "💐 PREVIEW & SHARE BOUQUET"}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </>
+                ) : (
+                  isPH ? "Maglagay ng bulaklak o sulat para magpatuloy" : "Add flowers or a note to continue"
+                )}
+              </button>
+
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", marginTop: "0.85rem", fontSize: "0.72rem", color: "#9e8f90", letterSpacing: "0.06em" }}>
+                <span>✨ 100% Free to create</span><span>•</span>
+                <span>Instant Share Link</span><span>•</span>
+                <span>No signup needed</span>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      ) : (
+        /* ── MOBILE STREAMLINED STUDIO (<1024px) ── */
+        <div style={{ maxWidth: 520, margin: "0 auto", padding: "0.75rem 1rem 6.5rem" }}>
+          {/* Mobile Hero Canvas Card */}
+          <section className="vv-card" style={{ padding: "0.85rem", marginBottom: "1rem", position: "relative" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.4rem", marginBottom: "0.65rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <button type="button" className="magic-btn" onClick={generateMagicBouquet} style={{ padding: "0.35rem 0.75rem", fontSize: "0.72rem" }}>
+                  {isPH ? "✨ Auto-Ayos" : "✨ Magic Compose"}
+                </button>
+                {flowerCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearCanvas}
+                    style={{
+                      background: "rgba(255,255,255,0.85)",
+                      border: "1px solid rgba(200,130,140,0.3)",
+                      borderRadius: "9999px",
+                      padding: "0.3rem 0.65rem",
+                      fontSize: "0.68rem",
+                      color: "#9e8f90",
+                      cursor: "pointer"
+                    }}
+                  >
+                    🗑️ Clear
+                  </button>
+                )}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <span className="count-pill" style={{ background: "#ffd9d8", color: "#7b5455", fontSize: "0.68rem", padding: "0.2rem 0.5rem" }}>
+                  🌸 {flowerCount}
+                </span>
+                <span className="count-pill" style={{ background: "#fef9ec", color: "#b45309", fontSize: "0.68rem", padding: "0.2rem 0.5rem" }}>
+                  ✍️ {wordCount}w
+                </span>
+              </div>
+            </div>
 
-      </div>{/* /max-w */}
+            {/* Mobile Canvas Board */}
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <CanvasBoard selectedFlower={selectedFlower} onCanvasStateChange={handleCanvasStateChange} presetRequest={presetRequest} />
+            </div>
+          </section>
 
-      {/* ── FIXED BOTTOM CTA ── */}
-      <div className="cr-bottom">
-        <div style={{ maxWidth: 680, margin: "0 auto" }}>
-
-          <button
-            type="button"
-            onClick={goToShare}
-            disabled={!hasBouquetContent}
-            className={`vv-btn-primary ${hasBouquetContent ? "cta-glow" : ""}`}
-          >
-            {hasBouquetContent ? (
-              <>
-                {isPH ? "I-SHARE NANG MAY PAGMAMAHAL 💖" : t("create.goToShare")}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </>
-            ) : (
-              isPH ? "Maglagay ng bulaklak o sulat para magpatuloy" : t("create.addContent", "Add flowers or a note to continue")
-            )}
-          </button>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
-            <button
-              type="button"
-              onClick={addBouquetToCart}
-              disabled={!hasBouquetContent}
-              className="vv-btn-ghost vv-cart-cta"
-              style={{ width: "100%", margin: 0 }}
-            >
-              <ShoppingCart size={16} />
-              {added ? (isPH ? "Naidagdag na!" : "Added!") : (isPH ? "Idagdag sa cart" : "Add to cart")}
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate("/cart")}
-              className="vv-btn-ghost vv-cart-cta"
-              style={{ width: "100%", margin: 0 }}
-            >
-              {isPH ? "Tingnan ang cart" : "View cart"}
-            </button>
+          {/* Mobile Segmented 3-Pill Switcher */}
+          <div style={{ marginBottom: "1rem" }}>
+            <div style={{
+              display: "flex",
+              gap: "0.35rem",
+              background: "rgba(255,255,255,0.75)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid rgba(228, 141, 156, 0.3)",
+              borderRadius: "9999px",
+              padding: "0.3rem",
+              boxShadow: "0 4px 16px rgba(124, 67, 67, 0.06)"
+            }}>
+              {[
+                { id: "flowers", label: isPH ? "🌸 Bulaklak" : "🌸 Flowers" },
+                { id: "note", label: isPH ? "✍️ Mensahe" : "✍️ Letter" },
+                { id: "audio", label: isPH ? "🎙️ Boses at Audio" : "🎙️ Voice & Audio" },
+              ].map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    style={{
+                      flex: 1,
+                      borderRadius: "9999px",
+                      padding: "0.55rem 0.35rem",
+                      border: "none",
+                      cursor: "pointer",
+                      fontFamily: "'Montserrat', sans-serif",
+                      fontSize: "0.78rem",
+                      fontWeight: 700,
+                      color: isActive ? "#ffffff" : "#6b5e5f",
+                      background: isActive ? "linear-gradient(135deg, #7c3f4f 0%, #a65d5d 100%)" : "transparent",
+                      boxShadow: isActive ? "0 4px 12px rgba(124,63,79,0.25)" : "none",
+                      transition: "all 0.2s ease",
+                      whiteSpace: "nowrap",
+                      textAlign: "center"
+                    }}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", marginTop: "0.6rem", fontSize: "0.7rem", color: "#9e8f90", letterSpacing: "0.08em" }}>
-            <span>✨ {isPH ? "100% Libre" : t("create.free100", "100% Free")}</span><span>|</span>
-            <span>{isPH ? "Agad na link" : t("create.instantLink", "Instant link")}</span><span>|</span>
-            <span>{isPH ? "Walang login na kailangan" : t("create.noLoginNeeded", "No login needed")}</span>
+
+          {/* Active Tab Panel on Mobile */}
+          {activeTab === "flowers" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <FlowerPicker onPick={setSelectedFlower} selectedFlower={selectedFlower} isPH={isPH} />
+
+              <div className="vv-card" style={{ padding: "1.1rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+                  <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.2rem", fontWeight: 600, color: "#3d3028" }}>
+                    {isPH ? "Mga Estilo ng Bouquet" : "Florist Presets"}
+                  </p>
+                  {bouquetSuggestions.length > 4 && (
+                    <button type="button" className="vv-btn-ghost" onClick={() => setShowMoreBouquets(v => !v)}>
+                      {showMoreBouquets ? (isPH ? "Mas Kaunti" : "Less") : (isPH ? "Tingnan Lahat" : "See all")}
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
+                  {visibleBouquets.map((s) => (
+                    <button key={s.id} type="button" className="preset-card" onClick={() => applyBouquet(s)} style={{ padding: "0.75rem" }}>
+                      <p style={{ fontSize: "0.82rem", fontWeight: 700, color: "#3E2723", lineHeight: 1.25 }}>{t(`create.presetTitle_${s.id}`, s.title)}</p>
+                      <p style={{ fontSize: "0.68rem", color: "#6b5e5f", lineHeight: 1.35, marginTop: "0.2rem" }}>{t(`create.presetDesc_${s.id}`, s.description)}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "note" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              {isPH && (
+                <div className="vv-card" style={{ padding: "1rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.45rem" }}>
+                    <span className="vv-label" style={{ fontSize: "0.65rem" }}>🌸 Piliin ang Okasyon</span>
+                    <span style={{ fontSize: "0.68rem", color: "#a65d5d", fontWeight: 600 }}>1-tap sweet notes ↓</span>
+                  </div>
+                  <div style={{ display: "flex", gap: "0.4rem", overflowX: "auto", paddingBottom: "0.3rem", scrollbarWidth: "none" }}>
+                    {occasionsPH.map((occ) => {
+                      const isSelected = note === occ.note;
+                      return (
+                        <button
+                          key={occ.label}
+                          type="button"
+                          onClick={() => setNote(occ.note)}
+                          style={{
+                            flexShrink: 0,
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "5px",
+                            background: isSelected ? "#fff5f4" : "rgba(255,255,255,0.85)",
+                            border: `1.5px solid ${isSelected ? "#a65d5d" : "rgba(200,130,140,0.2)"}`,
+                            borderRadius: "9999px",
+                            padding: "0.4rem 0.85rem",
+                            fontSize: "0.74rem",
+                            fontWeight: 700,
+                            color: isSelected ? "#7c3f4f" : "#5c4a40",
+                            cursor: "pointer"
+                          }}
+                        >
+                          <span>{occ.emoji}</span>
+                          <span>{occ.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <div className="vv-card" style={{ padding: "1.1rem" }}>
+                <NoteCard text={note} setText={setNote} isPH={isPH} />
+                <div style={{ marginTop: "0.85rem", paddingTop: "0.85rem", borderTop: "1px solid rgba(228, 141, 156, 0.2)" }}>
+                  <label htmlFor="senderNameInputMobile" className="vv-label" style={{ display: "block", marginBottom: "0.35rem" }}>
+                    {isPH ? "GALING KANINO?" : t("create.whoIsItFrom")}
+                  </label>
+                  <input
+                    id="senderNameInputMobile"
+                    type="text"
+                    placeholder={isPH ? "Iyong Pangalan" : t("create.namePlaceholder")}
+                    value={senderName}
+                    onChange={(e) => setSenderName(e.target.value)}
+                    style={{
+                      width: "100%", padding: "0.7rem 0.9rem",
+                      borderRadius: "0.875rem", border: "1.5px solid #ede8e9",
+                      fontFamily: "'Manrope', sans-serif", fontSize: "0.88rem",
+                      color: "#3E2723", background: "#fbf9f5", outline: "none"
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Note suggestions */}
+              <div className="vv-card" style={{ padding: "1.1rem" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.65rem" }}>
+                  <p className="vv-label">{isPH ? "MGA SWEET NA IDEYA" : t("create.noteIdeas")}</p>
+                  {noteSuggestions.length > 4 && (
+                    <button type="button" className="vv-btn-ghost" onClick={() => setShowMoreNotes(v => !v)}>
+                      {showMoreNotes ? (isPH ? "Mas Kaunti" : t("create.less")) : (isPH ? "Tingnan Lahat" : t("create.seeAll"))}
+                    </button>
+                  )}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
+                  {visibleNotes.map((s) => {
+                    const translatedNote = t(`create.noteIdea_${s.replace(/\s+/g, '').substring(0, 10)}`, s);
+                    return (
+                      <button
+                        key={s}
+                        type="button"
+                        className={note === translatedNote ? "note-chip-on" : "note-chip-off"}
+                        onClick={() => setNote(translatedNote)}
+                        style={{
+                          width: "100%", textAlign: "left", padding: "0.6rem 0.8rem",
+                          borderRadius: "0.75rem", border: "1.5px solid",
+                          fontFamily: "'Noto Serif', serif", fontSize: "0.85rem",
+                          color: "#3E2723", lineHeight: 1.5, cursor: "pointer"
+                        }}
+                      >
+                        {translatedNote}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "audio" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="vv-card" style={{ padding: "1.1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <VoiceRecorder voiceNote={voiceNote} onChange={setVoiceNote} isPH={isPH} />
+                <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} isPH={isPH} />
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Fixed Bottom CTA - Single Clean Button */}
+          <div className="cr-bottom">
+            <div style={{ maxWidth: 520, margin: "0 auto" }}>
+              <button
+                type="button"
+                onClick={goToShare}
+                disabled={!hasBouquetContent}
+                className={`vv-btn-primary ${hasBouquetContent ? "cta-glow" : ""}`}
+                style={{ width: "100%", margin: 0, padding: "0.9rem 1.25rem", fontSize: "0.95rem", borderRadius: "9999px" }}
+              >
+                {hasBouquetContent ? (
+                  <>
+                    {isPH ? "I-SHARE NANG MAY PAGMAMAHAL 💖" : t("create.goToShare")}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </>
+                ) : (
+                  isPH ? "Maglagay ng bulaklak o sulat" : t("create.addContent", "Add flowers or a note to continue")
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
     </main>
   );

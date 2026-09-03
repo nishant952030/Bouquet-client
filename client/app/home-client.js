@@ -679,16 +679,90 @@ export default function HomeClient() {
           </p>
 
           {/* CTAs */}
-          <div className="hw-cta-group" style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center", marginBottom: "2.5rem" }}>
+          <div className="hw-cta-group" style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center", marginBottom: "2rem" }}>
             <Link href="/create" className="hw-cta">{isPH ? "💐 Gumawa ng Bouquet" : "💐 Make a Bouquet"}</Link>
             <button className="hw-cta-ghost" onClick={() => document.getElementById("hw-gift-strip")?.scrollIntoView({ behavior: "smooth" })}>
               {isPH ? "Lahat ng gifts ↓" : "See all gifts ↓"}
             </button>
           </div>
 
-          <p style={{ textAlign: "center", fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#a65d5d", opacity: 0.75, marginBottom: "3rem" }}>
+          <p style={{ textAlign: "center", fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#a65d5d", opacity: 0.75, marginBottom: "2.5rem" }}>
             {isPH ? "Walang login · Walang bayad · Libre forever" : "No login · No credit card · Free forever"}
           </p>
+
+          {/* Interactive Live Bouquet Preview Showcase */}
+          <div 
+            style={{ 
+              display: "flex", 
+              flexDirection: "column", 
+              alignItems: "center", 
+              margin: "0 auto 3.5rem", 
+              maxWidth: "360px", 
+              width: "100%",
+            }}
+          >
+            <Link 
+              href="/create" 
+              style={{ 
+                textDecoration: "none", 
+                display: "block", 
+                width: "100%",
+                borderRadius: "2rem",
+                padding: "0.55rem",
+                background: "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,244,246,0.85) 100%)",
+                border: "1.5px solid rgba(228, 141, 156, 0.45)",
+                boxShadow: "0 24px 60px rgba(166, 93, 93, 0.18), 0 4px 16px rgba(0,0,0,0.04)",
+                transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease",
+                position: "relative",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "translateY(-6px) scale(1.01)";
+                e.currentTarget.style.boxShadow = "0 30px 70px rgba(166, 93, 93, 0.25), 0 8px 24px rgba(0,0,0,0.06)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "translateY(0) scale(1)";
+                e.currentTarget.style.boxShadow = "0 24px 60px rgba(166, 93, 93, 0.18), 0 4px 16px rgba(0,0,0,0.04)";
+              }}
+            >
+              <div style={{ position: "relative", overflow: "hidden", borderRadius: "1.6rem" }}>
+                <img
+                  src="/landing-bouquet-preview.png"
+                  alt="Interactive digital flower bouquet with personal voice note and love letter"
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    display: "block",
+                    borderRadius: "1.6rem",
+                  }}
+                />
+              </div>
+
+              {/* Floating CTA Pill below image */}
+              <div style={{
+                marginTop: "0.65rem",
+                padding: "0.55rem 0.9rem",
+                background: "rgba(255,255,255,0.92)",
+                borderRadius: "9999px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.4rem",
+                border: "1px solid rgba(228, 141, 156, 0.35)",
+                boxShadow: "0 2px 10px rgba(124, 67, 67, 0.06)"
+              }}>
+                <span style={{ fontSize: "0.85rem" }}>✨</span>
+                <span style={{
+                  fontSize: "0.75rem",
+                  fontWeight: 800,
+                  color: "#7c3f4f",
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase"
+                }}>
+                  {isPH ? "I-tap para gumawa ng bouquet mo →" : "Tap to make your bouquet →"}
+                </span>
+              </div>
+            </Link>
+          </div>
         </main>
 
         {/* Live Ticker */}
