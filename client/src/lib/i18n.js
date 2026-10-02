@@ -3,6 +3,13 @@ import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import HttpBackend from "i18next-http-backend";
 
+import enTranslation from "../../public/locales/en.json";
+import esTranslation from "../../public/locales/es.json";
+import bnTranslation from "../../public/locales/bn.json";
+import frTranslation from "../../public/locales/fr.json";
+import arTranslation from "../../public/locales/ar.json";
+import tlTranslation from "../../public/locales/tl.json";
+
 const SUPPORTED_LANGS = ["en", "es", "bn", "fr", "ar", "tl"];
 const RTL_LANGS = ["ar"];
 
@@ -37,15 +44,21 @@ const languageDetector = new LanguageDetector();
 languageDetector.addDetector(phDetector);
 
 i18n
-  .use(HttpBackend)
   .use(languageDetector)
   .use(initReactI18next)
   .init({
     fallbackLng: "en",
     supportedLngs: SUPPORTED_LANGS,
-
-    /* Only load translation files for the active language (code-split) */
-    load: "languageOnly", // "en-US" → loads "en"
+    keySeparator: false,
+    nsSeparator: false,
+    resources: {
+      en: { translation: enTranslation },
+      es: { translation: esTranslation },
+      bn: { translation: bnTranslation },
+      fr: { translation: frTranslation },
+      ar: { translation: arTranslation },
+      tl: { translation: tlTranslation },
+    },
 
     /* Language detection config */
     detection: {
@@ -54,17 +67,12 @@ i18n
       lookupLocalStorage: "i18nextLng",
     },
 
-    /* Lazy-load from /public/locales/{lng}.json */
-    backend: {
-      loadPath: "/locales/{{lng}}.json",
-    },
-
     interpolation: {
       escapeValue: false, // React already escapes
     },
 
     react: {
-      useSuspense: true,
+      useSuspense: false,
     },
   });
 

@@ -12,12 +12,6 @@ export default function sitemap() {
       priority: 1.0,
     },
     {
-      url: `${baseUrl}/ph`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.95,
-    },
-    {
       url: `${baseUrl}/virtual-bouquet-maker`,
       lastModified: new Date(),
       changeFrequency: "weekly",

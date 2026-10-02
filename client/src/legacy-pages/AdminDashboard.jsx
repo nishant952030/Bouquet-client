@@ -48,7 +48,7 @@ export default function AdminDashboard() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    const correctPassword = process.env.VITE_ADMIN_KEY;
+    const correctPassword = typeof process !== "undefined" && process.env ? process.env.VITE_ADMIN_KEY : undefined;
     if (!correctPassword) {
       setError("Admin key not configured in .env");
       return;

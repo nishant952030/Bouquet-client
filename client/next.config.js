@@ -18,6 +18,11 @@ const nextConfig = {
     VITE_ANALYTICS_WEBSITE_ID: process.env.VITE_ANALYTICS_WEBSITE_ID,
     VITE_SUPPORT_EMAIL: process.env.VITE_SUPPORT_EMAIL,
     VITE_ADMIN_KEY: process.env.VITE_ADMIN_KEY,
+    VITE_API_BASE_URL: process.env.VITE_API_BASE_URL,
+    VITE_GROK_PROXY_URL: process.env.VITE_GROK_PROXY_URL,
+    VITE_GROK_API_URL: process.env.VITE_GROK_API_URL,
+    VITE_GROK_MODEL: process.env.VITE_GROK_MODEL,
+    VITE_GROK_API_KEY: process.env.VITE_GROK_API_KEY,
   },
   async redirects() {
     return [

@@ -3,9 +3,11 @@
 const TRACKER_URL = 'https://site-tracker-ruddy.vercel.app';
 const WEBSITE_ID = 'petalsandwords';
 
+const getEnv = (key) => (typeof process !== "undefined" && process.env ? process.env[key] : undefined);
+
 // ✅ INIT GA
 export function initGoogleAnalytics() {
-  const measurementId = process.env.VITE_GA_MEASUREMENT_ID;
+  const measurementId = getEnv("VITE_GA_MEASUREMENT_ID");
 
   if (typeof window === "undefined" || !measurementId) return;
   if (window.__gaInitialized) return;
@@ -37,7 +39,7 @@ export function initGoogleAnalytics() {
 export function trackPageView(url) {
   if (typeof window === "undefined") return;
 
-  const measurementId = process.env.VITE_GA_MEASUREMENT_ID;
+  const measurementId = getEnv("VITE_GA_MEASUREMENT_ID");
 
   if (typeof window.gtag === "function") {
     window.gtag("event", "page_view", {
@@ -102,6 +104,7 @@ function sendToTracker(data) {
 
 // ✅ SESSION ID
 function getSessionId() {
+  if (typeof window === "undefined" || !globalThis.sessionStorage) return "ssr-session";
   const key = 'ax_sid';
   let sid = sessionStorage.getItem(key);
 
@@ -115,6 +118,7 @@ function getSessionId() {
 
 // ✅ VISITOR ID
 function getVisitorId() {
+  if (typeof window === "undefined" || !globalThis.localStorage) return "ssr-visitor";
   const key = 'ax_vid';
   let vid = localStorage.getItem(key);
 
@@ -128,5 +132,9 @@ function getVisitorId() {
 
 // ✅ BETTER ID
 function generateId() {
-  return crypto.randomUUID();
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
+

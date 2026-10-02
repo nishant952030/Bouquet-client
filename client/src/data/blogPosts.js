@@ -1032,8 +1032,8 @@ export const blogPosts = [
           emoji: "💐",
           title: "Gumawa ng Libreng Monthsary Bouquet",
           text: "100% Libre forever. Pumili ng bulaklak, magsulat ng sweet note, at i-share agad sa Messenger o Viber!",
-          link: "/ph",
-          linkText: "Gumawa ng Bouquet sa Pilipinas →"
+          link: "/create",
+          linkText: "Gumawa ng Bouquet →"
         }
       },
       {

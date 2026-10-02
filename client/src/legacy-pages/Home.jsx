@@ -1,436 +1,376 @@
-import { useEffect, useMemo, useRef, useState, Suspense } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../components/LanguageSwitcher";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Environment, ContactShadows, PerspectiveCamera } from "@react-three/drei";
-
 import { applySeo, seoKeywords } from "../lib/seo";
 import { blogPosts } from "../data/blogPosts";
 
-/* --- 3D Components --- */
+const TESTIMONIALS = [
+  { quote: "\u201cI sent my sister a digital peony bouquet with an audio poem when she defended her thesis. She wept happy tears across four time zones.\u201d", name: "Camille Laurent", role: "Sent \u2018Dawn Rose & Eucalyptus\u2019 bouquet", location: "Paris, France" },
+  { quote: "\u201cThe virtual hug card felt surprisingly intimate. My partner listened to the cello soundscape on his commute and felt wrapped in affection.\u201d", name: "Julian Thorne", role: "Created \u2018Meadow Breath\u2019 Hug Card", location: "Edinburgh, UK" },
+  { quote: "\u201cThe unsealing animation of the wax stamp is sheer poetry. There is no comparable gifting experience that feels this tactile and authentic online.\u201d", name: "Elena Rostova", role: "Sent \u2018Monogrammed Botanical Wax\u2019 letter", location: "Milan, Italy" },
+  { quote: "\u201cI sent this in 2 minutes and it felt so personal, not generic at all. She called me right after.\u201d", name: "Aditi Sharma", role: "Created a birthday bouquet", location: "Mumbai, India" },
+  { quote: "\u201cThe flowers looked so premium on mobile. She cried happy tears \ud83d\ude2d Best digital gift I\u2019ve ever sent.\u201d", name: "Priya Kapoor", role: "Sent an anniversary bouquet", location: "Hyderabad, India" },
+];
 
-const Petal = ({ color, position, rotation, scale }) => {
-  const mesh = useRef();
-  const [speed] = useState(() => 0.1 + Math.random() * 0.4);
-  
-  useFrame((state) => {
-    if (!mesh.current) return;
-    const t = state.clock.getElapsedTime();
-    mesh.current.rotation.y += speed * 0.05;
-    mesh.current.rotation.z += speed * 0.02;
-  });
-
-  return (
-    <Float speed={2} rotationIntensity={1.5} floatIntensity={2} position={position} rotation={rotation}>
-      <mesh ref={mesh} scale={[scale, scale * 0.1, scale * 0.5]}>
-        <sphereGeometry args={[0.3, 16, 16]} />
-        <meshStandardMaterial 
-          color={color} 
-          roughness={0.2} 
-          metalness={0.1}
-          transparent
-          opacity={0.8}
-        />
-      </mesh>
-    </Float>
-  );
-};
-
-const SceneBackground = () => {
-  const [petals] = useState(() => {
-    return Array.from({ length: 35 }).map((_, i) => ({
-      position: [
-        (Math.random() - 0.5) * 20,
-        (Math.random() - 0.5) * 15,
-        (Math.random() - 0.5) * 8 - 2
-      ],
-      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI],
-      scale: 0.5 + Math.random() * 1.5,
-      color: i % 2 === 0 ? '#e48d9c' : '#fbc4ab'
-    }));
-  });
-
-  return (
-    <group>
-      {petals.map((props, i) => <Petal key={i} {...props} />)}
-      <ContactShadows position={[0, -4, 0]} opacity={0.3} scale={20} blur={2} far={4.5} />
-    </group>
-  );
-};
+const TOOLS = [
+  { icon: "\ud83d\udc90", title: "Digital Floral Bouquet", desc: "Curate beautiful stems with a heartfelt note. Free, instant, no signup.", tags: ["Stem Builder", "Color Harmony", "Shareable Link"], path: "/create" },
+  { icon: "\ud83d\udc8c", title: "Artisanal Greeting Card", desc: "Write a letter in a beautiful envelope with custom calligraphy and wax seal.", tags: ["Linen Paper", "Wax Stamp", "Audio Note"], path: "/create-greeting-card" },
+  { icon: "\ud83e\udd17", title: "Virtual Hug Card", desc: "Send an interactive pull-to-open warm hug card with ambient sound.", tags: ["Breathing Glow", "Soundscapes", "Warmth Tokens"], path: "/create-hug-card" },
+];
 
 export default function Home() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-
-  const testimonials = useMemo(() => [
-    { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi", city: "Mumbai" },
-    { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "Rahul", city: "Bengaluru" },
-    { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Sneha", city: "Pune" },
-    { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Priya", city: "Hyderabad" },
-    { quote: "Got the share link in seconds. So quick and easy!", author: "Neha", city: "Delhi" },
-  ], []);
-
+  const featuredPosts = useMemo(() => blogPosts.slice(0, 3), []);
   const [activeIdx, setActiveIdx] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
-  const [isToolsModalOpen, setIsToolsModalOpen] = useState(false);
-  const featuredPosts = useMemo(() => blogPosts.slice(0, 3), []);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     applySeo({
       title: "Free Online Bouquet Maker | Create & Send Digital Flowers with a Note",
-      description: "Send a digital bouquet for birthdays, Father's Day, anniversaries, or just because. Free, instant, no signup. The easiest way to show someone you care.",
+      description: "Send a digital bouquet for birthdays, anniversaries, or just because. Free, instant, no signup.",
       keywords: seoKeywords.home,
       path: "/",
-      jsonLd: {
-        "@context": "https://schema.org",
-        "@graph": [
-          { "@type": "WebSite", name: "Petals and Words", url: window.location.origin, description: "Free online bouquet maker for creating and sharing digital flowers with personal notes for any occasion." },
-        ],
-      },
     });
   }, []);
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
+    const timer = setInterval(() => {
       setIsSliding(true);
-      window.setTimeout(() => { setActiveIdx(v => (v + 1) % testimonials.length); setIsSliding(false); }, 220);
-    }, 3600);
-    return () => window.clearInterval(timer);
-  }, [testimonials.length]);
+      setTimeout(() => { setActiveIdx(v => (v + 1) % TESTIMONIALS.length); setIsSliding(false); }, 200);
+    }, 4200);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const h = e => { if (e.key === "Escape") setModalOpen(false); };
+    document.addEventListener("keydown", h);
+    return () => document.removeEventListener("keydown", h);
+  }, []);
+
+  const t_ = TESTIMONIALS[activeIdx];
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-[#fff5f6] font-sans">
+    <div style={{ minHeight: "100vh", background: "#fff8f7", overflowX: "hidden", position: "relative" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@400;500;600;700&display=swap');
-        .glass-card {
-          background: rgba(255, 255, 255, 0.55);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.7);
-          box-shadow: 0 10px 40px rgba(228, 141, 156, 0.15);
-        }
-        .ui-layer { pointer-events: none; }
-        .ui-layer * { pointer-events: auto; }
-        
-        .vv-btn-primary {
-          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-          background: linear-gradient(135deg, #a65d5d 0%, #7c4343 100%);
-          color: #ffffff;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 0.95rem; font-weight: 600;
-          letter-spacing: 0.08em; text-transform: uppercase;
-          border: none; border-radius: 9999px;
-          padding: 0 2rem; min-height: 56px;
-          cursor: pointer;
-          box-shadow: 0 12px 30px rgba(124, 67, 67, 0.25);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-          width: 100%;
-        }
-        .vv-btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 16px 40px rgba(124, 67, 67, 0.35);
-        }
-        
-        .vv-btn-secondary {
-          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-          background: #ffffff;
-          color: #7c4343;
-          font-family: 'Montserrat', sans-serif;
-          font-size: 0.95rem; font-weight: 600;
-          letter-spacing: 0.05em; text-transform: uppercase;
-          border: 1.5px solid rgba(166, 93, 93, 0.2);
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+        .ms{font-family:'Material Symbols Outlined';font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;display:inline-block;vertical-align:middle;line-height:1}
+        .ms-fill{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+        @keyframes floatPetal{0%{transform:translateY(-20px) rotate(0deg);opacity:0}15%{opacity:.65}85%{opacity:.4}100%{transform:translateY(105vh) rotate(380deg) translateX(80px);opacity:0}}
+        @keyframes pulseAura{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.08);opacity:.65}}
+        @keyframes modalIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+        .petal{position:absolute;pointer-events:none;background:radial-gradient(circle at 35% 35%,#ffd9dd 0%,#fda2b1 55%,#e48d9c 100%);border-radius:70% 30% 70% 30%/30% 70% 30% 70%;filter:drop-shadow(0 4px 6px rgba(124,67,67,.08));animation:floatPetal linear infinite}
+        .shimmer{background:linear-gradient(135deg,#602d2d 0%,#904856 50%,#602d2d 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .glass{background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.88)}
+        .glass2{background:rgba(255,255,255,.76);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,.92)}
+        .btn-wine{background:linear-gradient(135deg,#7c4343,#904856);color:#fff;font-family:'Montserrat',sans-serif;font-weight:600;border-radius:9999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .22s;box-shadow:0 6px 20px rgba(124,67,67,.28);border:none;cursor:pointer}
+        .btn-wine:hover{background:linear-gradient(135deg,#5a2e2e,#7c4343);transform:scale(1.03);box-shadow:0 10px 28px rgba(124,67,67,.38)}
+        .btn-glass-s{background:rgba(255,255,255,.6);color:#602d2d;border:1px solid rgba(255,255,255,.85);border-radius:9999px;font-family:'Montserrat',sans-serif;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;text-decoration:none}
+        .btn-glass-s:hover{background:rgba(255,255,255,.9)}
+        .blog-link{background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.78);border-radius:18px;transition:all .22s;display:block;text-decoration:none}
+        .blog-link:hover{background:rgba(255,255,255,.76);transform:translateX(4px)}
+        .tag-pill{padding:3px 10px;background:rgba(255,255,255,.72);border-radius:9999px;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#524343}
+        .tool-card{background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.85);border-radius:24px;transition:all .28s;display:flex;flex-direction:column;justify-content:space-between}
+        .tool-card:hover{background:rgba(255,255,255,.84);box-shadow:0 16px 40px rgba(124,67,67,.12);transform:translateY(-3px)}
+        .modal-bd{position:fixed;inset:0;z-index:50;background:rgba(47,19,24,.45);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:1.25rem}
+        .modal-box{animation:modalIn .28s cubic-bezier(.22,1,.36,1);max-height:90vh;overflow-y:auto}
+        .dot-ctrl{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.76);border:1px solid rgba(214,194,193,.55);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#602d2d;transition:all .18s}
+        .dot-ctrl:hover{background:#fff}
+        a,button{cursor:pointer}
+
+        .home-header {
+          position: fixed;
+          top: 14px;
+          left: 14px;
+          right: 14px;
+          z-index: 40;
           border-radius: 9999px;
-          padding: 0 2rem; min-height: 56px;
-          cursor: pointer;
-          transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-          width: 100%;
+          box-shadow: 0 8px 32px rgba(124,67,67,.07);
+          max-width: 1200px;
+          margin: 0 auto;
         }
-        .vv-btn-secondary:hover {
-          transform: translateY(-2px);
-          border-color: rgba(166, 93, 93, 0.5);
-          box-shadow: 0 10px 25px rgba(166, 93, 93, 0.1);
+        .home-header-inner {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px 24px;
+          gap: 12px;
+        }
+        .home-header-logo {
+          height: 34px;
+          width: auto;
+          object-fit: contain;
+          flex-shrink: 0;
+          display: block;
+        }
+        .home-header-right {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          flex-shrink: 0;
+        }
+        .home-blog-link {
+          font-family: 'Montserrat', sans-serif;
+          font-size: 14px;
+          font-weight: 500;
+          color: #524343;
+          text-decoration: none;
+          transition: color 0.15s;
+          white-space: nowrap;
+        }
+        .home-blog-link:hover {
+          color: #904856;
+        }
+        .home-btn-gift {
+          padding: 9px 20px;
+          font-size: 13.5px;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
 
-        .vv-tag-new {
-          position: absolute; top: -10px; right: 10px;
-          background: linear-gradient(135deg, #e91e63 0%, #f48fb1 100%);
-          color: #ffffff;
-          font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em;
-          padding: 0.25rem 0.6rem; border-radius: 9999px;
-          box-shadow: 0 4px 12px rgba(233,30,99,0.3);
-          transform: rotate(8deg);
+        @media (max-width: 768px) {
+          .home-header {
+            top: 10px;
+            left: 10px;
+            right: 10px;
+          }
+          .home-header-inner {
+            padding: 7px 12px;
+            gap: 8px;
+          }
+          .home-header-logo {
+            height: 26px;
+          }
+          .home-header-right {
+            gap: 8px;
+          }
+          .home-blog-link {
+            display: none;
+          }
+          .home-btn-gift {
+            padding: 7px 13px;
+            font-size: 12px;
+            gap: 5px;
+          }
         }
-        
-        /* Shimmer badge */
-        @keyframes vvShimmer {
-          0%   { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        .vv-shimmer {
-          background: linear-gradient(90deg, #7c4343 0%, #e48d9c 40%, #c8a96e 70%, #7c4343 100%);
-          background-size: 200% auto;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: vvShimmer 4s linear infinite;
-        }
-        @keyframes modalFadeIn {
-          from { opacity: 0; transform: scale(0.96) translateY(12px); }
-          to { opacity: 1; transform: scale(1) translateY(0); }
+
+        @media (max-width: 380px) {
+          .home-header-inner {
+            padding: 6px 10px;
+            gap: 6px;
+          }
+          .home-header-logo {
+            height: 23px;
+          }
+          .home-btn-gift {
+            padding: 6px 10px;
+            font-size: 11px;
+            gap: 4px;
+          }
         }
       `}</style>
 
-      {/* 3D Canvas */}
-      <div className="absolute inset-0 z-0">
-        <Canvas shadows>
-          <PerspectiveCamera makeDefault position={[0, 0, 8]} fov={45} />
-          <ambientLight intensity={0.6} />
-          <pointLight position={[10, 10, 10]} intensity={0.5} color="#fff5f6" />
-          <spotLight position={[-10, 10, 10]} angle={0.15} penumbra={1} intensity={1} castShadow />
-          <SceneBackground />
-          <Suspense fallback={null}>
-            <Environment preset="dawn" />
-          </Suspense>
-        </Canvas>
+      {/* Background */}
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, overflow: "hidden" }}>
+        <div style={{ position:"absolute",top:"-15%",left:"50%",transform:"translateX(-50%)",width:900,height:750,background:"radial-gradient(circle,rgba(253,169,177,.22) 0%,transparent 70%)",borderRadius:"50%",filter:"blur(60px)",animation:"pulseAura 12s ease-in-out infinite" }} />
+        <div style={{ position:"absolute",top:"45%",left:"-10%",width:550,height:550,background:"rgba(255,178,190,.14)",borderRadius:"50%",filter:"blur(60px)" }} />
+        <div style={{ position:"absolute",bottom:"5%",right:"-5%",width:600,height:600,background:"rgba(255,225,228,.32)",borderRadius:"50%",filter:"blur(60px)" }} />
+        <div className="petal" style={{ width:16,height:24,left:"8%",animationDuration:"14s",animationDelay:"0s" }} />
+        <div className="petal" style={{ width:12,height:18,left:"22%",animationDuration:"18s",animationDelay:"3s" }} />
+        <div className="petal" style={{ width:20,height:28,left:"45%",animationDuration:"16s",animationDelay:"1.5s" }} />
+        <div className="petal" style={{ width:14,height:22,left:"68%",animationDuration:"20s",animationDelay:"5s" }} />
+        <div className="petal" style={{ width:16,height:24,left:"86%",animationDuration:"15s",animationDelay:"2s" }} />
+        <div className="petal" style={{ width:12,height:16,left:"93%",animationDuration:"19s",animationDelay:"7s" }} />
       </div>
 
-      {/* UI Overlay */}
-      <div className="ui-layer absolute inset-0 z-10 flex flex-col items-center overflow-y-auto px-4 pb-20">
-        
-        {/* Header */}
-        <header className="w-full max-w-6xl flex items-center justify-between py-6 mb-4 md:mb-10">
-          <img src="/logo-transparent.png" alt="Petals and Words" className="h-8 md:h-10" />
-          <div className="flex items-center gap-4">
-            <Link to="/blog" className="text-[#7c4343] font-semibold text-sm tracking-wide hover:opacity-70 transition-opacity hidden md:block">{t("common.blog")}</Link>
+      {/* NAV */}
+      <header className="glass2 home-header">
+        <div className="home-header-inner">
+          <Link to="/" style={{ display: "flex", alignItems: "center" }}>
+            <img src="/logo-transparent.png" alt="Petals & Words" className="home-header-logo" />
+          </Link>
+          <div className="home-header-right">
+            <Link to="/blog" className="home-blog-link">Blog</Link>
             <LanguageSwitcher />
+            <button className="btn-wine home-btn-gift" onClick={() => setModalOpen(true)}>
+              <span className="ms" style={{ fontSize: 16 }}>redeem</span>
+              <span>Send a Gift</span>
+            </button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Hero Section Card */}
-        <main className="w-full flex items-center justify-center mb-16">
-          <div className="glass-card max-w-2xl w-full rounded-[3rem] p-10 md:p-16 text-center relative overflow-hidden">
-            
-            {/* Logo Area */}
-            <div className="mb-8 flex flex-col items-center">
-              <div className="mb-4 text-[#e48d9c] opacity-60">
-                <svg fill="none" height="30" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 60 30" width="60"><path d="M30 15c-5-10-15-10-20-5 5 5 15 5 20 5m0 0c5-10 15-10 20-5-5 5-15 5-20 5" strokeLinecap="round"></path></svg>
-              </div>
-              <h2 className="uppercase tracking-widest text-xs font-bold mb-2 text-[#7c4343] opacity-80">
-                {t("home.label", "Made for Meaningful Moments")}
-              </h2>
-            </div>
+      {/* HERO */}
+      <main style={{ position:"relative",zIndex:10,paddingTop:130,paddingBottom:56,padding:"130px 16px 56px",maxWidth:1200,margin:"0 auto" }}>
+        <div className="glass" style={{ maxWidth:860,margin:"0 auto 48px",borderRadius:40,padding:"clamp(32px,6vw,64px)",textAlign:"center",position:"relative",overflow:"hidden",boxShadow:"0 20px 60px rgba(124,67,67,.09)" }}>
+          <div style={{ position:"absolute",top:-80,right:-80,width:200,height:200,background:"rgba(253,162,177,.32)",borderRadius:"50%",filter:"blur(40px)",pointerEvents:"none" }} />
+          <div style={{ position:"absolute",bottom:-80,left:-80,width:200,height:200,background:"rgba(255,225,228,.45)",borderRadius:"50%",filter:"blur(40px)",pointerEvents:"none" }} />
 
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-[#3d3028] mb-6 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-              Send flowers that <br className="hidden md:block"/>
-              <em className="vv-shimmer italic font-medium">feel like you</em>
-            </h1>
-            
-            <p className="text-[#5c4a40] text-sm md:text-base font-medium mb-10 max-w-md mx-auto leading-relaxed">
-              Birthdays, rainy days, Father's Day, anniversaries — or just because you thought of them. Free, in 60 seconds.
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-col gap-4 max-w-xs mx-auto">
-              <button className="vv-btn-primary animate-pulse" onClick={() => setIsToolsModalOpen(true)}>
-                🎁 {t("home.toolsGifts", "Tools & Gifts")}
-              </button>
-            </div>
-            
-            <p className="mt-8 text-[10px] md:text-xs tracking-widest uppercase font-semibold text-[#a65d5d] opacity-70">
-              No login • Ready in 60 seconds
-            </p>
+          {/* Kicker */}
+          <div style={{ display:"inline-flex",alignItems:"center",gap:8,padding:"6px 18px",borderRadius:9999,background:"rgba(255,255,255,.76)",border:"1px solid rgba(255,217,221,.75)",boxShadow:"0 2px 8px rgba(124,67,67,.06)",marginBottom:22 }}>
+            <span className="ms" style={{ fontSize:14,color:"#904856" }}>auto_awesome</span>
+            <span style={{ fontFamily:"Montserrat,sans-serif",fontSize:11,fontWeight:700,letterSpacing:".18em",textTransform:"uppercase",color:"#602d2d" }}>✦ MADE FOR MEANINGFUL MOMENTS ✦</span>
           </div>
-        </main>
 
-        {/* Below the fold content */}
-        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 px-4">
-          
-          {/* Testimonials */}
-          <div className="glass-card rounded-[2rem] p-8">
-            <h3 className="uppercase tracking-widest text-xs font-bold mb-6 text-[#7c4343] opacity-80">{t("home.testimonials")}</h3>
-            <div 
-              style={{
-                opacity: isSliding ? 0 : 1,
-                transform: isSliding ? "translateX(-12px)" : "translateX(0)",
-                transition: "opacity 0.2s, transform 0.2s",
-              }}
-            >
-              <p className="font-serif text-xl italic text-[#3d3028] mb-6 leading-relaxed" style={{ fontFamily: "'Playfair Display', serif" }}>
-                "{testimonials[activeIdx].quote}"
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-[#fbc4ab] text-[#7c4343] flex items-center justify-center font-bold">
-                  {testimonials[activeIdx].author[0]}
+          <h1 style={{ fontFamily:"'Playfair Display',serif",fontSize:"clamp(2.1rem,5vw,3.4rem)",lineHeight:1.15,fontWeight:500,color:"#2f1318",margin:"0 0 18px" }}>
+            Send flowers that{" "}<em className="shimmer" style={{ fontStyle:"italic",fontWeight:400 }}>feel like you</em>
+          </h1>
+
+          <p style={{ fontFamily:"Montserrat,sans-serif",fontSize:16,lineHeight:1.78,color:"#524343",maxWidth:560,margin:"0 auto 34px",fontWeight:300 }}>
+            Handcraft bespoke digital floral arrangements paired with poetic notes and heartfelt motion. Free forever, no waste, infinitely cherished.
+          </p>
+
+          <div style={{ display:"flex",flexWrap:"wrap",gap:14,justifyContent:"center",marginBottom:26 }}>
+            <button className="btn-wine" style={{ padding:"14px 36px",fontSize:15 }} onClick={() => setModalOpen(true)}>
+              <span className="ms" style={{ fontSize:20 }}>redeem</span> Gifts &amp; Tools <span className="ms" style={{ fontSize:18 }}>arrow_forward</span>
+            </button>
+            <Link to="/blog" className="btn-glass-s" style={{ padding:"13px 28px",fontSize:14 }}>
+              <span className="ms" style={{ fontSize:18 }}>menu_book</span> Explore Journal
+            </Link>
+          </div>
+
+          <p style={{ fontFamily:"Montserrat,sans-serif",fontSize:12,color:"#857372" }}>
+            <span className="ms" style={{ fontSize:14,color:"#904856",marginRight:4 }}>verified</span>
+            No login required · Ready to send in 60 seconds · 100% Free
+          </p>
+
+          {/* Feature strip */}
+          <div style={{ marginTop:32,paddingTop:22,borderTop:"1px solid rgba(214,194,193,.45)",display:"flex",flexWrap:"wrap",gap:18,justifyContent:"space-around" }}>
+            {[{icon:"spa",label:"Living Petals",sub:"Wind & blossom physics"},{icon:"history_edu",label:"Artisan Script",sub:"Letterpress calligraphy"},{icon:"workspace_premium",label:"Wax Seal Stamp",sub:"Bespoke monogram emblems"}].map(f => (
+              <div key={f.icon} style={{ display:"flex",alignItems:"center",gap:12,textAlign:"left" }}>
+                <div style={{ width:38,height:38,borderRadius:"50%",background:"rgba(253,162,177,.28)",display:"flex",alignItems:"center",justifyContent:"center",color:"#602d2d" }}>
+                  <span className="ms" style={{ fontSize:19 }}>{f.icon}</span>
                 </div>
                 <div>
-                  <p className="font-semibold text-[#5c4a40] text-sm">{testimonials[activeIdx].author}</p>
-                  <p className="text-xs text-[#a65d5d]">{testimonials[activeIdx].city}</p>
+                  <p style={{ fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600,color:"#602d2d",margin:0 }}>{f.label}</p>
+                  <p style={{ fontFamily:"Montserrat,sans-serif",fontSize:11,color:"#857372",margin:0 }}>{f.sub}</p>
                 </div>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Two-col cards */}
+        <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))",gap:26 }}>
+
+          {/* Testimonials */}
+          <div className="glass" style={{ borderRadius:30,padding:"clamp(24px,4vw,36px)",display:"flex",flexDirection:"column",justifyContent:"space-between",position:"relative",overflow:"hidden",boxShadow:"0 8px 32px rgba(124,67,67,.06)" }}>
+            <span style={{ position:"absolute",top:-16,right:12,fontSize:130,lineHeight:1,color:"rgba(214,194,193,.3)",fontFamily:"'Playfair Display',serif",fontStyle:"italic",pointerEvents:"none",userSelect:"none" }}>"</span>
+            <div>
+              <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18 }}>
+                <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+                  <span className="ms ms-fill" style={{ fontSize:20,color:"#904856" }}>favorite</span>
+                  <h2 style={{ fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:600,color:"#602d2d",margin:0 }}>Words from the Heart</h2>
+                </div>
+                <div style={{ display:"flex",gap:2,color:"#904856" }}>
+                  {[...Array(5)].map((_,i) => <span key={i} className="ms ms-fill" style={{ fontSize:15 }}>star</span>)}
+                </div>
+              </div>
+              <div style={{ minHeight:120,display:"flex",alignItems:"center",opacity:isSliding?0:1,transform:isSliding?"translateX(-10px)":"translateX(0)",transition:"opacity .2s,transform .2s" }}>
+                <p style={{ fontFamily:"'Playfair Display',serif",fontSize:17,fontStyle:"italic",lineHeight:1.7,color:"#2f1318",margin:0 }}>{t_.quote}</p>
+              </div>
             </div>
-            <div className="flex gap-2 mt-8">
-              {testimonials.map((_, i) => (
-                <div 
-                  key={i} 
-                  onClick={() => setActiveIdx(i)}
-                  className={`h-2 rounded-full cursor-pointer transition-all ${i === activeIdx ? 'w-8 bg-[#7c4343]' : 'w-2 bg-[#e48d9c] opacity-40'}`} 
-                />
-              ))}
+            <div style={{ marginTop:22,paddingTop:18,borderTop:"1px solid rgba(214,194,193,.42)",display:"flex",alignItems:"center",justifyContent:"space-between" }}>
+              <div style={{ display:"flex",alignItems:"center",gap:12 }}>
+                <div style={{ width:42,height:42,borderRadius:"50%",background:"rgba(253,162,177,.38)",border:"2px solid rgba(253,162,177,.6)",display:"flex",alignItems:"center",justifyContent:"center",color:"#602d2d",fontFamily:"'Playfair Display',serif",fontWeight:600,fontSize:17 }}>{t_.name[0]}</div>
+                <div>
+                  <h4 style={{ fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:700,color:"#602d2d",margin:0 }}>{t_.name}</h4>
+                  <p style={{ fontFamily:"Montserrat,sans-serif",fontSize:11,color:"#904856",margin:0 }}>{t_.role}</p>
+                  <p style={{ fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:".12em",textTransform:"uppercase",color:"#857372",margin:0 }}>{t_.location}</p>
+                </div>
+              </div>
+              <div style={{ display:"flex",alignItems:"center",gap:7 }}>
+                <button className="dot-ctrl" onClick={() => setActiveIdx((activeIdx-1+TESTIMONIALS.length)%TESTIMONIALS.length)}><span className="ms" style={{ fontSize:16 }}>arrow_back</span></button>
+                <div style={{ display:"flex",gap:5 }}>
+                  {TESTIMONIALS.map((_,i) => (
+                    <button key={i} onClick={() => setActiveIdx(i)} style={{ width:i===activeIdx?10:7,height:i===activeIdx?10:7,borderRadius:"50%",background:i===activeIdx?"#602d2d":"rgba(133,115,114,.4)",border:"none",cursor:"pointer",transition:"all .2s" }} />
+                  ))}
+                </div>
+                <button className="dot-ctrl" onClick={() => setActiveIdx((activeIdx+1)%TESTIMONIALS.length)}><span className="ms" style={{ fontSize:16 }}>arrow_forward</span></button>
+              </div>
             </div>
           </div>
 
-          {/* Blog / Explore */}
-          <div className="glass-card rounded-[2rem] p-8">
-            <h3 className="uppercase tracking-widest text-xs font-bold mb-6 text-[#7c4343] opacity-80">{t("home.fromBlog")}</h3>
-            <div className="flex flex-col gap-4">
+          {/* Blog */}
+          <div className="glass" style={{ borderRadius:30,padding:"clamp(24px,4vw,36px)",display:"flex",flexDirection:"column",boxShadow:"0 8px 32px rgba(124,67,67,.06)" }}>
+            <div style={{ display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,paddingBottom:14,borderBottom:"1px solid rgba(214,194,193,.42)" }}>
+              <div style={{ display:"flex",alignItems:"center",gap:8 }}>
+                <span className="ms" style={{ fontSize:22,color:"#904856" }}>auto_stories</span>
+                <h2 style={{ fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:600,color:"#602d2d",margin:0 }}>The Floral Journal</h2>
+              </div>
+              <Link to="/blog" style={{ fontFamily:"Montserrat,sans-serif",fontSize:12,fontWeight:600,color:"#904856",textDecoration:"none",display:"flex",alignItems:"center",gap:4 }}>
+                View all <span className="ms" style={{ fontSize:14 }}>arrow_forward</span>
+              </Link>
+            </div>
+            <div style={{ display:"flex",flexDirection:"column",gap:11 }}>
               {featuredPosts.map(post => (
-                <Link key={post.slug} to={`/blog/${post.slug}`} className="block group">
-                  <h4 className="font-semibold text-[#3d3028] text-sm mb-1 group-hover:text-[#7c4343] transition-colors">
-                    {post.title}
-                  </h4>
-                  <p className="text-xs text-[#5c4a40] opacity-80 line-clamp-2">
-                    {post.description}
-                  </p>
+                <Link key={post.slug} to={`/blog/${post.slug}`} className="blog-link" style={{ padding:"13px 15px" }}>
+                  <div style={{ display:"flex",alignItems:"flex-start",gap:13 }}>
+                    <div style={{ width:44,height:44,borderRadius:12,background:"rgba(253,162,177,.25)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:20 }}>🌸</div>
+                    <div>
+                      <div style={{ fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:700,letterSpacing:".14em",textTransform:"uppercase",color:"#904856",marginBottom:4 }}>Floral Lore · 4 min read</div>
+                      <h3 style={{ fontFamily:"'Playfair Display',serif",fontSize:15,fontWeight:500,color:"#2f1318",margin:0,lineHeight:1.45 }}>{post.title}</h3>
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>
-            
-            <div className="mt-8 pt-6 border-t border-[#e48d9c]/20">
-               <Link to="/blog" className="text-xs font-bold tracking-widest uppercase text-[#a65d5d] hover:text-[#7c4343] transition-colors flex items-center gap-2">
-                 View all articles
-                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-               </Link>
-            </div>
           </div>
-
         </div>
-        
-      </div>
+      </main>
 
-      {/* Tools & Gifts Modal */}
-      {isToolsModalOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#3d3028]/45 backdrop-blur-md transition-opacity duration-300"
-          onClick={() => setIsToolsModalOpen(false)}
-        >
-          <div 
-            className="relative w-full max-w-lg rounded-[2.5rem] p-8 md:p-10 text-[#3d3028] shadow-2xl animate-fade-in"
-            onClick={(e) => e.stopPropagation()}
-            style={{ 
-              animation: "modalFadeIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              background: "rgba(255, 255, 255, 0.9)",
-              backdropFilter: "blur(20px)",
-              WebkitBackdropFilter: "blur(20px)",
-              border: "1px solid rgba(255, 255, 255, 0.85)"
-            }}
-          >
-            {/* Close Button */}
-            <button 
-              className="absolute top-6 right-6 w-10 h-10 rounded-full flex items-center justify-center border-none cursor-pointer bg-[#fff5f6] text-[#7c4343] hover:bg-[#7c4343] hover:text-white transition-colors duration-200"
-              onClick={() => setIsToolsModalOpen(false)}
-              aria-label="Close modal"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
+      {/* TOOLS MODAL */}
+      {modalOpen && (
+        <div className="modal-bd" onClick={() => setModalOpen(false)}>
+          <div className="modal-box glass2" style={{ maxWidth:900,width:"100%",borderRadius:40,padding:"clamp(24px,5vw,48px)",position:"relative" }} onClick={e => e.stopPropagation()}>
+            <button onClick={() => setModalOpen(false)} style={{ position:"absolute",top:18,right:18,width:40,height:40,borderRadius:"50%",background:"rgba(255,255,255,.88)",border:"1px solid rgba(214,194,193,.55)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#602d2d",transition:"all .2s",zIndex:1 }}>
+              <span className="ms" style={{ fontSize:20 }}>close</span>
             </button>
-
-            {/* Modal Header */}
-            <div className="text-center mb-8">
-              <span className="text-xs font-bold tracking-widest uppercase text-[#a65d5d] opacity-80 block mb-2">
-                Choose a Digital Surprise
-              </span>
-              <h2 className="text-3xl font-serif text-[#3d3028] leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-                Interactive Gifts & Tools
-              </h2>
+            <div style={{ textAlign:"center",marginBottom:32 }}>
+              <div style={{ display:"inline-flex",alignItems:"center",gap:8,padding:"5px 16px",borderRadius:9999,background:"rgba(253,162,177,.28)",border:"1px solid rgba(253,162,177,.5)",marginBottom:12 }}>
+                <span className="ms" style={{ fontSize:13,color:"#602d2d" }}>auto_fix_high</span>
+                <span style={{ fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:700,letterSpacing:".16em",textTransform:"uppercase",color:"#602d2d" }}>Bespoke Digital Suite</span>
+              </div>
+              <h2 style={{ fontFamily:"'Playfair Display',serif",fontSize:"clamp(1.4rem,3vw,2rem)",fontWeight:500,color:"#602d2d",margin:"0 0 8px" }}>Choose Your Gesture of Devotion</h2>
+              <p style={{ fontFamily:"Montserrat,sans-serif",fontSize:14,color:"#524343",margin:0,fontWeight:300 }}>Select an interactive instrument to build and customize your unique token.</p>
             </div>
-
-            {/* Grid of Options */}
-            <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto pr-1">
-              {[
-                {
-                  title: "Digital Shagun Envelope",
-                  desc: "Digitize cash gifts for weddings, Eid, and Diwali. Claim via UPI.",
-                  icon: "✉️",
-                  path: "/shagun",
-                  tag: "NEW"
-                },
-                {
-                  title: t("common.createBouquet", "Create Bouquet"),
-                  desc: "Arrange beautiful 2D flower stems with a card note.",
-                  icon: "💐",
-                  path: "/create",
-                  tag: ""
-                },
-                {
-                  title: t("home.createCard", "Send a Card"),
-                  desc: "Write a letter in a beautiful customizable envelope.",
-                  icon: "💌",
-                  path: "/create-greeting-card",
-                  tag: t("common.new", "NEW")
-                },
-                {
-                  title: t("home.sendPlushie", "Send a Plushie"),
-                  desc: "Customize a furry 3D plushie inside a surprise gift box.",
-                  icon: "🧸",
-                  path: "/create-plushie",
-                  tag: ""
-                },
-                {
-                  title: t("home.bakeCake", "Bake a Cake"),
-                  desc: "Bake and decorate a 3D birthday cake with candles.",
-                  icon: "🎂",
-                  path: "/create-cake",
-                  tag: ""
-                },
-                {
-                  title: "Virtual Hug Card",
-                  desc: "Send an interactive pull-to-open warm hug card.",
-                  icon: "🤗",
-                  path: "/create-hug-card",
-                  tag: ""
-                }
-              ].map((opt) => (
-                <button
-                  key={opt.path}
-                  onClick={() => {
-                    setIsToolsModalOpen(false);
-                    navigate(opt.path);
-                  }}
-                  className="flex items-center gap-4 w-full text-left p-4 rounded-2xl border border-solid border-[#e48d9c]/20 hover:border-[#7c4343]/40 bg-white/80 hover:bg-[#fff9fa] transition-all duration-200 cursor-pointer group shadow-sm hover:shadow-md hover:-translate-y-0.5"
-                  style={{ border: "1px solid rgba(228, 141, 156, 0.25)" }}
-                >
-                  <div className="text-3xl flex-shrink-0 bg-[#fff5f6] p-2 rounded-xl group-hover:scale-110 transition-transform duration-200">
-                    {opt.icon}
-                  </div>
-                  <div className="flex-grow min-width-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-sm text-[#3d3028] group-hover:text-[#7c4343] transition-colors duration-150">
-                        {opt.title}
-                      </span>
-                      {opt.tag && (
-                        <span className="text-[9px] font-bold tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-[#e91e63] to-[#f48fb1] text-white">
-                          {opt.tag}
-                        </span>
-                      )}
+            <div style={{ display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:18 }}>
+              {TOOLS.map(tool => (
+                <div key={tool.path} className="tool-card" style={{ padding:22 }}>
+                  <div>
+                    <div style={{ fontSize:34,marginBottom:14 }}>{tool.icon}</div>
+                    <h3 style={{ fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:600,color:"#602d2d",margin:"0 0 8px" }}>{tool.title}</h3>
+                    <p style={{ fontFamily:"Montserrat,sans-serif",fontSize:13,color:"#524343",lineHeight:1.65,margin:"0 0 14px" }}>{tool.desc}</p>
+                    <div style={{ display:"flex",flexWrap:"wrap",gap:5,marginBottom:18 }}>
+                      {tool.tags.map(tag => <span key={tag} className="tag-pill">{tag}</span>)}
                     </div>
-                    <p className="text-xs text-[#705f58] line-clamp-1 mt-0.5">
-                      {opt.desc}
-                    </p>
                   </div>
-                  <div className="text-[#a65d5d] opacity-0 group-hover:opacity-100 transition-opacity duration-150 pr-1">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M5 12h14M12 5l7 7-7 7" />
-                    </svg>
-                  </div>
-                </button>
+                  <button className="btn-wine" style={{ width:"100%",padding:"12px 0",fontSize:14 }} onClick={() => { setModalOpen(false); navigate(tool.path); }}>
+                    Explore Tool <span className="ms" style={{ fontSize:15 }}>arrow_forward</span>
+                  </button>
+                </div>
               ))}
             </div>
           </div>
         </div>
       )}
+
+      {/* FOOTER */}
+      <footer style={{ background:"rgba(255,240,241,.6)",borderTop:"1px solid rgba(214,194,193,.4)",position:"relative",zIndex:10,marginTop:52 }}>
+        <div style={{ maxWidth:1200,margin:"0 auto",padding:"36px 24px",display:"flex",flexWrap:"wrap",justifyContent:"space-between",alignItems:"center",gap:18 }}>
+          <div>
+            <h4 style={{ fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:500,color:"#602d2d",margin:"0 0 4px" }}>Petals &amp; Words</h4>
+            <p style={{ fontFamily:"Montserrat,sans-serif",fontSize:12,color:"#857372",margin:0 }}>© 2024 Petals &amp; Words. Handcrafted digital floral poetry.</p>
+          </div>
+          <nav style={{ display:"flex",flexWrap:"wrap",gap:18 }}>
+            {[["Blog","/blog"],["Bouquet Maker","/create"],["Greeting Card","/create-greeting-card"],["Virtual Hug","/create-hug-card"]].map(([label,to]) => (
+              <Link key={to} to={to} style={{ fontFamily:"Montserrat,sans-serif",fontSize:13,color:"#524343",textDecoration:"none" }}>{label}</Link>
+            ))}
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 }

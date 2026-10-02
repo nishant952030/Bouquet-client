@@ -31,7 +31,7 @@ import {
 import { loadRazorpayScript } from "../lib/razorpay";
 import { applySeo } from "../lib/seo";
 
-const API_BASE_URL = String(process.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
+const API_BASE_URL = String((typeof process !== "undefined" && process.env && process.env.VITE_API_BASE_URL) || "").replace(/\/+$/, "");
 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');
@@ -192,7 +192,7 @@ export default function Cart() {
   const [copied, setCopied] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
 
-  const razorpayKey = process.env.VITE_RAZORPAY_KEY_ID;
+  const razorpayKey = typeof process !== "undefined" && process.env ? process.env.VITE_RAZORPAY_KEY_ID : undefined;
   const currency = normalizeCurrency(countryCode);
   const totals = useMemo(() => getGiftCartTotals(items, currency), [items, currency]);
   const displayItems = paid ? checkedOutItems : items;
@@ -296,8 +296,13 @@ export default function Cart() {
           planId: "gift_bundle",
           amountMinor: totals.totalMinor,
           currency,
-          receipt: `bundle_${Date.now()}`,
-          notes: { type: "gift_bundle", itemCount: items.length },
+          receipt: `rcpt_bundle_${Date.now()}`,
+          notes: {
+            gift_type: "Digital Gift Bundle",
+            item_count: String(items.length),
+            items_included: items.map(i => i.type || "gift").join(", ").slice(0, 100),
+            website: "www.petalsandwords.com",
+          },
         }),
       });
       const orderData = await readApi(orderRes);
@@ -310,8 +315,13 @@ export default function Cart() {
         order_id: orderData.orderId,
         currency: orderData.currency || currency,
         name: "Petals and Words",
-        description: `Gift bundle (${items.length} items)`,
+        description: `Digital Gift Bundle (${items.length} gifts: ${items.map(i => i.type).join(", ")})`,
+        image: "https://www.petalsandwords.com/logo-transparent.png",
         theme: { color: "#7b5455" },
+        notes: {
+          gift_type: "Digital Gift Bundle",
+          item_count: String(items.length),
+        },
         modal: {
           ondismiss: () => {
             setPaying(false);
@@ -478,14 +488,12 @@ export default function Cart() {
           <section className="cart-empty">
             <div className="cart-empty-icon"><ShoppingCart size={26} /></div>
             <h1>{countryCode === "PH" ? "Walang laman ang iyong gift cart" : "Your gift cart is empty"}</h1>
-            <p>{countryCode === "PH" ? "Gumawa muna ng bouquet, cake, greeting card, o virtual hug bago mag-checkout." : "Create a bouquet, cake, card, or hug first. Each one can be added here as an individual product."}</p>
+            <p>{countryCode === "PH" ? "Gumawa muna ng bouquet, greeting card, o virtual hug bago mag-checkout." : "Create a bouquet, card, or hug first. Each one can be added here as an individual product."}</p>
             <div className="cart-add-grid" style={{ maxWidth: 520, margin: "0 auto" }}>
               {Object.entries({
                 bouquet: "/create",
-                cake: "/create-cake",
                 greeting_card: "/create-greeting-card",
                 hug_card: "/create-hug-card",
-                plushie: "/create-plushie",
               }).map(([type, path]) => (
                 <Link className="cart-btn cart-btn-soft" to={path} key={type}>
                   <Plus size={16} /> {getGiftProductMeta(type)?.shortLabel}
@@ -610,10 +618,8 @@ export default function Cart() {
                 <div className="cart-add-products">
                   {[
                     { type: "bouquet", path: "/create", icon: "💐", desc: "Flower arrangement with note" },
-                    { type: "cake", path: "/create-cake", icon: "🎂", desc: "3D virtual birthday cake" },
                     { type: "greeting_card", path: "/create-greeting-card", icon: "💌", desc: "Personalised envelope card" },
                     { type: "hug_card", path: "/create-hug-card", icon: "🤗", desc: "Interactive pull-to-open hug" },
-                    { type: "plushie", path: "/create-plushie", icon: "🧸", desc: "3D interactive plushie" },
                   ].map(({ type, path, icon, desc }) => (
                     <Link key={type} to={path} className="cart-add-product">
                       <div className="cart-add-product-icon" style={{ fontSize: "1.15rem" }}>{icon}</div>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ShoppingCart } from "lucide-react";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+import CreatorNavbar from "../components/CreatorNavbar";
 import { applySeo, seoKeywords } from "../lib/seo";
 import { trackEvent } from "../lib/analytics";
 import { addGiftCartItem } from "../lib/giftCart";
@@ -32,46 +32,55 @@ const CSS = `
   *,*::before,*::after{box-sizing:border-box}
 
   .chc-root{font-family:'Manrope',sans-serif;min-height:100vh;background:linear-gradient(160deg,#fdf6f0 0%,#f8edf0 55%,#fdf0f5 100%);color:#3E2723}
+  .chc-header{position:sticky;top:12px;z-index:50;max-width:900px;margin:0 auto 0.75rem;width:calc(100% - 24px);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(255,255,255,0.82);border:1.5px solid rgba(255,255,255,0.95);border-radius:9999px;box-shadow:0 12px 32px rgba(166,93,93,0.12);overflow:hidden}
+  .chc-header-inner{max-width:900px;margin:0 auto;padding:0.55rem 1.15rem;display:flex;align-items:center;justify-content:space-between}
 
-  .chc-header{position:sticky;top:0;z-index:40;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);background:rgba(253,246,240,0.88);border-bottom:1px solid rgba(200,130,140,0.10);box-shadow:0 2px 20px rgba(200,100,120,0.06)}
-  .chc-header-inner{max-width:560px;margin:0 auto;padding:0.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between}
+  .chc-studio-grid{display:grid;grid-template-columns:1fr;gap:1.5rem;max-width:1200px;margin:0 auto;padding:1.25rem 1.25rem 6.5rem}
+  @media(min-width:1024px){
+    .chc-studio-grid{grid-template-columns:380px 1fr;gap:2rem;align-items:start}
+  }
 
-  .chc-body{max-width:560px;margin:0 auto;padding:1rem 1.25rem 6rem}
+  .chc-sticky-stage{position:relative}
+  @media(min-width:1024px){
+    .chc-sticky-stage{position:sticky;top:5rem;align-self:start;z-index:20}
+  }
 
-  .chc-card{background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.85);border-radius:1.5rem;box-shadow:0 8px 32px rgba(200,130,140,0.10);padding:1.25rem;margin-bottom:1rem}
+  .chc-card{background:rgba(255,255,255,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.95);border-radius:1.5rem;box-shadow:0 12px 36px rgba(200,130,140,0.10);padding:1.25rem;margin-bottom:1.15rem}
 
-  .chc-label{font-size:0.65rem;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;color:#a65d5d;margin-bottom:0.5rem;display:block;font-family:'Montserrat',sans-serif}
+  .chc-label{font-size:0.68rem;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:#a65d5d;margin-bottom:0.45rem;display:block;font-family:'Montserrat',sans-serif}
 
-  .chc-input{width:100%;padding:0.75rem 1rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.22);font-family:'Manrope',sans-serif;font-size:0.9rem;color:#3E2723;background:rgba(255,255,255,0.85);outline:none;transition:border-color 0.2s,box-shadow 0.2s;margin-bottom:0.4rem}
+  .chc-input{width:100%;padding:0.75rem 1rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.22);font-family:'Manrope',sans-serif;font-size:0.9rem;color:#3E2723;background:rgba(255,255,255,0.9);outline:none;transition:border-color 0.2s,box-shadow 0.2s;margin-bottom:0.5rem}
   .chc-input:focus{border-color:#a65d5d;box-shadow:0 0 0 3px rgba(166,93,93,0.12)}
 
-  .chc-textarea{width:100%;padding:0.75rem 1rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.22);font-family:'Patrick Hand',cursive;font-size:1.05rem;color:#3E2723;background:rgba(255,255,255,0.85);outline:none;resize:vertical;min-height:100px;line-height:1.5;transition:border-color 0.2s,box-shadow 0.2s}
+  .chc-textarea{width:100%;padding:0.85rem 1rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.22);font-family:'Patrick Hand',cursive;font-size:1.15rem;color:#3E2723;background:rgba(255,255,255,0.9);outline:none;resize:vertical;min-height:110px;line-height:1.5;transition:border-color 0.2s,box-shadow 0.2s}
   .chc-textarea:focus{border-color:#a65d5d;box-shadow:0 0 0 3px rgba(166,93,93,0.12)}
 
-  .chc-presets{display:flex;flex-direction:column;gap:0.4rem;margin-top:0.6rem}
-  .chc-preset{text-align:left;padding:0.65rem 0.9rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.18);background:rgba(255,255,255,0.75);font-family:'Patrick Hand',cursive;font-size:1rem;color:#7b5455;line-height:1.4;cursor:pointer;transition:all 0.18s}
+  .chc-presets{display:flex;flex-direction:column;gap:0.45rem;margin-top:0.6rem}
+  .chc-preset{text-align:left;padding:0.65rem 0.9rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.18);background:rgba(255,255,255,0.8);font-family:'Patrick Hand',cursive;font-size:1.05rem;color:#7b5455;line-height:1.4;cursor:pointer;transition:all 0.18s}
   .chc-preset:hover{border-color:#a65d5d;background:#fff5f4;transform:translateY(-1px)}
-  .chc-preset.active{border-color:#a65d5d;background:#fff5f4}
+  .chc-preset.active{border-color:#a65d5d;background:#fff5f4;font-weight:700}
 
   /* Live preview */
   .chc-preview-wrap{display:flex;justify-content:center;margin:0.75rem 0}
-  .chc-preview{position:relative;width:220px;border-radius:14px;padding:1.5rem 1rem;text-align:center;display:flex;flex-direction:column;align-items:center;box-shadow:0 8px 30px rgba(166,93,93,0.12);background:rgba(255,255,255,0.9);border:2px dashed rgba(166,93,93,0.35)}
-  .chc-prev-title{font-family:'Caveat',cursive;font-size:1.8rem;font-weight:700;color:#a65d5d;line-height:1.1;margin-bottom:0.5rem}
-  .chc-prev-msg{font-family:'Patrick Hand',cursive;font-size:1rem;color:#3E2723;line-height:1.4}
+  .chc-preview{position:relative;width:100%;max-width:300px;min-height:360px;border-radius:18px;padding:2rem 1.25rem;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:space-between;box-shadow:0 14px 38px rgba(166,93,93,0.16);background:rgba(255,255,255,0.95);border:2.5px dashed rgba(166,93,93,0.4);transition:all 0.3s ease}
+  .chc-preview:hover{transform:translateY(-3px);box-shadow:0 20px 48px rgba(166,93,93,0.22)}
+  .chc-prev-title{font-family:'Caveat',cursive;font-size:2.2rem;font-weight:700;color:#a65d5d;line-height:1.1;margin:0}
+  .chc-prev-msg{font-family:'Patrick Hand',cursive;font-size:1.15rem;color:#3E2723;line-height:1.5;margin:0}
 
-  /* Shimmer CTA — matches landing page */
+  .chc-step-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#7c3f4f;color:#fff;font-size:0.72rem;font-weight:800;margin-right:6px}
+
+  /* Shimmer CTA */
   @keyframes pw-pulse {
     0%, 100% { box-shadow: 0 14px 34px rgba(124,63,79,0.28); }
     50%       { box-shadow: 0 14px 34px rgba(124,63,79,0.48), 0 0 0 10px rgba(124,63,79,0); }
   }
-  .chc-cta{width:100%;padding:0 1.5rem;min-height:54px;border:none;border-radius:999px;background:linear-gradient(135deg,#a65d5d 0%,#7c3f4f 100%);color:#fff;font-family:'Montserrat',sans-serif;font-size:0.88rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;animation:pw-pulse 2.5s infinite;transition:transform 0.2s ease;display:flex;align-items:center;justify-content:center;gap:8px}
-  .chc-cta:hover{transform:translateY(-2px)}
+  .chc-cta{width:100%;padding:0 1.5rem;min-height:56px;border:none;border-radius:999px;background:linear-gradient(135deg,#a65d5d 0%,#7c3f4f 100%);color:#fff;font-family:'Montserrat',sans-serif;font-size:0.92rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;animation:pw-pulse 2.5s infinite;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:8px}
+  .chc-cta:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(124,63,79,0.4)}
   .chc-cta:disabled{background:#e4e2de;color:#a0888d;cursor:not-allowed;box-shadow:none;transform:none;animation:none}
 
-  .chc-ghost{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.7);color:#7c4343;font-size:0.78rem;font-weight:600;font-family:'Montserrat',sans-serif;border:1.5px solid rgba(124,67,67,0.22);border-radius:999px;padding:0.3rem 0.8rem;cursor:pointer;text-decoration:none;transition:all 0.15s}
+  .chc-ghost{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.8);color:#7c4343;font-size:0.78rem;font-weight:600;font-family:'Montserrat',sans-serif;border:1.5px solid rgba(124,67,67,0.22);border-radius:999px;padding:0.35rem 0.85rem;cursor:pointer;text-decoration:none;transition:all 0.15s}
   .chc-ghost:hover{background:#ffd9d8;border-color:#7c4343;transform:translateY(-1px)}
-  .chc-cart-cta{width:100%;min-height:44px;justify-content:center;margin-top:0.55rem;background:rgba(255,255,255,0.85)}
-  .chc-bottom{position:fixed;inset:auto 0 0;z-index:40;background:rgba(253,246,240,0.96);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid rgba(200,130,140,0.10);padding:0.75rem 1.25rem 1.1rem}
+  .chc-bottom{position:fixed;inset:auto 0 0;z-index:40;background:rgba(253,246,240,0.96);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid rgba(200,130,140,0.12);padding:0.75rem 1.25rem 1rem}
 `;
 
 export default function CreateHugCard() {
@@ -85,6 +94,14 @@ export default function CreateHugCard() {
     } catch {}
     return "OTHER";
   });
+
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== "undefined" && window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     fetch("https://api.country.is/")
@@ -103,13 +120,11 @@ export default function CreateHugCard() {
   const [toName, setToName] = useState("");
   const [fromName, setFromName] = useState("");
   const [musicTrack, setMusicTrack] = useState("none");
-  const [added, setAdded] = useState(false);
 
   useEffect(() => {
     applySeo({
       title: "Create a Virtual Hug Card | Personalize & Share Free",
       description: "Create a personalized, interactive virtual hug card with a custom message. Share it instantly via link or WhatsApp!",
-      keywords: seoKeywords.mothersDay, // fallback
       path: "/create-hug-card",
     });
     trackEvent("hug_card_create_start");
@@ -125,111 +140,135 @@ export default function CreateHugCard() {
     navigate("/hug-card?data=" + encodeURIComponent(encoded));
   };
 
-  const addCardToCart = () => {
-    const cardData = buildCardData();
-    addGiftCartItem("hug_card", { title: "Virtual Hug Card", payload: cardData });
-    trackEvent("gift_cart_add", { type: "hug_card_custom" });
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
-  };
-
   return (
     <main className="chc-root">
       <style>{CSS}</style>
 
-      <header className="chc-header">
-        <div className="chc-header-inner">
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <img src="/logo-transparent.png" alt="Petals & Words" style={{ height: 28, width: "auto" }} />
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-            <Link to="/" className="chc-ghost">🏠 Home</Link>
-            <LanguageSwitcher />
+      <CreatorNavbar />
+
+      <div className="chc-studio-grid">
+        {/* ── LEFT COLUMN: STICKY LIVE PREVIEW ── */}
+        <div className="chc-sticky-stage">
+          <div className="chc-card" style={{ padding: "1.25rem", textAlign: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+              <span className="chc-label" style={{ margin: 0 }}>✨ Live Hug Preview</span>
+              <span style={{ fontSize: "0.72rem", color: "#a65d5d", fontWeight: 700 }}>Pull-To-Open Hug</span>
+            </div>
+
+            <div className="chc-preview-wrap">
+              <div className="chc-preview">
+                {toName ? <p style={{ fontFamily: "'Patrick Hand',cursive", color: "#be185d", fontSize: "1.05rem", margin: 0 }}>To {toName}</p> : <p style={{ fontFamily: "'Patrick Hand',cursive", color: "#be185d", fontSize: "1.05rem", opacity: 0.5, margin: 0 }}>To Someone Special</p>}
+                <div>
+                  <h2 className="chc-prev-title">
+                    {line1 || "..."}<br />{line2}<br />{line3}
+                  </h2>
+                  <div style={{ width: 45, height: 2, background: "#fecdd3", margin: "0.5rem auto" }} />
+                </div>
+                <p className="chc-prev-msg">{(message || "Your inside message here...").slice(0, 100)}{message.length > 100 ? "..." : ""}</p>
+                {fromName ? <p style={{ fontFamily: "'Patrick Hand',cursive", color: "#be185d", fontSize: "1.05rem", margin: 0 }}>— {fromName}</p> : <p style={{ fontFamily: "'Patrick Hand',cursive", color: "#be185d", fontSize: "1.05rem", opacity: 0.5, margin: 0 }}>— With love</p>}
+              </div>
+            </div>
+
+            <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginTop: "0.6rem" }}>
+              Interactive opening animation when recipient unlocks
+            </p>
           </div>
         </div>
-      </header>
 
-      <div className="chc-body">
-        <div style={{ textAlign: "center", marginBottom: "1.25rem" }}>
-          <p style={{ fontSize: "2rem", marginBottom: "0.3rem" }}>🤗</p>
-          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2.2rem", fontWeight: 500, color: "#3d3028", lineHeight: 1.2, margin: 0 }}>
-            {isPH ? "Gumawa ng Virtual Hug" : "Create a Hug Card"}
-          </h1>
-          <p style={{ fontSize: "0.85rem", color: "#705f58", marginTop: "0.4rem" }}>
-            {isPH ? "Magpadala ng mahigpit na yakap na bubukas sa screen nila" : "Customize your pull-to-open virtual hug and share it instantly."}
-          </p>
-        </div>
+        {/* ── RIGHT COLUMN: STUDIO CONTROLS ── */}
+        <div>
+          {/* Headline */}
+          <div style={{ marginBottom: "1rem" }}>
+            <p className="chc-label" style={{ marginBottom: "0.25rem" }}>🤗 Virtual Hug Studio</p>
+            <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "clamp(2rem, 3.5vw, 2.6rem)", fontWeight: 600, color: "#3d3028", lineHeight: 1.15, margin: 0 }}>
+              {isPH ? "Gumawa ng Virtual Hug" : "Send a Warm Virtual Hug"}
+            </h1>
+            <p style={{ fontSize: "0.85rem", color: "#705f58", marginTop: "0.35rem" }}>
+              {isPH ? "Magpadala ng mahigpit na yakap na bubukas sa screen nila nang libre." : "Personalize your pull-to-open virtual hug card and send it across the miles."}
+            </p>
+          </div>
 
-        {/* Live Preview */}
-        <div className="chc-card">
-          <span className="chc-label">✨ Live Preview</span>
-          <div className="chc-preview-wrap">
-            <div className="chc-preview">
-              {toName && <p style={{fontFamily:"'Patrick Hand',cursive", color:"#be185d", fontSize:"0.9rem", marginBottom: "0.5rem"}}>To {toName}</p>}
-              <h2 className="chc-prev-title">
-                {line1 || "..."}<br/>{line2}<br/>{line3}
-              </h2>
-              <div style={{ width: 40, height: 1.5, background: "#fecdd3", margin: "0.4rem 0" }} />
-              <p className="chc-prev-msg">{(message || "Your inside message here...").slice(0, 80)}{message.length > 80 ? "..." : ""}</p>
-              {fromName && <p style={{fontFamily:"'Patrick Hand',cursive", color:"#be185d", fontSize:"0.9rem", marginTop: "0.5rem"}}>— {fromName}</p>}
+          {/* Step 1: Names & Cover */}
+          <div className="chc-card">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+              <span className="chc-step-badge">1</span>
+              <span className="chc-label" style={{ margin: 0 }}>💝 Recipient & Cover Lines</span>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "0.75rem" }}>
+              <div>
+                <label className="chc-label" htmlFor="hc-to">To (Recipient)</label>
+                <input id="hc-to" className="chc-input" value={toName} onChange={e => setToName(e.target.value)} placeholder="Recipient's Name" maxLength={30} />
+              </div>
+              <div>
+                <label className="chc-label" htmlFor="hc-from">From (Sender)</label>
+                <input id="hc-from" className="chc-input" value={fromName} onChange={e => setFromName(e.target.value)} placeholder="Your Name" maxLength={30} />
+              </div>
+            </div>
+
+            <label className="chc-label">🌟 Cover Text (3 Animated Lines)</label>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.5rem" }}>
+              <input className="chc-input" value={line1} onChange={e => setLine1(e.target.value)} placeholder="Line 1" maxLength={15} />
+              <input className="chc-input" value={line2} onChange={e => setLine2(e.target.value)} placeholder="Line 2" maxLength={15} />
+              <input className="chc-input" value={line3} onChange={e => setLine3(e.target.value)} placeholder="Line 3" maxLength={15} />
             </div>
           </div>
-        </div>
 
-        {/* To field */}
-        <div className="chc-card">
-          <label className="chc-label" htmlFor="hc-to">💝 To (Optional)</label>
-          <input id="hc-to" className="chc-input" value={toName} onChange={e => setToName(e.target.value)} placeholder="Recipient's Name" maxLength={30} />
-        </div>
+          {/* Step 2: Inside Message */}
+          <div className="chc-card">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+              <span className="chc-step-badge">2</span>
+              <span className="chc-label" style={{ margin: 0 }}>✍️ Inside Hug Note</span>
+            </div>
 
-        {/* Cover text */}
-        <div className="chc-card">
-          <label className="chc-label">🌟 Cover Text (3 Lines)</label>
-          <input className="chc-input" value={line1} onChange={e => setLine1(e.target.value)} placeholder="Line 1 (e.g. Happy)" maxLength={15} />
-          <input className="chc-input" value={line2} onChange={e => setLine2(e.target.value)} placeholder="Line 2 (e.g. Mother's)" maxLength={15} />
-          <input className="chc-input" value={line3} onChange={e => setLine3(e.target.value)} placeholder="Line 3 (e.g. Day!)" maxLength={15} />
-        </div>
+            <textarea id="hc-msg" className="chc-textarea" value={message} onChange={e => setMessage(e.target.value)} placeholder="Write something from the heart..." maxLength={250} rows={3} />
+            <p style={{ fontSize: "0.7rem", color: "#a65d5d", opacity: 0.6, marginTop: "0.3rem", textAlign: "right" }}>{message.length}/250</p>
 
-        {/* Inside Message */}
-        <div className="chc-card">
-          <label className="chc-label" htmlFor="hc-msg">✍️ Inside Message</label>
-          <textarea id="hc-msg" className="chc-textarea" value={message} onChange={e => setMessage(e.target.value)} placeholder="Write something from the heart..." maxLength={150} rows={3} />
-          <span className="chc-label" style={{ marginTop: "0.5rem" }}>💡 Or pick a message</span>
-          <div className="chc-presets">
-            {activePresets.map((p, i) => (
-              <button key={i} type="button" className={`chc-preset ${message === p ? "active" : ""}`} onClick={() => setMessage(p)}>
-                {p}
+            <span className="chc-label" style={{ marginTop: "0.6rem" }}>💡 1-Tap Sweet Notes</span>
+            <div className="chc-presets">
+              {activePresets.map((p, i) => (
+                <button key={i} type="button" className={`chc-preset ${message === p ? "active" : ""}`} onClick={() => setMessage(p)}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Step 3: Music */}
+          <div className="chc-card">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+              <span className="chc-step-badge">3</span>
+              <span className="chc-label" style={{ margin: 0 }}>🎵 Background Soundtrack</span>
+            </div>
+            <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} />
+          </div>
+
+          {/* Desktop Single CTA Box */}
+          {isDesktop && (
+            <div className="chc-card" style={{ background: "linear-gradient(135deg, #ffffff 0%, #fff4f6 100%)", border: "1.5px solid rgba(228, 141, 156, 0.45)" }}>
+              <button type="button" className="chc-cta" onClick={handlePreview} disabled={!message.trim() || !line1.trim()}>
+                🤗 PREVIEW & SHARE HUG CARD →
               </button>
-            ))}
-          </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", marginTop: "0.75rem", fontSize: "0.72rem", color: "#9e8f90" }}>
+                <span>✨ 100% Free to create</span><span>•</span>
+                <span>Instant Share Link</span><span>•</span>
+                <span>Interactive Hug Unfold</span>
+              </div>
+            </div>
+          )}
         </div>
-
-        {/* From field */}
-        <div className="chc-card">
-          <label className="chc-label" htmlFor="hc-from">💌 From (Optional)</label>
-          <input id="hc-from" className="chc-input" value={fromName} onChange={e => setFromName(e.target.value)} placeholder="Your Name" maxLength={30} />
-        </div>
-
-        <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} />
       </div>
 
-      {/* Fixed bottom CTA bar */}
-      <div className="chc-bottom">
-        <div style={{ maxWidth: 560, margin: "0 auto" }}>
-          <button type="button" className="chc-cta" onClick={handlePreview} disabled={!message.trim() || !line1.trim()}>
-            Preview & Share ✨
-          </button>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
-            <button type="button" className="chc-ghost chc-cart-cta" onClick={addCardToCart} disabled={!message.trim() || !line1.trim()} style={{ width: "100%", margin: 0 }}>
-              <ShoppingCart size={16} />
-              {added ? "Added!" : "Add to cart"}
-            </button>
-            <button type="button" className="chc-ghost chc-cart-cta" onClick={() => navigate("/cart")} style={{ width: "100%", margin: 0 }}>
-              View cart
+      {/* Mobile Fixed bottom CTA bar */}
+      {!isDesktop && (
+        <div className="chc-bottom">
+          <div style={{ maxWidth: 520, margin: "0 auto" }}>
+            <button type="button" className="chc-cta" onClick={handlePreview} disabled={!message.trim() || !line1.trim()}>
+              🤗 PREVIEW & SHARE HUG CARD →
             </button>
           </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }

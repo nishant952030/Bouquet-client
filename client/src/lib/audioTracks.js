@@ -1,28 +1,16 @@
 export const MUSIC_TRACKS = [
   { id: "none", name: "No music", url: "", desc: "Silence" },
   {
-    id: "acoustic",
-    name: "Gentle Guitar",
-    url: "/music/acoustic.mp3",
-    desc: "Warm & acoustic",
+    id: "with-a-smile",
+    name: "With a Smile",
+    url: "/music/with-a-smile.mp3",
+    desc: "Acoustic & comforting",
   },
   {
-    id: "piano",
-    name: "Sweet Piano",
-    url: "/music/piano.mp3",
-    desc: "Soft & emotional",
-  },
-  {
-    id: "lofi",
-    name: "Lofi Vibe",
-    url: "/music/lofi.mp3",
-    desc: "Chill & relaxing",
-  },
-  {
-    id: "chiptune",
-    name: "Cute Chiptune",
-    url: "/music/chiptune.mp3",
-    desc: "Playful 8-bit",
+    id: "happy-birthday",
+    name: "Happy Birthday",
+    url: "/music/happy-birthday-guitar.mp3",
+    desc: "Acoustic guitar version",
   },
 ];
 

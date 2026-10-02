@@ -357,5 +357,20 @@
   "plushie.bear": "Teddy Bear",
   "plushie.bunny": "Soft Bunny",
   "plushie.panda": "Panda Bear",
-  "plushie.boxOpen": "Tap the box to open 🎁"
+  "plushie.boxOpen": "Tap the box to open 🎁",
+  "plushie.tagPlaceholder": "Write a sweet card message that they will read after opening the box...",
+  "plushie.yourNamePlaceholder": "Your Name (Optional)",
+  "plushie.titleSuffix": "Plushie Gift",
+  "music.title": "BACKGROUND MUSIC",
+  "music.subtitle": "Choose a track to play when the receiver opens your gift. Tap to preview.",
+  "music.noneName": "No music",
+  "music.noneDesc": "Silence",
+  "music.withASmileName": "With a Smile",
+  "music.withASmileDesc": "Acoustic & comforting",
+  "music.happyBirthdayName": "Happy Birthday",
+  "music.happyBirthdayDesc": "Acoustic guitar version",
+  "home.headline": "Someone out there is waiting for a message from you.",
+  "home.subCopy": "Birthdays, rainy Tuesdays, anniversaries, Father's Day — or just because you thought of them. Free digital gifts, ready in 60 seconds.",
+  "home.seeAllGifts": "See all gifts ↓",
+  "home.tapToMake": "Tap to make your bouquet →"
 }

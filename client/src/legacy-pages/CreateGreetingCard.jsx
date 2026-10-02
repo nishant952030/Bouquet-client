@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ShoppingCart } from "lucide-react";
-import LanguageSwitcher from "../components/LanguageSwitcher";
+import CreatorNavbar from "../components/CreatorNavbar";
 import { applySeo, seoKeywords } from "../lib/seo";
 import { trackEvent } from "../lib/analytics";
 import { addGiftCartItem } from "../lib/giftCart";
@@ -48,83 +48,87 @@ const PRESETS_PH = [
 ];
 
 const CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&family=Great+Vibes&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
   *,*::before,*::after{box-sizing:border-box}
 
   .cmc-root{font-family:'Manrope',sans-serif;min-height:100vh;background:linear-gradient(160deg,#fdf6f0 0%,#f8edf0 55%,#fdf0f5 100%);color:#3E2723}
+  .cmc-header{position:sticky;top:12px;z-index:50;max-width:900px;margin:0 auto 0.75rem;width:calc(100% - 24px);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(255,255,255,0.82);border:1.5px solid rgba(255,255,255,0.95);border-radius:9999px;box-shadow:0 12px 32px rgba(166,93,93,0.12);overflow:hidden}
+  .cmc-header-inner{max-width:900px;margin:0 auto;padding:0.55rem 1.15rem;display:flex;align-items:center;justify-content:space-between}
 
-  .cmc-header{position:sticky;top:0;z-index:40;backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);background:rgba(253,246,240,0.88);border-bottom:1px solid rgba(200,130,140,0.10);box-shadow:0 2px 20px rgba(200,100,120,0.06)}
-  .cmc-header-inner{max-width:560px;margin:0 auto;padding:0.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between}
+  .cmc-studio-grid{display:grid;grid-template-columns:1fr;gap:1.5rem;max-width:1200px;margin:0 auto;padding:1.25rem 1.25rem 6.5rem}
+  @media(min-width:1024px){
+    .cmc-studio-grid{grid-template-columns:420px 1fr;gap:2rem;align-items:start}
+  }
 
-  .cmc-body{max-width:560px;margin:0 auto;padding:1rem 1.25rem 6rem}
+  .cmc-sticky-stage{position:relative}
+  @media(min-width:1024px){
+    .cmc-sticky-stage{position:sticky;top:5rem;align-self:start;z-index:20}
+  }
 
-  .cmc-card{background:rgba(255,255,255,0.78);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.85);border-radius:1.5rem;box-shadow:0 8px 32px rgba(200,130,140,0.10);padding:1.25rem;margin-bottom:1rem}
+  .cmc-card{background:rgba(255,255,255,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.95);border-radius:1.5rem;box-shadow:0 12px 36px rgba(200,130,140,0.10);padding:1.25rem;margin-bottom:1.15rem}
 
-  .cmc-label{font-size:0.65rem;font-weight:800;letter-spacing:0.22em;text-transform:uppercase;color:#a65d5d;margin-bottom:0.5rem;display:block;font-family:'Montserrat',sans-serif}
+  .cmc-label{font-size:0.68rem;font-weight:800;letter-spacing:0.2em;text-transform:uppercase;color:#a65d5d;margin-bottom:0.45rem;display:block;font-family:'Montserrat',sans-serif}
 
-  .cmc-input{width:100%;padding:0.75rem 1rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.22);font-family:'Manrope',sans-serif;font-size:0.9rem;color:#3E2723;background:rgba(255,255,255,0.85);outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+  .cmc-input{width:100%;padding:0.75rem 1rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.22);font-family:'Manrope',sans-serif;font-size:0.9rem;color:#3E2723;background:rgba(255,255,255,0.9);outline:none;transition:border-color 0.2s,box-shadow 0.2s}
   .cmc-input:focus{border-color:#a65d5d;box-shadow:0 0 0 3px rgba(166,93,93,0.12)}
 
-  .cmc-textarea{width:100%;padding:0.75rem 1rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.22);font-family:'Cormorant Garamond',serif;font-size:1rem;font-style:italic;color:#3E2723;background:rgba(255,255,255,0.85);outline:none;resize:vertical;min-height:100px;line-height:1.7;transition:border-color 0.2s,box-shadow 0.2s}
+  .cmc-textarea{width:100%;padding:0.85rem 1rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.22);font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-style:italic;color:#3E2723;background:rgba(255,255,255,0.9);outline:none;resize:vertical;min-height:110px;line-height:1.7;transition:border-color 0.2s,box-shadow 0.2s}
   .cmc-textarea:focus{border-color:#a65d5d;box-shadow:0 0 0 3px rgba(166,93,93,0.12)}
 
-  .cmc-presets{display:flex;flex-direction:column;gap:0.4rem;margin-top:0.6rem}
-  .cmc-preset{text-align:left;padding:0.65rem 0.9rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.18);background:rgba(255,255,255,0.75);font-family:'Cormorant Garamond',serif;font-size:0.88rem;font-style:italic;color:#7b5455;line-height:1.6;cursor:pointer;transition:all 0.18s}
+  .cmc-presets{display:flex;flex-direction:column;gap:0.45rem;margin-top:0.6rem}
+  .cmc-preset{text-align:left;padding:0.65rem 0.9rem;border-radius:0.875rem;border:1.5px solid rgba(200,130,140,0.18);background:rgba(255,255,255,0.8);font-family:'Cormorant Garamond',serif;font-size:0.92rem;font-style:italic;color:#7b5455;line-height:1.6;cursor:pointer;transition:all 0.18s}
   .cmc-preset:hover{border-color:#a65d5d;background:#fff5f4;transform:translateY(-1px)}
-  .cmc-preset.active{border-color:#a65d5d;background:#fff5f4}
+  .cmc-preset.active{border-color:#a65d5d;background:#fff5f4;font-weight:600}
 
-  .cmc-papers{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem}
-  .cmc-paper-btn{border-radius:0.875rem;border:2.5px solid transparent;padding:0.5rem;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:0.3rem;background:rgba(255,255,255,0.7)}
-  .cmc-paper-btn:hover{border-color:rgba(166,93,93,0.4)}
+  .cmc-papers{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem}
+  .cmc-paper-btn{border-radius:0.875rem;border:2.5px solid transparent;padding:0.55rem;cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:0.35rem;background:rgba(255,255,255,0.85)}
+  .cmc-paper-btn:hover{border-color:rgba(166,93,93,0.4);transform:translateY(-1px)}
   .cmc-paper-btn.active{border-color:#a65d5d;box-shadow:0 0 0 3px rgba(166,93,93,0.15)}
   .cmc-paper-swatch{width:100%;aspect-ratio:4/3;border-radius:0.5rem;border:1px solid rgba(0,0,0,0.06)}
-  .cmc-paper-name{font-size:0.65rem;font-weight:700;color:#a65d5d;font-family:'Montserrat',sans-serif}
+  .cmc-paper-name{font-size:0.68rem;font-weight:700;color:#a65d5d;font-family:'Montserrat',sans-serif}
 
-  .cmc-decos{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem}
-  .cmc-deco-btn{border-radius:0.875rem;border:2px solid rgba(200,130,140,0.15);padding:0.6rem;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;gap:0.2rem;background:rgba(255,255,255,0.78)}
+  .cmc-decos{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem}
+  .cmc-deco-btn{border-radius:0.875rem;border:2px solid rgba(200,130,140,0.15);padding:0.65rem;cursor:pointer;transition:all 0.18s;display:flex;flex-direction:column;align-items:center;gap:0.25rem;background:rgba(255,255,255,0.85)}
   .cmc-deco-btn:hover{border-color:rgba(166,93,93,0.4);transform:translateY(-1px)}
   .cmc-deco-btn.active{border-color:#a65d5d;background:#fff5f4}
-  .cmc-deco-emoji{font-size:1.4rem}
-  .cmc-deco-name{font-size:0.65rem;font-weight:700;color:#a65d5d;font-family:'Montserrat',sans-serif}
+  .cmc-deco-emoji{font-size:1.5rem}
+  .cmc-deco-name{font-size:0.68rem;font-weight:700;color:#a65d5d;font-family:'Montserrat',sans-serif}
 
-  /* Live preview */
+  /* Live preview Card */
   .cmc-preview-wrap{display:flex;justify-content:center;margin:0.75rem 0}
-  .cmc-preview{position:relative;width:220px;border-radius:14px;padding:1.2rem 1rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:0.3rem;box-shadow:0 8px 30px rgba(166,93,93,0.14);overflow:hidden}
-  .cmc-preview::before{content:'';position:absolute;inset:5px;border-radius:10px;pointer-events:none}
-  .cmc-prev-to{font-family:'Great Vibes',cursive;font-size:0.8rem;color:#a65d5d}
-  .cmc-prev-flower{font-size:1.6rem;line-height:1}
-  .cmc-prev-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:700;color:#7c3f4f;line-height:1.2}
-  .cmc-prev-line{width:30px;height:1px;background:linear-gradient(90deg,transparent,#d4af37,transparent)}
-  .cmc-prev-msg{font-family:'Cormorant Garamond',serif;font-size:0.7rem;font-style:italic;color:#7b5455;line-height:1.6;max-width:170px}
-  .cmc-prev-heart{font-size:1rem}
-  .cmc-prev-from{font-family:'Great Vibes',cursive;font-size:0.8rem;color:#a65d5d}
-  .cmc-prev-deco{position:absolute;pointer-events:none;font-size:0.9rem;opacity:0.5}
+  .cmc-preview{position:relative;width:100%;max-width:320px;min-height:400px;border-radius:18px;padding:2rem 1.25rem;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:0.75rem;box-shadow:0 16px 40px rgba(166,93,93,0.18);overflow:hidden;transition:all 0.3s ease}
+  .cmc-preview:hover{transform:translateY(-3px);box-shadow:0 22px 50px rgba(166,93,93,0.24)}
+  .cmc-prev-to{font-family:'Great Vibes',cursive;font-size:1.15rem;color:#a65d5d;margin:0}
+  .cmc-prev-flower{font-size:2rem;line-height:1}
+  .cmc-prev-title{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:700;color:#7c3f4f;line-height:1.2;margin:0}
+  .cmc-prev-line{width:50px;height:1.5px;background:linear-gradient(90deg,transparent,#d4af37,transparent);margin:0.25rem auto}
+  .cmc-prev-msg{font-family:'Cormorant Garamond',serif;font-size:0.95rem;font-style:italic;color:#7b5455;line-height:1.7;max-width:260px;margin:0}
+  .cmc-prev-heart{font-size:1.3rem}
+  .cmc-prev-from{font-family:'Great Vibes',cursive;font-size:1.15rem;color:#a65d5d;margin:0}
+  .cmc-prev-deco{position:absolute;pointer-events:none;font-size:1.1rem;opacity:0.6}
 
-  /* Shimmer CTA — matches landing page */
+  /* Step badge */
+  .cmc-step-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:#7c3f4f;color:#fff;font-size:0.72rem;font-weight:800;margin-right:6px}
+
+  /* Shimmer CTA */
   @keyframes pw-pulse {
     0%, 100% { box-shadow: 0 14px 34px rgba(124,63,79,0.28); }
     50%       { box-shadow: 0 14px 34px rgba(124,63,79,0.48), 0 0 0 10px rgba(124,63,79,0); }
   }
-  .cmc-cta{width:100%;padding:0 1.5rem;min-height:54px;border:none;border-radius:999px;background:linear-gradient(135deg,#a65d5d 0%,#7c3f4f 100%);color:#fff;font-family:'Montserrat',sans-serif;font-size:0.88rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;animation:pw-pulse 2.5s infinite;transition:transform 0.2s ease;display:flex;align-items:center;justify-content:center;gap:8px}
-  .cmc-cta:hover{transform:translateY(-2px)}
+  .cmc-cta{width:100%;padding:0 1.5rem;min-height:56px;border:none;border-radius:999px;background:linear-gradient(135deg,#a65d5d 0%,#7c3f4f 100%);color:#fff;font-family:'Montserrat',sans-serif;font-size:0.92rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;animation:pw-pulse 2.5s infinite;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:8px}
+  .cmc-cta:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(124,63,79,0.4)}
   .cmc-cta:disabled{background:#e4e2de;color:#a0888d;cursor:not-allowed;box-shadow:none;transform:none;animation:none}
 
-  .cmc-ghost{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.7);color:#7c4343;font-size:0.78rem;font-weight:600;font-family:'Montserrat',sans-serif;border:1.5px solid rgba(124,67,67,0.22);border-radius:999px;padding:0.3rem 0.8rem;cursor:pointer;text-decoration:none;transition:all 0.15s}
+  .cmc-ghost{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.8);color:#7c4343;font-size:0.78rem;font-weight:600;font-family:'Montserrat',sans-serif;border:1.5px solid rgba(124,67,67,0.22);border-radius:999px;padding:0.35rem 0.85rem;cursor:pointer;text-decoration:none;transition:all 0.15s}
   .cmc-ghost:hover{background:#ffd9d8;border-color:#7c4343;transform:translateY(-1px)}
-  .cmc-bottom{position:fixed;inset:auto 0 0;z-index:40;background:rgba(253,246,240,0.96);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid rgba(200,130,140,0.10);padding:0.75rem 1.25rem 1.1rem}
-
-  @media(max-width:380px){
-    .cmc-papers{grid-template-columns:repeat(2,1fr)}
-    .cmc-preview{width:190px}
-  }
+  .cmc-bottom{position:fixed;inset:auto 0 0;z-index:40;background:rgba(253,246,240,0.96);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid rgba(200,130,140,0.12);padding:0.75rem 1.25rem 1rem}
 `;
 
-
-/* ── Decoration positions (scattered around card) ── */
+/* ── Decoration positions ── */
 const DECO_POSITIONS = [
-  { top: "5%", left: "8%" }, { top: "8%", right: "10%" },
-  { bottom: "12%", left: "6%" }, { bottom: "8%", right: "8%" },
-  { top: "45%", left: "2%" }, { top: "40%", right: "3%" },
+  { top: "6%", left: "8%" }, { top: "8%", right: "10%" },
+  { bottom: "10%", left: "8%" }, { bottom: "8%", right: "10%" },
+  { top: "45%", left: "4%" }, { top: "42%", right: "4%" },
 ];
 
 export default function CreateGreetingCard() {
@@ -138,6 +142,14 @@ export default function CreateGreetingCard() {
     } catch {}
     return "OTHER";
   });
+
+  const [isDesktop, setIsDesktop] = useState(() => typeof window !== "undefined" && window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     fetch("https://api.country.is/")
@@ -156,7 +168,7 @@ export default function CreateGreetingCard() {
   const [paper, setPaper] = useState("blush");
   const [decos, setDecos] = useState(["hearts"]);
   const [musicTrack, setMusicTrack] = useState("none");
-  const [added, setAdded] = useState(false);
+  const [activeMobileTab, setActiveMobileTab] = useState("style");
 
   const selectedPaper = PAPERS.find(p => p.id === paper) || PAPERS[0];
   const activeDecos = DECOS.filter(d => decos.includes(d.id));
@@ -164,22 +176,9 @@ export default function CreateGreetingCard() {
   useEffect(() => {
     applySeo({
       title: "Create a Greeting Card | Personalize & Share Free",
-      description: "Create a personalized, interactive greeting card for any occasion with custom messages, paper textures, and decorations. Share it instantly via link or WhatsApp!",
+      description: "Create a personalized, interactive greeting card with custom messages, paper textures, and decorations. Share it instantly via link or WhatsApp!",
       keywords: ["greeting card", "digital card maker", "ecard creator"],
       path: "/create-greeting-card",
-      jsonLd: {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "Digital Greeting Card Maker",
-        "url": window.location.href,
-        "description": "Create and send personalized, interactive digital greeting cards for free.",
-        "applicationCategory": "LifestyleApplication",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "USD"
-        }
-      }
     });
     trackEvent("card_create_start");
   }, []);
@@ -195,146 +194,219 @@ export default function CreateGreetingCard() {
   const handlePreview = () => {
     const cardData = buildCardData();
     const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(cardData))));
-    // Save to localStorage for payment page
     localStorage.setItem("pw_pending_greeting_card", JSON.stringify(cardData));
     navigate("/payment-greeting-card", { state: { cardData, encoded } });
-  };
-
-  const addCardToCart = () => {
-    const cardData = buildCardData();
-    addGiftCartItem("greeting_card", cardData);
-    trackEvent("gift_cart_add", { type: "greeting_card", paper });
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
   };
 
   return (
     <main className="cmc-root">
       <style>{CSS}</style>
 
-      <header className="cmc-header">
-        <div className="cmc-header-inner">
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <img src="/logo-transparent.png" alt="Petals & Words" style={{ height: 28, width: "auto" }} />
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-            <Link to="/" className="cmc-ghost">🏠 Home</Link>
-            <LanguageSwitcher />
-          </div>
-        </div>
-      </header>
+      <CreatorNavbar />
 
-      <div className="cmc-body">
-        {/* Title */}
-        <div style={{ textAlign: "center", marginBottom: "1.25rem" }}>
-          <p style={{ fontSize: "2rem", marginBottom: "0.3rem" }}>💌</p>
-          <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "2.2rem", fontWeight: 500, color: "#3d3028", lineHeight: 1.2, margin: 0 }}>
-            {isPH ? "Gumawa ng Greeting Card" : t("card.createTitle", "Create a Greeting Card")}
-          </h1>
-          <p style={{ fontSize: "0.85rem", color: "#705f58", marginTop: "0.4rem" }}>
-            {isPH ? "Maglagay ng sweet message, pumili ng style, at i-share agad" : t("card.createSub", "Personalize your message, pick a style, and share the love")}
-          </p>
-        </div>
-
-        {/* Live Preview */}
-        <div className="cmc-card">
-          <span className="cmc-label">✨ Live Preview</span>
-          <div className="cmc-preview-wrap">
-            <div className="cmc-preview" style={{ background: selectedPaper.bg }}>
-              <div style={{ position: "absolute", inset: 5, borderRadius: 10, border: `1.5px solid ${selectedPaper.border}`, pointerEvents: "none" }} />
-              {activeDecos.map((d, i) => (
-                <span key={d.id} className="cmc-prev-deco" style={DECO_POSITIONS[i] || {}}>{d.emoji}</span>
-              ))}
-              {toName && <p className="cmc-prev-to">To {toName}</p>}
-              <span className="cmc-prev-flower">🌷</span>
-              <h2 className="cmc-prev-title">{title || "Hello!"}</h2>
-              <div className="cmc-prev-line" />
-              <p className="cmc-prev-msg">{(message || "Your message here...").slice(0, 80)}{message.length > 80 ? "..." : ""}</p>
-              <span className="cmc-prev-heart">❤️</span>
-              {fromName && <p className="cmc-prev-from">{fromName}</p>}
+      <div className="cmc-studio-grid">
+        {/* ── LEFT COLUMN: STICKY LIVE CARD PREVIEW ── */}
+        <div className="cmc-sticky-stage">
+          <div className="cmc-card" style={{ padding: "1.25rem", textAlign: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.75rem" }}>
+              <span className="cmc-label" style={{ margin: 0 }}>✨ Live Card Preview</span>
+              <span style={{ fontSize: "0.72rem", color: "#a65d5d", fontWeight: 700 }}>Interactive 3D Card</span>
             </div>
+
+            <div className="cmc-preview-wrap">
+              <div className="cmc-preview" style={{ background: selectedPaper.bg }}>
+                <div style={{ position: "absolute", inset: 7, borderRadius: 13, border: `1.5px solid ${selectedPaper.border}`, pointerEvents: "none" }} />
+                {activeDecos.map((d, i) => (
+                  <span key={d.id} className="cmc-prev-deco" style={DECO_POSITIONS[i] || {}}>{d.emoji}</span>
+                ))}
+                {toName ? <p className="cmc-prev-to">To {toName}</p> : <p className="cmc-prev-to" style={{ opacity: 0.5 }}>To Someone Special</p>}
+                <div>
+                  <span className="cmc-prev-flower">🌷</span>
+                  <h2 className="cmc-prev-title">{title || "Hello!"}</h2>
+                  <div className="cmc-prev-line" />
+                </div>
+                <p className="cmc-prev-msg">{(message || "Your message here...").slice(0, 120)}{message.length > 120 ? "..." : ""}</p>
+                <div>
+                  <span className="cmc-prev-heart">❤️</span>
+                  {fromName ? <p className="cmc-prev-from">With love, {fromName}</p> : <p className="cmc-prev-from" style={{ opacity: 0.5 }}>With love, You</p>}
+                </div>
+              </div>
+            </div>
+
+            <p style={{ fontSize: "0.72rem", color: "#9e8f90", marginTop: "0.6rem" }}>
+              Updates in real time as you customize
+            </p>
           </div>
         </div>
 
-        {/* To field */}
-        <div className="cmc-card">
-          <label className="cmc-label" htmlFor="card-to">💝 To</label>
-          <input id="card-to" className="cmc-input" value={toName} onChange={e => setToName(e.target.value)} placeholder="Recipient's name" maxLength={40} />
-        </div>
+        {/* ── RIGHT COLUMN: STUDIO CUSTOMIZATION PANELS ── */}
+        <div>
+          {/* Headline */}
+          <div style={{ marginBottom: "1rem" }}>
+            <p className="cmc-label" style={{ marginBottom: "0.25rem" }}>💌 Digital Greeting Card Studio</p>
+            <h1 style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "clamp(2rem, 3.5vw, 2.6rem)", fontWeight: 600, color: "#3d3028", lineHeight: 1.15, margin: 0 }}>
+              {isPH ? "Gumawa ng Greeting Card" : t("card.createTitle", "Personalize your greeting card.")}
+            </h1>
+            <p style={{ fontSize: "0.85rem", color: "#705f58", marginTop: "0.35rem" }}>
+              {isPH ? "Pumili ng luxury paper texture, maglagay ng sweet message, at i-share agad." : "Select luxury stationery, add decorative stamps, and write your heartfelt message."}
+            </p>
+          </div>
 
-        {/* Title field */}
-        <div className="cmc-card">
-          <label className="cmc-label" htmlFor="card-title">🎉 Occasion / Title</label>
-          <input id="card-title" className="cmc-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="Happy Birthday, Congratulations, etc." maxLength={40} />
-        </div>
+          {/* Mobile Tab Switcher */}
+          {!isDesktop && (
+            <div style={{ marginBottom: "1rem" }}>
+              <div style={{ display: "flex", gap: "0.35rem", background: "rgba(255,255,255,0.75)", padding: "0.3rem", borderRadius: "9999px", border: "1px solid rgba(200,130,140,0.25)" }}>
+                {[
+                  { id: "style", label: "🎨 Paper & Stamps" },
+                  { id: "message", label: "✍️ Letter & Names" },
+                  { id: "audio", label: "🎵 Music" },
+                ].map((tab) => {
+                  const isActive = activeMobileTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveMobileTab(tab.id)}
+                      style={{
+                        flex: 1,
+                        borderRadius: "9999px",
+                        padding: "0.5rem 0.3rem",
+                        border: "none",
+                        cursor: "pointer",
+                        fontFamily: "'Montserrat', sans-serif",
+                        fontSize: "0.74rem",
+                        fontWeight: 700,
+                        color: isActive ? "#fff" : "#6b5e5f",
+                        background: isActive ? "linear-gradient(135deg, #7c3f4f 0%, #a65d5d 100%)" : "transparent",
+                        transition: "all 0.2s ease"
+                      }}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-        {/* Message */}
-        <div className="cmc-card">
-          <label className="cmc-label" htmlFor="card-msg">✍️ Your Message</label>
-          <textarea id="card-msg" className="cmc-textarea" value={message} onChange={e => setMessage(e.target.value)} placeholder="Write something from the heart..." maxLength={500} rows={4} />
-          <p style={{ fontSize: "0.7rem", color: "#be185d", opacity: 0.5, marginTop: "0.3rem", textAlign: "right" }}>{message.length}/500</p>
-          <span className="cmc-label" style={{ marginTop: "0.5rem" }}>💡 Or pick a message</span>
-          <div className="cmc-presets">
-            {activePresets.map((p, i) => (
-              <button key={i} type="button" className={`cmc-preset ${message === p ? "active" : ""}`} onClick={() => setMessage(p)}>
-                {p}
+          {/* Step 1: Paper Texture & Stamps */}
+          {(isDesktop || activeMobileTab === "style") && (
+            <>
+              <div className="cmc-card">
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                  <span className="cmc-step-badge">1</span>
+                  <span className="cmc-label" style={{ margin: 0 }}>🎨 Stationery Paper Texture</span>
+                </div>
+                <div className="cmc-papers">
+                  {PAPERS.map(p => (
+                    <button key={p.id} type="button" className={`cmc-paper-btn ${paper === p.id ? "active" : ""}`} onClick={() => setPaper(p.id)}>
+                      <div className="cmc-paper-swatch" style={{ background: p.bg }} />
+                      <span className="cmc-paper-name">{p.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="cmc-card">
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                  <span className="cmc-step-badge">2</span>
+                  <span className="cmc-label" style={{ margin: 0 }}>🎀 Decorative Stickers & Accents</span>
+                </div>
+                <div className="cmc-decos">
+                  {DECOS.map(d => (
+                    <button key={d.id} type="button" className={`cmc-deco-btn ${decos.includes(d.id) ? "active" : ""}`} onClick={() => toggleDeco(d.id)}>
+                      <span className="cmc-deco-emoji">{d.emoji}</span>
+                      <span className="cmc-deco-name">{d.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Step 2: Message & Details */}
+          {(isDesktop || activeMobileTab === "message") && (
+            <>
+              <div className="cmc-card">
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                  <span className="cmc-step-badge">3</span>
+                  <span className="cmc-label" style={{ margin: 0 }}>✍️ Personalized Message & Names</span>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem", marginBottom: "0.75rem" }}>
+                  <div>
+                    <label className="cmc-label" htmlFor="card-to">💝 To (Recipient)</label>
+                    <input id="card-to" className="cmc-input" value={toName} onChange={e => setToName(e.target.value)} placeholder="e.g. Maria, Mom" maxLength={40} />
+                  </div>
+                  <div>
+                    <label className="cmc-label" htmlFor="card-from">💌 From (Sender)</label>
+                    <input id="card-from" className="cmc-input" value={fromName} onChange={e => setFromName(e.target.value)} placeholder="Your Name" maxLength={40} />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: "0.75rem" }}>
+                  <label className="cmc-label" htmlFor="card-title">🎉 Occasion / Headline</label>
+                  <input id="card-title" className="cmc-input" value={title} onChange={e => setTitle(e.target.value)} placeholder="Happy Birthday, Happy Anniversary, etc." maxLength={40} />
+                </div>
+
+                <div>
+                  <label className="cmc-label" htmlFor="card-msg">✍️ Your Handwritten Note</label>
+                  <textarea id="card-msg" className="cmc-textarea" value={message} onChange={e => setMessage(e.target.value)} placeholder="Write something from the heart..." maxLength={500} rows={4} />
+                  <p style={{ fontSize: "0.7rem", color: "#a65d5d", opacity: 0.6, marginTop: "0.3rem", textAlign: "right" }}>{message.length}/500</p>
+                </div>
+              </div>
+
+              {/* Message ideas */}
+              <div className="cmc-card">
+                <span className="cmc-label">💡 1-Tap Sweet Messages</span>
+                <div className="cmc-presets">
+                  {activePresets.map((p, i) => (
+                    <button key={i} type="button" className={`cmc-preset ${message === p ? "active" : ""}`} onClick={() => setMessage(p)}>
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Step 3: Music */}
+          {(isDesktop || activeMobileTab === "audio") && (
+            <div className="cmc-card">
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
+                <span className="cmc-step-badge">4</span>
+                <span className="cmc-label" style={{ margin: 0 }}>🎵 Soundtrack & Atmosphere</span>
+              </div>
+              <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} />
+            </div>
+          )}
+
+          {/* Desktop Single CTA Box */}
+          {isDesktop && (
+            <div className="cmc-card" style={{ background: "linear-gradient(135deg, #ffffff 0%, #fff4f6 100%)", border: "1.5px solid rgba(228, 141, 156, 0.45)" }}>
+              <button type="button" className="cmc-cta" onClick={handlePreview} disabled={!message.trim()}>
+                💌 PREVIEW & SHARE CARD →
               </button>
-            ))}
-          </div>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.6rem", marginTop: "0.75rem", fontSize: "0.72rem", color: "#9e8f90" }}>
+                <span>✨ 100% Free to create</span><span>•</span>
+                <span>Instant Share Link</span><span>•</span>
+                <span>Interactive 3D Opening</span>
+              </div>
+            </div>
+          )}
         </div>
-
-        {/* From field */}
-        <div className="cmc-card">
-          <label className="cmc-label" htmlFor="card-from">💌 From</label>
-          <input id="card-from" className="cmc-input" value={fromName} onChange={e => setFromName(e.target.value)} placeholder="With love, your name" maxLength={40} />
-        </div>
-
-        {/* Paper texture */}
-        <div className="cmc-card">
-          <span className="cmc-label">🎨 Paper Texture</span>
-          <div className="cmc-papers">
-            {PAPERS.map(p => (
-              <button key={p.id} type="button" className={`cmc-paper-btn ${paper === p.id ? "active" : ""}`} onClick={() => setPaper(p.id)}>
-                <div className="cmc-paper-swatch" style={{ background: p.bg }} />
-                <span className="cmc-paper-name">{p.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Decorations */}
-        <div className="cmc-card">
-          <span className="cmc-label">🎀 Decorations</span>
-          <div className="cmc-decos">
-            {DECOS.map(d => (
-              <button key={d.id} type="button" className={`cmc-deco-btn ${decos.includes(d.id) ? "active" : ""}`} onClick={() => toggleDeco(d.id)}>
-                <span className="cmc-deco-emoji">{d.emoji}</span>
-                <span className="cmc-deco-name">{d.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} />
       </div>
 
-      {/* Fixed bottom CTA bar */}
-      <div className="cmc-bottom">
-        <div style={{ maxWidth: 560, margin: "0 auto" }}>
-          <button type="button" className="cmc-cta" onClick={handlePreview} disabled={!message.trim()}>
-            {t("card.previewBtn", "Preview & Share ✨")}
-          </button>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginTop: "0.5rem" }}>
-            <button type="button" className="cmc-ghost cmc-cart-cta" onClick={addCardToCart} disabled={!message.trim()} style={{ width: "100%", margin: 0 }}>
-              <ShoppingCart size={16} />
-              {added ? "Added!" : "Add to cart"}
-            </button>
-            <button type="button" className="cmc-ghost cmc-cart-cta" onClick={() => navigate("/cart")} style={{ width: "100%", margin: 0 }}>
-              View cart
+      {/* Mobile Fixed bottom CTA bar */}
+      {!isDesktop && (
+        <div className="cmc-bottom">
+          <div style={{ maxWidth: 520, margin: "0 auto" }}>
+            <button type="button" className="cmc-cta" onClick={handlePreview} disabled={!message.trim()}>
+              {t("card.previewBtn", "PREVIEW & SHARE CARD ✨ →")}
             </button>
           </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }

@@ -50,12 +50,28 @@ export default function LanguageSwitcher() {
 
   return (
     <div ref={ref} style={{ position: "relative", zIndex: 50 }}>
+      <style>{`
+        @media (max-width: 480px) {
+          .lang-switcher-btn {
+            padding: 0.28rem 0.55rem !important;
+            font-size: 0.72rem !important;
+            gap: 3px !important;
+          }
+          .lang-label-text {
+            max-width: 52px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
+      `}</style>
       {/* Trigger */}
       <button
         type="button"
         onClick={toggle}
         aria-label="Change language"
         aria-expanded={open}
+        className="lang-switcher-btn"
         style={{
           display: "inline-flex",
           alignItems: "center",
@@ -70,6 +86,7 @@ export default function LanguageSwitcher() {
           padding: "0.35rem 0.7rem",
           cursor: "pointer",
           transition: "background 0.15s, border-color 0.15s",
+          whiteSpace: "nowrap",
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.background = "#ffd9d8";
@@ -81,7 +98,7 @@ export default function LanguageSwitcher() {
         }}
       >
         <span style={{ fontSize: "0.9rem", lineHeight: 1 }}>🌐</span>
-        <span>{LANG_META[current]?.native || "English"}</span>
+        <span className="lang-label-text">{LANG_META[current]?.native || "English"}</span>
         <span
           style={{
             fontSize: "0.6rem",

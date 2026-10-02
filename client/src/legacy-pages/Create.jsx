@@ -54,6 +54,9 @@ const PH_FLOWER_NAMES = {
   lily: "Liryo",
   jasmine: "Sampaguita",
   marigold: "Amarilyo",
+  orchid: "Orkidyas",
+  dahlia: "Dalia",
+  peony: "Peonya",
   mixed: "Iba't Ibang Bulaklak",
 };
 
@@ -70,14 +73,15 @@ const CSS = `
     min-height: 100vh;
   }
 
-  /* ── Glassmorphism header ── */
+  /* ── Modern Blended Glass Pill Header ── */
   .cr-header {
-    position: sticky; top: 0; z-index: 40;
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
-    background: rgba(253,246,240,0.88);
-    border-bottom: 1px solid rgba(200,130,140,0.10);
-    box-shadow: 0 2px 20px rgba(200,100,120,0.06);
+    position: sticky; top: 12px; z-index: 50;
+    max-width: 900px; margin: 0 auto 0.75rem; width: calc(100% - 24px);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    background: rgba(253, 246, 240, 0.72);
+    border: 1px solid rgba(210, 160, 168, 0.25);
+    border-radius: 9999px;
+    box-shadow: 0 8px 24px rgba(200, 120, 135, 0.08);
   }
 
   /* Progress bar */
@@ -339,7 +343,8 @@ const CSS = `
   }
   .cr-sticky-canvas {
     position: sticky;
-    top: 76px;
+    top: 80px;
+    align-self: start;
     z-index: 20;
   }
   .cr-studio-panel {
@@ -416,27 +421,8 @@ export default function Create() {
   const hasBouquetContent = flowerCount > 0 || note.trim().length > 0;
   const progress = Math.min(100, (flowerCount > 0 ? 40 : 0) + Math.min(60, wordCount * 4));
 
-  /* Philippines geo detection */
-  const [country, setCountry] = useState(() => {
-    try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-      if (tz === "Asia/Manila") return "PH";
-      if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta") return "IN";
-    } catch {}
-    return "OTHER";
-  });
-
-  useEffect(() => {
-    fetch("https://api.country.is/")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.country) setCountry(d.country);
-      })
-      .catch(() => {});
-  }, []);
-
-  const isPH = country === "PH";
-  const activeNoteSuggestions = isPH ? noteSuggestionsPH : noteSuggestions;
+  const isPH = false;
+  const activeNoteSuggestions = noteSuggestions;
 
   const visibleBouquets = showMoreBouquets ? bouquetSuggestions : bouquetSuggestions.slice(0, 4);
   const visibleNotes = showMoreNotes ? activeNoteSuggestions : activeNoteSuggestions.slice(0, 4);
@@ -448,7 +434,7 @@ export default function Create() {
       acc[key].items.push(flower);
       return acc;
     }, {});
-    const preferred = ["peony", "sakura", "rose", "daisy", "baby's breath", "sampaguita", "lavender", "sunflower", "tulip", "hydrangea", "mixed"];
+    const preferred = ["rose", "lily", "orchid", "dahlia", "peony", "marigold", "sunflower", "hydrangea", "tulip", "sakura", "daisy", "baby's breath", "sampaguita", "lavender", "mixed"];
     return Object.values(byType).sort((a, b) => {
       const ai = preferred.indexOf(a.id), bi = preferred.indexOf(b.id);
       const av = ai === -1 ? 999 : ai, bv = bi === -1 ? 999 : bi;
@@ -532,6 +518,26 @@ export default function Create() {
 
   const generateMagicBouquet = useCallback(() => {
     const palettes = [
+      {
+        hero: ["crimson", "dahlia"],
+        accent: ["rose_peach", "rose_1"],
+        filler: ["babys_breath", "sakura"],
+      },
+      {
+        hero: ["lily", "peony"],
+        accent: ["hydrangea_blue", "rose_peach"],
+        filler: ["sampaguita", "babys_breath"],
+      },
+      {
+        hero: ["marigold", "sunflower_2"],
+        accent: ["daisy", "rose_peach"],
+        filler: ["babys_breath", "sampaguita"],
+      },
+      {
+        hero: ["orchid", "violet"],
+        accent: ["lavender", "tulip_lilac"],
+        filler: ["sakura", "babys_breath"],
+      },
       {
         hero: ["peony", "rose_peach"],
         accent: ["sakura", "rose_1"],
@@ -657,7 +663,7 @@ export default function Create() {
   };
 
   return (
-    <main className="cr-root" style={{ paddingBottom: "8.75rem", position: "relative", overflowX: "hidden" }}>
+    <main className="cr-root" style={{ paddingBottom: "8.75rem", position: "relative", overflowX: "clip" }}>
       <style>{CSS}</style>
 
       {/* WD floating bg doodles */}
@@ -697,15 +703,15 @@ export default function Create() {
           </div>
         )}
 
-        <div style={{ maxWidth: 680, margin: "0 auto", padding: "0.75rem 1.25rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", padding: "0.5rem 1.15rem", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem" }}>
+          <Link to="/" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}>
             <img src="/logo-transparent.png" alt="Petals and Words" style={{ height: 30, width: "auto" }} />
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
             {/* Progress pill */}
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <span style={{ fontSize: "0.68rem", fontWeight: 600, color: "#7b5455", letterSpacing: "0.1em" }}>{progress}%</span>
-              <div className="prog-track" style={{ width: 56 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.45rem", background: "rgba(255, 255, 255, 0.55)", padding: "0.28rem 0.65rem", borderRadius: "9999px", border: "1px solid rgba(200, 130, 140, 0.18)" }}>
+              <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "#7b5455", letterSpacing: "0.05em" }}>{progress}%</span>
+              <div className="prog-track" style={{ width: 48 }}>
                 <div className="prog-fill" style={{ width: `${progress}%` }} />
               </div>
             </div>
@@ -923,8 +929,8 @@ export default function Create() {
             <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
               <div className="vv-card" style={{ padding: "1.25rem" }}>
                 <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                  <VoiceRecorder voiceNote={voiceNote} onChange={setVoiceNote} isPH={isPH} />
                   <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} isPH={isPH} />
+                  <VoiceRecorder voiceNote={voiceNote} onChange={setVoiceNote} isPH={isPH} />
                 </div>
               </div>
             </div>
@@ -993,6 +999,27 @@ export default function Create() {
                 <span className="count-pill" style={{ background: "#fef9ec", color: "#b45309", fontSize: "0.68rem", padding: "0.2rem 0.5rem" }}>
                   ✍️ {wordCount}w
                 </span>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("music")}
+                  className="count-pill"
+                  style={{
+                    background: musicTrack !== "none" ? "#ffd9d8" : "rgba(255,255,255,0.85)",
+                    color: musicTrack !== "none" ? "#7c3f4f" : "#6b5e5f",
+                    fontSize: "0.68rem",
+                    padding: "0.2rem 0.5rem",
+                    border: "1px solid rgba(200,130,140,0.3)",
+                    borderRadius: "9999px",
+                    cursor: "pointer",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "3px",
+                    fontWeight: 600
+                  }}
+                  title="Background Music"
+                >
+                  🎵 {musicTrack !== "none" ? (musicTrack === "with-a-smile" ? "With a Smile" : "Happy Birthday") : "BGM"}
+                </button>
               </div>
             </div>
 
@@ -1002,24 +1029,25 @@ export default function Create() {
             </div>
           </section>
 
-          {/* Mobile Segmented 3-Pill Switcher */}
+          {/* Mobile Segmented 4-Pill Switcher */}
           <div style={{ marginBottom: "1rem" }}>
             <div style={{
               display: "flex",
-              gap: "0.35rem",
+              gap: "0.25rem",
               background: "rgba(255,255,255,0.75)",
               backdropFilter: "blur(12px)",
               border: "1px solid rgba(228, 141, 156, 0.3)",
               borderRadius: "9999px",
-              padding: "0.3rem",
+              padding: "0.28rem",
               boxShadow: "0 4px 16px rgba(124, 67, 67, 0.06)"
             }}>
               {[
                 { id: "flowers", label: isPH ? "🌸 Bulaklak" : "🌸 Flowers" },
                 { id: "note", label: isPH ? "✍️ Mensahe" : "✍️ Letter" },
-                { id: "audio", label: isPH ? "🎙️ Boses at Audio" : "🎙️ Voice & Audio" },
+                { id: "music", label: isPH ? "🎵 BGM Musika" : "🎵 BGM" },
+                { id: "voice", label: isPH ? "🎙️ Boses" : "🎙️ Voice" },
               ].map((tab) => {
-                const isActive = activeTab === tab.id;
+                const isActive = activeTab === tab.id || (tab.id === "music" && activeTab === "audio");
                 return (
                   <button
                     key={tab.id}
@@ -1028,11 +1056,11 @@ export default function Create() {
                     style={{
                       flex: 1,
                       borderRadius: "9999px",
-                      padding: "0.55rem 0.35rem",
+                      padding: "0.55rem 0.25rem",
                       border: "none",
                       cursor: "pointer",
                       fontFamily: "'Montserrat', sans-serif",
-                      fontSize: "0.78rem",
+                      fontSize: "0.74rem",
                       fontWeight: 700,
                       color: isActive ? "#ffffff" : "#6b5e5f",
                       background: isActive ? "linear-gradient(135deg, #7c3f4f 0%, #a65d5d 100%)" : "transparent",
@@ -1171,14 +1199,26 @@ export default function Create() {
                   })}
                 </div>
               </div>
+
+              {/* Quick BGM Card inside Letter tab for easy one-stop flow */}
+              <div className="vv-card" style={{ padding: "1.1rem" }}>
+                <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} isPH={isPH} />
+              </div>
             </div>
           )}
 
-          {activeTab === "audio" && (
+          {(activeTab === "music" || activeTab === "audio") && (
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-              <div className="vv-card" style={{ padding: "1.1rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
-                <VoiceRecorder voiceNote={voiceNote} onChange={setVoiceNote} isPH={isPH} />
+              <div className="vv-card" style={{ padding: "1.1rem" }}>
                 <MusicSelector selectedTrackId={musicTrack} onChange={setMusicTrack} isPH={isPH} />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "voice" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="vv-card" style={{ padding: "1.1rem" }}>
+                <VoiceRecorder voiceNote={voiceNote} onChange={setVoiceNote} isPH={isPH} />
               </div>
             </div>
           )}

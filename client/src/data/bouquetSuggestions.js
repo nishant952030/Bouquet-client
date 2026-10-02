@@ -188,9 +188,154 @@ function lunarCrescent() {
   return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
 }
 
+/** Royal Velvet — Dramatic Crimson Rose with Burgundy Dahlia & Peach Rose */
+function royalVelvet() {
+  const crimsonRose = getFlower("crimson") || getFlower("rose");
+  const dahlia = getFlower("dahlia") || getFlower("peony");
+  const peachRose = getFlower("peach") || getFlower("rose");
+  const babysBreath = getFlower("babys_breath");
+  const rose = getFlower("rose_1") || getFlower("rose");
+
+  const list = [
+    [babysBreath, 0.34, 0.42, 0.44, -20, 0],
+    [babysBreath, 0.66, 0.42, 0.44, 20, 1],
+    [dahlia, 0.38, 0.51, 0.48, -10, 2],
+    [peachRose, 0.62, 0.51, 0.48, 10, 3],
+    [rose, 0.50, 0.43, 0.44, 0, 4],
+    [crimsonRose, 0.50, 0.60, 0.58, 0, 5],
+  ];
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
+}
+
+/** Imperial Lily — Stargazer Oriental Lily centerpiece with Peony & Blue Hydrangea */
+function imperialLily() {
+  const lily = getFlower("lily") || getFlower("peony");
+  const peony = getFlower("peony");
+  const blueHydrangea = getFlower("hydrangea_blue") || getFlower("hydrangea");
+  const sampaguita = getFlower("sampaguita") || getFlower("babys_breath");
+  const sakura = getFlower("sakura");
+
+  const list = [
+    [sampaguita, 0.32, 0.45, 0.44, -22, 0],
+    [sakura, 0.68, 0.45, 0.44, 22, 1],
+    [blueHydrangea, 0.38, 0.54, 0.50, -8, 2],
+    [peony, 0.62, 0.54, 0.50, 8, 3],
+    [lily, 0.50, 0.59, 0.62, 0, 4],
+  ];
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
+}
+
+/** Golden Fiesta — Joyful Marigold & Sunflower harvest bouquet */
+function goldenFiesta() {
+  const marigold = getFlower("marigold") || getFlower("sunflower");
+  const sunflower = getFlower("sunflower_2") || getFlower("sunflower");
+  const daisy = getFlower("daisy");
+  const peachRose = getFlower("peach") || getFlower("rose");
+  const babysBreath = getFlower("babys_breath");
+
+  const list = [
+    [babysBreath, 0.35, 0.43, 0.44, -18, 0],
+    [daisy, 0.65, 0.43, 0.44, 18, 1],
+    [sunflower, 0.39, 0.52, 0.48, -10, 2],
+    [peachRose, 0.61, 0.52, 0.48, 10, 3],
+    [marigold, 0.50, 0.60, 0.56, 0, 4],
+  ];
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
+}
+
+/** Orchid Serenity — Exotic Purple Moth Orchid with English Lavender & Violet Tulip */
+function orchidSerenity() {
+  const orchid = getFlower("orchid") || getFlower("peony");
+  const lavender = getFlower("lavender");
+  const violetTulip = getFlower("violet") || getFlower("tulip");
+  const sakura = getFlower("sakura");
+  const babysBreath = getFlower("babys_breath");
+
+  const list = [
+    [lavender, 0.32, 0.42, 0.42, -22, 0],
+    [sakura, 0.68, 0.42, 0.44, 22, 1],
+    [violetTulip, 0.39, 0.51, 0.46, -8, 2],
+    [babysBreath, 0.61, 0.51, 0.46, 8, 3],
+    [orchid, 0.50, 0.58, 0.60, 0, 4],
+  ];
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
+}
+
+/** Hydrangea Sky — Majestic blue cloud of Hydrangeas, Lily & Blush Peony */
+function hydrangeaSky() {
+  const blueHydrangea = getFlower("hydrangea_blue") || getFlower("hydrangea");
+  const lily = getFlower("lily") || getFlower("peony");
+  const peony = getFlower("peony");
+  const sampaguita = getFlower("sampaguita");
+  const peachRose = getFlower("peach") || getFlower("rose");
+
+  const list = [
+    [sampaguita, 0.34, 0.44, 0.44, -18, 0],
+    [peachRose, 0.66, 0.44, 0.46, 18, 1],
+    [peony, 0.39, 0.53, 0.48, -9, 2],
+    [lily, 0.61, 0.53, 0.50, 9, 3],
+    [blueHydrangea, 0.50, 0.60, 0.60, 0, 4],
+  ];
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
+}
+
+/** Autumn Jewel — Deep Burgundy Dahlia with Golden Marigold & Crimson Rose */
+function autumnJewel() {
+  const dahlia = getFlower("dahlia") || getFlower("peony");
+  const marigold = getFlower("marigold") || getFlower("sunflower");
+  const crimsonRose = getFlower("crimson") || getFlower("rose");
+  const babysBreath = getFlower("babys_breath");
+  const sunflower = getFlower("sunflower_1") || getFlower("sunflower");
+
+  const list = [
+    [babysBreath, 0.33, 0.42, 0.44, -20, 0],
+    [sunflower, 0.67, 0.44, 0.45, 20, 1],
+    [marigold, 0.40, 0.52, 0.48, -10, 2],
+    [crimsonRose, 0.60, 0.52, 0.48, 10, 3],
+    [dahlia, 0.50, 0.60, 0.58, 0, 4],
+  ];
+  return list.map(([src, x, y, width, angle, z]) => stem(src, x, y, width, angle, z));
+}
+
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 export const bouquetSuggestions = [
+  {
+    id: "royal-velvet",
+    title: "Royal Velvet",
+    description: "Deep velvet crimson rose with burgundy dahlia, peach garden rose & baby's breath.",
+    build: royalVelvet,
+  },
+  {
+    id: "imperial-lily",
+    title: "Imperial Lily",
+    description: "Stargazer Oriental Lily centerpiece surrounded by blush peony and blue hydrangeas.",
+    build: imperialLily,
+  },
+  {
+    id: "golden-fiesta",
+    title: "Golden Fiesta",
+    description: "Vibrant golden marigold and sunflowers with chamomile daisies & warm blossoms.",
+    build: goldenFiesta,
+  },
+  {
+    id: "orchid-serenity",
+    title: "Orchid Serenity",
+    description: "Exotic purple moth orchid with fragrant lavender, violet tulips & cherry blossoms.",
+    build: orchidSerenity,
+  },
+  {
+    id: "hydrangea-sky",
+    title: "Hydrangea Sky",
+    description: "Lush periwinkle blue hydrangea cloud crowned with blush peony & oriental lily.",
+    build: hydrangeaSky,
+  },
+  {
+    id: "autumn-jewel",
+    title: "Autumn Jewel",
+    description: "Burgundy dahlia, golden marigold & crimson garden rose — deeply rich and opulent.",
+    build: autumnJewel,
+  },
   {
     id: "romantic-arc",
     title: "Blush Romance",

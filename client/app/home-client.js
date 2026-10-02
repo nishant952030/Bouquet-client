@@ -1,141 +1,41 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import dynamic from "next/dynamic";
 import LanguageSwitcher from "../src/components/LanguageSwitcher";
 import { blogPosts } from "../src/data/blogPosts";
 
-const HomeScene = dynamic(() => import("./home-scene"), { ssr: false });
-
-// ─── Data ────────────────────────────────────────────────────────────────────
-
 const ALL_GIFTS = [
-  { title: "Digital Bouquet", desc: "Arrange real flower stems with a heartfelt note.", icon: "💐", path: "/create", tag: "", color: "#fce4ec", accent: "#e48d9c", indiaOnly: false },
-  { title: "Greeting Card", desc: "A beautiful letter in a customisable envelope.", icon: "💌", path: "/create-greeting-card", tag: "NEW", color: "#f3e5f5", accent: "#ab47bc", indiaOnly: false },
-  { title: "Shagun Envelope", desc: "Digital cash gift claimed via UPI. Perfect for weddings.", icon: "✉️", path: "/shagun", tag: "NEW", color: "#fff8e1", accent: "#f9a825", indiaOnly: true },
-  { title: "3D Birthday Cake", desc: "Bake & decorate a real 3D cake with candles.", icon: "🎂", path: "/create-cake", tag: "", color: "#e8f5e9", accent: "#66bb6a", indiaOnly: false },
-  { title: "Plushie Gift Box", desc: "Cute furry 3D plushie inside a surprise box.", icon: "🧸", path: "/create-plushie", tag: "", color: "#e3f2fd", accent: "#42a5f5", indiaOnly: false },
-  { title: "Virtual Hug Card", desc: "Pull-to-open interactive warm hug card.", icon: "🤗", path: "/create-hug-card", tag: "", color: "#fce4ec", accent: "#ef5350", indiaOnly: false },
+  { title: "Digital Bouquet", desc: "Arrange real flower stems with a heartfelt note.", icon: "💐", path: "/create", tag: "", indiaOnly: false },
+  { title: "Greeting Card", desc: "A beautiful letter in a customisable envelope.", icon: "💌", path: "/create-greeting-card", tag: "NEW", indiaOnly: false },
+  { title: "Shagun Envelope", desc: "Digital cash gift via UPI. Perfect for weddings.", icon: "✉️", path: "/shagun", tag: "NEW", indiaOnly: true },
+  { title: "Virtual Hug Card", desc: "Pull-to-open interactive warm hug card.", icon: "🤗", path: "/create-hug-card", tag: "", indiaOnly: false },
 ];
 
 const TESTIMONIALS_PH = [
-  { quote: "Nagpadala ako ng bouquet sa aking Mama — niyakap niya ang screen niya! 😭 So worth it.", author: "Maria C.", city: "Quezon City", stars: 5 },
-  { quote: "My boyfriend is in Dubai. This made our Monthsary feel so real. He cried!", author: "Ria S.", city: "Cebu City", stars: 5 },
-  { quote: "Perfect for pasalubong without the expense! Sent it on Valentine's — she screenshotted it right away.", author: "Carlo D.", city: "Makati", stars: 5 },
-  { quote: "Ang cute ng animations! Ginamit ko for Pasko para sa Lola ko sa Davao. She loved it!", author: "Bea M.", city: "Davao City", stars: 5 },
-  { quote: "Ready in under 1 minute and free. No reason NOT to send your loved ones a surprise 🌸", author: "Ana T.", city: "Pasig", stars: 5 },
+  { quote: "Nagpadala ako ng bouquet sa aking Mama — niyakap niya ang screen niya! So worth it.", author: "Maria C.", city: "Quezon City" },
+  { quote: "My boyfriend is in Dubai. This made our Monthsary feel so real. He cried!", author: "Ria S.", city: "Cebu City" },
+  { quote: "Ang cute ng animations! Ginamit ko for Pasko para sa Lola ko sa Davao.", author: "Bea M.", city: "Davao City" },
+  { quote: "Ready in under 1 minute and free. No reason NOT to send your loved ones a surprise.", author: "Ana T.", city: "Pasig" },
 ];
 
 const TESTIMONIALS_IN = [
-  { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi S.", city: "Mumbai", stars: 5 },
-  { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "Rahul G.", city: "Bengaluru", stars: 5 },
-  { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Sneha P.", city: "Pune", stars: 5 },
-  { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Priya M.", city: "Hyderabad", stars: 5 },
-  { quote: "Got the share link in seconds. Sent it on WhatsApp and she loved it instantly.", author: "Neha K.", city: "Delhi", stars: 5 },
+  { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Aditi S.", city: "Mumbai" },
+  { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "Rahul G.", city: "Bengaluru" },
+  { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Sneha P.", city: "Pune" },
+  { quote: "The flowers looked so premium on mobile. She cried happy tears.", author: "Priya M.", city: "Hyderabad" },
 ];
 
 const TESTIMONIALS_GLOBAL = [
-  { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Sarah K.", city: "New York", stars: 5 },
-  { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "James L.", city: "London", stars: 5 },
-  { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Emma R.", city: "Toronto", stars: 5 },
-  { quote: "The flowers looked so premium on mobile. She cried happy tears 😭", author: "Lily T.", city: "Sydney", stars: 5 },
-  { quote: "Got the share link in seconds. Sent it on WhatsApp and she loved it instantly.", author: "Sofia M.", city: "Amsterdam", stars: 5 },
+  { quote: "I sent this in 2 minutes and it felt so personal, not generic at all.", author: "Sarah K.", city: "New York" },
+  { quote: "Sent this to my dad on Father's Day — he called me right after. First time in years.", author: "James L.", city: "London" },
+  { quote: "It was raining and I just wanted to say I was thinking of her. This was perfect.", author: "Emma R.", city: "Toronto" },
+  { quote: "The flowers looked so premium on mobile. She cried happy tears.", author: "Lily T.", city: "Sydney" },
+  { quote: "Got the share link in seconds. She loved it instantly.", author: "Sofia M.", city: "Amsterdam" },
 ];
 
-const TICKER_PH = [
-  "💐 Maria just sent a bouquet to her Mama · 2m ago",
-  "🎂 Juan baked a Pasko cake for Lola · 5m ago",
-  "💌 Jasmine sent a love letter to Carlo · 8m ago",
-  "🤗 Bea sent a virtual hug to her Ate · 12m ago",
-  "💐 Ria made a bouquet for Monthsary · 15m ago",
-  "🎂 Diego baked a birthday cake for Ana · 18m ago",
-  "💐 Clara sent flowers to her best friend in Cebu · 21m ago",
-  "🤗 Kuya sent a hug card to his baby sister · 25m ago",
-];
-
-const TICKER_IN = [
-  "💐 Aditi just sent a bouquet to her mom · 2m ago",
-  "🎂 Rohan baked a birthday cake for Riya · 5m ago",
-  "💌 Sneha sent a greeting card to her bestie · 8m ago",
-  "🧸 Karan gifted a plushie to his girlfriend · 12m ago",
-  "✉️ Amit sent a Shagun envelope for Pooja's wedding · 15m ago",
-  "🤗 Priya sent a virtual hug to her sister · 18m ago",
-  "💐 Dev made a bouquet for Teacher's Day · 21m ago",
-  "🎂 Neha baked a cake for her dad's birthday · 25m ago",
-];
-
-const TICKER_GLOBAL = [
-  "💐 Sarah just sent a bouquet to her mom · 2m ago",
-  "🎂 James baked a birthday cake for Emma · 5m ago",
-  "💌 Lily sent a greeting card to her best friend · 8m ago",
-  "🧸 Marco gifted a plushie to his partner · 12m ago",
-  "🤗 Sofia sent a virtual hug to her sister · 15m ago",
-  "💐 Alex made a bouquet for Mother's Day · 18m ago",
-  "🎂 Olivia baked a cake for her dad's birthday · 22m ago",
-  "💌 Noah sent a card to surprise his girlfriend · 26m ago",
-];
-
-const HOW_IT_WORKS = [
-  { step: "01", title: "Pick a gift", desc: "Choose from bouquets, cakes, cards, plushies & more.", icon: "🎁" },
-  { step: "02", title: "Personalise it", desc: "Add your name, a heartfelt note, and customise the look.", icon: "✏️" },
-  { step: "03", title: "Share the link", desc: "Send via WhatsApp, Messenger, or Viber. Done in seconds.", icon: "🔗" },
-];
-
-const FEATURES_PH = [
-  "🌸 Sobrang cute na bouquet layouts", "🎨 Customize ng colors & themes", "💬 May personal note",
-  "📲 Share via Messenger or Viber", "🚀 Tapos sa 60 seconds", "🔒 No signup needed",
-  "🇵🇭 Para sa mga Pilipino", "💸 100% Libre forever",
-];
-
-const FEATURES_IN = [
-  "🌸 Real bouquet layouts", "🎨 Custom colors & themes", "💬 Personal note included",
-  "📲 WhatsApp-ready link", "🚀 Ready in 60 seconds", "🔒 No signup needed",
-  "❤️ Made with love in India", "💸 100% Free forever",
-];
-
-const FEATURES_GLOBAL = [
-  "🌸 Real bouquet layouts", "🎨 Custom colors & themes", "💬 Personal note included",
-  "📲 WhatsApp-ready link", "🚀 Ready in 60 seconds", "🔒 No signup needed",
-  "🌍 Works worldwide", "💸 100% Free forever",
-];
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function useCountUp(target, duration = 1800, start = false) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!start) return;
-    let startTime = null;
-    const step = (timestamp) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(eased * target));
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [target, duration, start]);
-  return count;
-}
-
-function useIntersectionOnce(ref) {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); obs.disconnect(); } },
-      { threshold: 0.3 }
-    );
-    if (ref.current) obs.observe(ref.current);
-    return () => obs.disconnect();
-  }, [ref]);
-  return visible;
-}
-
-// Detect visitor country via timezone/locale with lightweight IP geo API fallback.
-// Returns country code ("IN", "PH", etc.) or null while loading.
 function useCountry() {
   const [country, setCountry] = useState(() => {
     if (typeof window === "undefined") return null;
@@ -147,826 +47,351 @@ function useCountry() {
     } catch {}
     return null;
   });
-
   useEffect(() => {
     if (country === "PH") return;
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
       const locale = String(navigator?.language || "").toUpperCase();
-      if (tz === "Asia/Manila" || locale.includes("-PH")) {
-        setCountry("PH");
-        return;
-      } else if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta" || locale.includes("-IN")) {
-        setCountry("IN");
-      }
+      if (tz === "Asia/Manila" || locale.includes("-PH")) { setCountry("PH"); return; }
+      if (tz === "Asia/Kolkata" || tz === "Asia/Calcutta" || locale.includes("-IN")) { setCountry("IN"); }
     } catch {}
-
-    fetch("https://api.country.is/")
-      .then(r => r.json())
-      .then(d => {
-        if (d?.country) setCountry(d.country);
-      })
-      .catch(() => {});
+    fetch("https://api.country.is/").then(r => r.json()).then(d => { if (d?.country) setCountry(d.country); }).catch(() => {});
   }, [country]);
-
   return country;
 }
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function Stars({ count = 5 }) {
-  return <span style={{ color: "#f9a825", letterSpacing: "2px", fontSize: "0.85rem" }}>{"★".repeat(count)}</span>;
-}
-
-function GiftCard({ gift, onClick }) {
-  return (
-    <button
-      onClick={() => onClick(gift.path)}
-      style={{
-        flexShrink: 0, width: "200px",
-        background: gift.color,
-        border: `1.5px solid ${gift.accent}22`,
-        borderRadius: "1.5rem", padding: "1.25rem 1rem",
-        textAlign: "left", cursor: "pointer",
-        transition: "transform 0.22s ease, box-shadow 0.22s ease",
-        position: "relative", outline: "none",
-      }}
-      onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 16px 40px ${gift.accent}33`; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
-    >
-      {gift.tag && (
-        <span style={{
-          position: "absolute", top: "10px", right: "10px",
-          background: "linear-gradient(135deg, #e91e63, #f48fb1)",
-          color: "#fff", fontSize: "0.6rem", fontWeight: 800,
-          letterSpacing: "0.1em", padding: "2px 8px", borderRadius: "9999px",
-        }}>{gift.tag}</span>
-      )}
-      <div style={{ fontSize: "2.2rem", marginBottom: "0.75rem" }}>{gift.icon}</div>
-      <div style={{ fontWeight: 700, fontSize: "0.88rem", color: "#3d3028", marginBottom: "0.35rem", fontFamily: "'Montserrat', sans-serif" }}>{gift.title}</div>
-      <div style={{ fontSize: "0.75rem", color: "#705f58", lineHeight: 1.5 }}>{gift.desc}</div>
-      <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "4px", fontSize: "0.7rem", fontWeight: 700, color: gift.accent, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-        Make it free
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-      </div>
-    </button>
-  );
-}
-
-// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function HomeClient() {
   const router = useRouter();
   const { t } = useTranslation();
-
   const country = useCountry();
   const isIndia = country === "IN";
-  const isPH = country === "PH";
-
-  // Locale-aware data: Philippines, India, or Global
-  const GIFTS      = useMemo(() => isIndia ? ALL_GIFTS : ALL_GIFTS.filter(g => !g.indiaOnly), [isIndia]);
-  const TESTIMONIALS = useMemo(() => isPH ? TESTIMONIALS_PH : isIndia ? TESTIMONIALS_IN : TESTIMONIALS_GLOBAL, [isIndia, isPH]);
-  const TICKER_ITEMS = useMemo(() => isPH ? TICKER_PH : isIndia ? TICKER_IN : TICKER_GLOBAL, [isIndia, isPH]);
-  const FEATURES   = useMemo(() => isPH ? FEATURES_PH : isIndia ? FEATURES_IN : FEATURES_GLOBAL, [isIndia, isPH]);
-
+  const GIFTS = useMemo(() => isIndia ? ALL_GIFTS : ALL_GIFTS.filter(g => !g.indiaOnly), [isIndia]);
+  const TESTIMONIALS = useMemo(() => isIndia ? TESTIMONIALS_IN : TESTIMONIALS_GLOBAL, [isIndia]);
+  const featuredPosts = useMemo(() => blogPosts.slice(0, 3), []);
   const [activeIdx, setActiveIdx] = useState(0);
   const [isSliding, setIsSliding] = useState(false);
-  const [load3D, setLoad3D] = useState(false);
-  const [tickerIdx, setTickerIdx] = useState(0);
-  const [tickerVisible, setTickerVisible] = useState(true);
-
-  const statsRef = useRef(null);
-  const statsVisible = useIntersectionOnce(statsRef);
-  const bouquetCount = useCountUp(12847, 1800, statsVisible);
-  const happyCount = useCountUp(98, 1200, statsVisible);
-  const secondsCount = useCountUp(60, 900, statsVisible);
-
-  const featuredPosts = useMemo(() => blogPosts.slice(0, 3), []);
-
-  // Automatically redirect Philippine visitors to dedicated /ph landing page
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("global") === "1" || params.get("no_redirect") === "1") return;
-
-    if (isPH) {
-      router.replace("/ph");
-    }
-  }, [isPH, router]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if ("requestIdleCallback" in window) {
-      const id = window.requestIdleCallback(() => setLoad3D(true), { timeout: 1000 });
-      return () => window.cancelIdleCallback(id);
-    }
-    const id = window.setTimeout(() => setLoad3D(true), 250);
-    return () => window.clearTimeout(id);
-  }, []);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setIsSliding(true);
-      setTimeout(() => { setActiveIdx(v => (v + 1) % TESTIMONIALS.length); setIsSliding(false); }, 220);
-    }, 4000);
+      setTimeout(() => { setActiveIdx(v => (v + 1) % TESTIMONIALS.length); setIsSliding(false); }, 200);
+    }, 4200);
     return () => clearInterval(timer);
-  }, []);
+  }, [TESTIMONIALS.length]);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTickerVisible(false);
-      setTimeout(() => { setTickerIdx(v => (v + 1) % TICKER_ITEMS.length); setTickerVisible(true); }, 350);
-    }, 3000);
-    return () => clearInterval(timer);
+    const h = e => { if (e.key === "Escape") setModalOpen(false); };
+    document.addEventListener("keydown", h);
+    return () => document.removeEventListener("keydown", h);
   }, []);
 
-  const handleGiftClick = useCallback((path) => router.push(path), [router]);
-
-  // If Philippines is detected, immediately show clean loading while redirecting to /ph
-  if (isPH && typeof window !== "undefined") {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("global") !== "1" && params.get("no_redirect") !== "1") {
-      return (
-        <div
-          suppressHydrationWarning
-          style={{
-            minHeight: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "linear-gradient(160deg, #fdf6f0 0%, #f8edf0 55%, #fdf0f5 100%)",
-            color: "#7b5455",
-            fontFamily: "'Manrope', sans-serif",
-            fontSize: "0.9rem",
-          }}
-        >
-          Loading…
-        </div>
-      );
-    }
-  }
+  const t_ = TESTIMONIALS[activeIdx];
 
   return (
-    <div style={{ position: "relative", width: "100%", minHeight: "100vh", overflowX: "hidden", background: "linear-gradient(160deg, #fdf6f0 0%, #f8edf0 50%, #fdf0f5 100%)", fontFamily: "'Montserrat', sans-serif" }}>
+    <div style={{ minHeight:"100vh", background:"#fff8f7", overflowX:"hidden", position:"relative" }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Montserrat:wght@400;500;600;700;800&display=swap');
-        * { box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Montserrat:wght@300;400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+        .ms{font-family:'Material Symbols Outlined';font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;display:inline-block;vertical-align:middle;line-height:1}
+        .ms-fill{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+        @keyframes floatPetal{0%{transform:translateY(-20px) rotate(0deg) translateX(0);opacity:0}15%{opacity:.65}85%{opacity:.4}100%{transform:translateY(105vh) rotate(380deg) translateX(80px);opacity:0}}
+        @keyframes pulseAura{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.08);opacity:.65}}
+        @keyframes modalIn{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+        @keyframes slideInUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+        .petal{position:absolute;pointer-events:none;background:radial-gradient(circle at 35% 35%,#ffd9dd 0%,#fda2b1 55%,#e48d9c 100%);border-radius:70% 30% 70% 30%/30% 70% 30% 70%;filter:drop-shadow(0 4px 6px rgba(124,67,67,.08));animation:floatPetal linear infinite}
+        .shimmer{background:linear-gradient(135deg,#602d2d 0%,#904856 50%,#602d2d 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .glass{background:rgba(255,255,255,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.88)}
+        .glass2{background:rgba(255,255,255,.76);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,.92)}
+        .btn-wine{background:linear-gradient(135deg,#7c4343,#904856);color:#fff;font-family:'Montserrat',sans-serif;font-weight:600;border-radius:9999px;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .22s;box-shadow:0 6px 20px rgba(124,67,67,.28);border:none;cursor:pointer}
+        .btn-wine:hover{background:linear-gradient(135deg,#5a2e2e,#7c4343);transform:scale(1.03)}
+        .btn-glass-s{background:rgba(255,255,255,.6);color:#602d2d;border:1px solid rgba(255,255,255,.85);border-radius:9999px;font-family:'Montserrat',sans-serif;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;text-decoration:none}
+        .btn-glass-s:hover{background:rgba(255,255,255,.9)}
+        .blog-link{background:rgba(255,255,255,.42);border:1px solid rgba(255,255,255,.78);border-radius:18px;transition:all .22s;display:block;text-decoration:none}
+        .blog-link:hover{background:rgba(255,255,255,.76);transform:translateX(4px)}
+        .tool-card{background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.85);border-radius:24px;transition:all .28s;display:flex;flex-direction:column;justify-content:space-between}
+        .tool-card:hover{background:rgba(255,255,255,.84);box-shadow:0 16px 40px rgba(124,67,67,.12);transform:translateY(-3px)}
+        .modal-bd{position:fixed;inset:0;z-index:50;background:rgba(47,19,24,.45);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:1.25rem}
+        .modal-box{animation:modalIn .28s cubic-bezier(.22,1,.36,1);max-height:90vh;overflow-y:auto}
+        .dot-ctrl{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.76);border:1px solid rgba(214,194,193,.55);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#602d2d;transition:all .18s;flex-shrink:0}
+        .dot-ctrl:hover{background:#fff}
 
-        .hw-glass {
-          background: rgba(255,255,255,0.65);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border: 1px solid rgba(255,255,255,0.8);
-          box-shadow: 0 8px 40px rgba(200,130,140,0.12);
+        .home-header {
+          position: fixed;
+          top: 14px;
+          left: 14px;
+          right: 14px;
+          z-index: 40;
+          border-radius: 9999px;
+          box-shadow: 0 8px 32px rgba(124,67,67,.07);
+          max-width: 1200px;
+          margin: 0 auto;
         }
-
-        @keyframes petalDrift {
-          0%   { transform: translateY(0px) rotate(0deg) scale(1); }
-          33%  { transform: translateY(-18px) rotate(12deg) scale(1.04); }
-          66%  { transform: translateY(-8px) rotate(-8deg) scale(0.97); }
-          100% { transform: translateY(0px) rotate(0deg) scale(1); }
+        .home-header-inner {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px 24px;
+          gap: 12px;
         }
-        @keyframes floatUp {
-          0%   { opacity: 0; transform: translateY(24px); }
-          100% { opacity: 1; transform: translateY(0); }
+        .home-header-logo {
+          height: 34px;
+          width: auto;
+          object-fit: contain;
+          flex-shrink: 0;
+          display: block;
         }
-        @keyframes shimmerText {
-          0%   { background-position: -300% center; }
-          100% { background-position: 300% center; }
+        .home-header-right {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          flex-shrink: 0;
         }
-        @keyframes marqueeScroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        @keyframes pulseSoft {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(166,93,93,0.3); }
-          50%       { box-shadow: 0 0 0 10px rgba(166,93,93,0); }
-        }
-
-        .hw-shimmer {
-          background: linear-gradient(90deg, #7c4343 0%, #c8637a 25%, #d4956a 50%, #c8637a 75%, #7c4343 100%);
-          background-size: 300% auto;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          animation: shimmerText 5s linear infinite;
-        }
-        .hw-cta {
-          display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-          background: linear-gradient(135deg, #a65d5d 0%, #7c3f4f 100%);
-          color: #fff; font-family: 'Montserrat', sans-serif;
-          font-size: 0.9rem; font-weight: 700;
-          letter-spacing: 0.08em; text-transform: uppercase;
-          border: none; border-radius: 9999px;
-          padding: 0 2.2rem; min-height: 56px; cursor: pointer;
-          box-shadow: 0 14px 34px rgba(124,63,79,0.30);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-          animation: pulseSoft 2.5s infinite;
-          text-decoration: none;
-          -webkit-tap-highlight-color: transparent;
-        }
-        .hw-cta:hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(124,63,79,0.38); }
-        .hw-cta:active { transform: scale(0.98); }
-
-        .hw-cta-ghost {
-          display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-          background: rgba(255,255,255,0.7); color: #7c4343;
+        .home-blog-link {
           font-family: 'Montserrat', sans-serif;
-          font-size: 0.85rem; font-weight: 600;
-          letter-spacing: 0.05em; text-transform: uppercase;
-          border: 1.5px solid rgba(124,67,67,0.25); border-radius: 9999px;
-          padding: 0 1.8rem; min-height: 52px; cursor: pointer;
-          transition: all 0.2s ease; text-decoration: none;
-          -webkit-tap-highlight-color: transparent;
-        }
-        .hw-cta-ghost:hover { border-color: rgba(124,67,67,0.6); background: rgba(255,255,255,0.95); transform: translateY(-2px); }
-        .hw-cta-ghost:active { transform: scale(0.98); }
-
-        .petal-deco {
-          position: absolute; border-radius: 50% 0 50% 0;
-          opacity: 0.4; pointer-events: none;
-          animation: petalDrift ease-in-out infinite;
-        }
-        .hw-scroll-strip {
-          display: flex; gap: 0.85rem; overflow-x: auto;
-          padding: 0.5rem 1rem 1.25rem;
-          scrollbar-width: none; -ms-overflow-style: none;
-          -webkit-overflow-scrolling: touch;
-          scroll-snap-type: x mandatory;
-        }
-        .hw-scroll-strip::-webkit-scrollbar { display: none; }
-        .hw-scroll-strip > * {
-          scroll-snap-align: start;
-        }
-
-        .hw-marquee-track {
-          display: flex; gap: 2.5rem;
-          animation: marqueeScroll 22s linear infinite;
+          font-size: 14px;
+          font-weight: 500;
+          color: #524343;
+          text-decoration: none;
+          transition: color 0.15s;
           white-space: nowrap;
         }
-        .hw-step-card {
-          flex: 1; min-width: 180px; text-align: center;
-          padding: 2rem 1.25rem; border-radius: 1.75rem;
-          background: rgba(255,255,255,0.6);
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          border: 1px solid rgba(255,255,255,0.75);
-          transition: transform 0.2s ease;
+        .home-blog-link:hover {
+          color: #904856;
         }
-        .hw-step-card:hover { transform: translateY(-3px); }
+        .home-btn-gift {
+          padding: 9px 20px;
+          font-size: 13.5px;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
 
-        /* Responsive Mobile Styles */
-        @media (max-width: 640px) {
-          .hw-header {
-            padding: 0.75rem 1rem !important;
+        @media (max-width: 768px) {
+          .home-header {
+            top: 10px;
+            left: 10px;
+            right: 10px;
           }
-          .hw-logo-img {
-            height: 38px !important;
+          .home-header-inner {
+            padding: 7px 12px;
+            gap: 8px;
           }
-          .hw-hero-section {
-            padding: 1.25rem 1rem 0 !important;
+          .home-header-logo {
+            height: 26px;
           }
-          .hw-hero-eyebrow {
-            padding: 0.35rem 0.9rem !important;
-            font-size: 0.65rem !important;
-            margin-bottom: 1rem !important;
+          .home-header-right {
+            gap: 8px;
           }
-          .hw-hero-headline { 
-            font-size: 2.45rem !important; 
-            line-height: 1.15 !important;
-            margin-bottom: 1rem !important;
+          .home-blog-link {
+            display: none;
           }
-          .hw-hero-sub {
-            font-size: 0.92rem !important;
-            line-height: 1.6 !important;
-            margin-bottom: 1.75rem !important;
-            padding: 0 0.25rem !important;
-          }
-          .hw-cta-group {
-            flex-direction: column !important;
-            gap: 0.75rem !important;
-            width: 100% !important;
-            max-width: 320px !important;
-            margin: 0 auto 2rem !important;
-          }
-          .hw-cta, .hw-cta-ghost {
-            width: 100% !important;
-            min-height: 50px !important;
-            font-size: 0.85rem !important;
-          }
-          .hw-ticker-wrap {
-            padding: 0 1rem !important;
-            margin-bottom: 2.5rem !important;
-          }
-          .hw-stats-grid { 
-            gap: 0.5rem !important; 
-            padding: 0 0.75rem !important;
-            margin-bottom: 3rem !important;
-          }
-          .hw-stat-card {
-            padding: 1rem 0.5rem !important;
-            border-radius: 1.2rem !important;
-            flex: 1 1 30% !important;
-            min-width: 90px !important;
-          }
-          .hw-stat-num {
-            font-size: 1.75rem !important;
-          }
-          .hw-stat-label {
-            font-size: 0.62rem !important;
-          }
-          .hw-section-title {
-            font-size: 2rem !important;
-          }
-          .hw-steps { 
-            flex-direction: column !important; 
-            gap: 0.85rem !important; 
-          }
-          .hw-step-card {
-            padding: 1.35rem 1rem !important;
-            border-radius: 1.35rem !important;
-          }
-          .hw-step-arrow-h {
-            display: none !important;
-          }
-          .hw-step-arrow-v {
-            display: block !important;
-            font-size: 1.25rem !important;
-            color: #e48d9c !important;
-            opacity: 0.6 !important;
-            margin-top: 0.5rem !important;
-          }
-          .hw-grid-twocol {
-            grid-template-columns: 1fr !important;
-            gap: 1.25rem !important;
-            padding: 0 1rem !important;
-            margin-bottom: 3rem !important;
-          }
-          .hw-testimonial-card, .hw-blog-card {
-            padding: 1.5rem 1.25rem !important;
-            border-radius: 1.5rem !important;
-          }
-          .hw-testimonial-quote {
-            font-size: 1.15rem !important;
-            line-height: 1.5 !important;
-          }
-          .hw-banner-card {
-            padding: 2.5rem 1.25rem !important;
-            border-radius: 1.75rem !important;
-          }
-          .hw-banner-heading {
-            font-size: 2rem !important;
-            line-height: 1.2 !important;
-          }
-          .hw-banner-btn {
-            width: 100% !important;
-            max-width: 280px !important;
+          .home-btn-gift {
+            padding: 7px 13px;
+            font-size: 12px;
+            gap: 5px;
           }
         }
 
-        @media (min-width: 641px) {
-          .hw-step-arrow-v {
-            display: none !important;
+        @media (max-width: 380px) {
+          .home-header-inner {
+            padding: 6px 10px;
+            gap: 6px;
+          }
+          .home-header-logo {
+            height: 23px;
+          }
+          .home-btn-gift {
+            padding: 6px 10px;
+            font-size: 11px;
+            gap: 4px;
           }
         }
       `}</style>
 
-      {/* 3D Background */}
-      <div style={{ position: "fixed", inset: 0, zIndex: 0 }}>
-        {load3D && <HomeScene />}
+      <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0,overflow:"hidden"}}>
+        <div style={{position:"absolute",top:"-15%",left:"50%",transform:"translateX(-50%)",width:900,height:750,background:"radial-gradient(circle,rgba(253,169,177,.22) 0%,transparent 70%)",borderRadius:"50%",filter:"blur(60px)",animation:"pulseAura 12s ease-in-out infinite"}}/>
+        <div style={{position:"absolute",top:"45%",left:"-10%",width:550,height:550,background:"rgba(255,178,190,.14)",borderRadius:"50%",filter:"blur(60px)"}}/>
+        <div style={{position:"absolute",bottom:"5%",right:"-5%",width:600,height:600,background:"rgba(255,225,228,.32)",borderRadius:"50%",filter:"blur(60px)"}}/>
+        <div className="petal" style={{width:16,height:24,left:"8%",animationDuration:"14s",animationDelay:"0s"}}/>
+        <div className="petal" style={{width:12,height:18,left:"22%",animationDuration:"18s",animationDelay:"3s"}}/>
+        <div className="petal" style={{width:20,height:28,left:"45%",animationDuration:"16s",animationDelay:"1.5s"}}/>
+        <div className="petal" style={{width:14,height:22,left:"68%",animationDuration:"20s",animationDelay:"5s"}}/>
+        <div className="petal" style={{width:16,height:24,left:"86%",animationDuration:"15s",animationDelay:"2s"}}/>
+        <div className="petal" style={{width:12,height:16,left:"93%",animationDuration:"19s",animationDelay:"7s"}}/>
       </div>
 
-      {/* CSS Petal Decorations */}
-      <div style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", overflow: "hidden" }}>
-        {[
-          { w: 90, h: 55, top: "8%",  left: "3%",   color: "#f48fb1", dur: "7s",  delay: "0s"   },
-          { w: 60, h: 38, top: "20%", left: "92%",  color: "#ffcc80", dur: "9s",  delay: "1.5s" },
-          { w: 75, h: 45, top: "70%", left: "5%",   color: "#f8bbd0", dur: "8s",  delay: "3s"   },
-          { w: 50, h: 30, top: "80%", left: "88%",  color: "#ce93d8", dur: "10s", delay: "0.8s" },
-          { w: 40, h: 25, top: "45%", left: "96%",  color: "#ef9a9a", dur: "6s",  delay: "2s"   },
-          { w: 65, h: 40, top: "60%", left: "-2%",  color: "#ffe082", dur: "11s", delay: "4s"   },
-        ].map((p, i) => (
-          <div key={i} className="petal-deco" style={{
-            width: p.w, height: p.h, top: p.top, left: p.left,
-            background: `radial-gradient(ellipse at 30% 30%, ${p.color}cc, ${p.color}55)`,
-            animationDuration: p.dur, animationDelay: p.delay,
-          }} />
-        ))}
-      </div>
-
-      {/* UI Layer */}
-      <div style={{ position: "relative", zIndex: 10, display: "flex", flexDirection: "column", alignItems: "center", paddingBottom: "5rem" }}>
-
-        {/* Header */}
-        <header className="hw-header" style={{ 
-          width: "100%", 
-          maxWidth: "1160px", 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "space-between", 
-          padding: "1rem 1.5rem",
-          zIndex: 20
-        }}>
-          <Link 
-            href="/" 
-            style={{ 
-              display: "inline-flex", 
-              alignItems: "center", 
-              textDecoration: "none",
-              transition: "transform 0.2s ease, opacity 0.2s ease",
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.transform = "scale(1.03)";
-              e.currentTarget.style.opacity = "0.9";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.transform = "scale(1)";
-              e.currentTarget.style.opacity = "1";
-            }}
-          >
-            <img 
-              src="/logo-transparent.png" 
-              alt="Petals and Words" 
-              className="hw-logo-img"
-              style={{ 
-                height: "44px", 
-                width: "auto", 
-                objectFit: "contain",
-                display: "block",
-                userSelect: "none"
-              }} 
-            />
+      <header className="glass2 home-header">
+        <div className="home-header-inner">
+          <Link href="/" style={{display:"flex",alignItems:"center"}}>
+            <img src="/logo-transparent.png" alt="Petals and Words" className="home-header-logo"/>
           </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <Link 
-              href="/blog" 
-              style={{ 
-                color: "#7c4343", 
-                fontWeight: 600, 
-                fontSize: "0.78rem", 
-                letterSpacing: "0.06em", 
-                textTransform: "uppercase", 
-                textDecoration: "none", 
-                padding: "0.45rem 0.9rem",
-                borderRadius: "9999px",
-                background: "rgba(255, 255, 255, 0.75)",
-                backdropFilter: "blur(12px)",
-                border: "1px solid rgba(228, 141, 156, 0.3)",
-                boxShadow: "0 2px 10px rgba(124, 67, 67, 0.06)",
-                transition: "all 0.2s ease",
-                whiteSpace: "nowrap"
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.background = "#ffffff";
-                e.currentTarget.style.boxShadow = "0 4px 16px rgba(124, 67, 67, 0.12)";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.background = "rgba(255, 255, 255, 0.75)";
-                e.currentTarget.style.boxShadow = "0 2px 10px rgba(124, 67, 67, 0.06)";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              {t("common.blog", "Blog")}
-            </Link>
-            <div style={{
-              background: "rgba(255, 255, 255, 0.75)",
-              backdropFilter: "blur(12px)",
-              borderRadius: "9999px",
-              border: "1px solid rgba(228, 141, 156, 0.3)",
-              boxShadow: "0 2px 10px rgba(124, 67, 67, 0.06)",
-              padding: "0.15rem 0.35rem"
-            }}>
-              <LanguageSwitcher />
-            </div>
-          </div>
-        </header>
-
-        {/* Hero */}
-        <main className="hw-hero-section" style={{ width: "100%", maxWidth: "900px", padding: "2rem 1.5rem 0", animation: "floatUp 0.8s ease both" }}>
-          {/* Eyebrow */}
-          <div style={{ textAlign: "center", marginBottom: "1.25rem" }}>
-            <span className="hw-hero-eyebrow" style={{
-              display: "inline-flex", alignItems: "center", gap: "8px",
-              background: "rgba(255,255,255,0.7)", border: "1px solid rgba(228,141,156,0.3)",
-              borderRadius: "9999px", padding: "0.45rem 1.2rem",
-              fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em",
-              textTransform: "uppercase", color: "#a65d5d", backdropFilter: "blur(12px)",
-            }}>
-              <span style={{ fontSize: "1rem" }}>🌸</span>
-              Made for meaningful moments
-            </span>
-          </div>
-
-          {/* Headline */}
-          <h1 className="hw-hero-headline" style={{
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: "4.2rem", fontWeight: 500, lineHeight: 1.1,
-            color: "#3d3028", textAlign: "center", margin: "0 auto 1.5rem", maxWidth: "780px",
-          }}>
-            {isPH
-              ? <>{"Padalhan ng pagmamahal ang iyong"}<br />{"mga "}<em className="hw-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>{"mahal sa buhay."}</em></>
-              : <>Someone out there is<br />waiting for a message{" "}<em className="hw-shimmer" style={{ fontStyle: "italic", fontWeight: 600 }}>from you.</em></>
-            }
-          </h1>
-
-          {/* Sub-headline */}
-          <p className="hw-hero-sub" style={{ textAlign: "center", maxWidth: "520px", margin: "0 auto 2.25rem", fontSize: "1.05rem", color: "#5c4a40", lineHeight: 1.75, fontWeight: 400 }}>
-            {isPH
-              ? "Valentine's, Monthsary, Pasko, Mother's Day — o basta gusto mong mag-surprise. Free, tapos sa 60 seconds."
-              : "Birthdays, rainy Tuesdays, anniversaries, Father's Day — or just because you thought of them. Free digital gifts, ready in 60 seconds."
-            }
-          </p>
-
-          {/* CTAs */}
-          <div className="hw-cta-group" style={{ display: "flex", flexWrap: "wrap", gap: "1rem", justifyContent: "center", marginBottom: "2rem" }}>
-            <Link href="/create" className="hw-cta">{isPH ? "💐 Gumawa ng Bouquet" : "💐 Make a Bouquet"}</Link>
-            <button className="hw-cta-ghost" onClick={() => document.getElementById("hw-gift-strip")?.scrollIntoView({ behavior: "smooth" })}>
-              {isPH ? "Lahat ng gifts ↓" : "See all gifts ↓"}
+          <div className="home-header-right">
+            <Link href="/blog" className="home-blog-link">Blog</Link>
+            <LanguageSwitcher/>
+            <button className="btn-wine home-btn-gift" onClick={()=>setModalOpen(true)}>
+              <span className="ms" style={{fontSize:16}}>redeem</span>
+              <span>Send a Gift</span>
             </button>
           </div>
+        </div>
+      </header>
 
-          <p style={{ textAlign: "center", fontSize: "0.7rem", letterSpacing: "0.12em", textTransform: "uppercase", color: "#a65d5d", opacity: 0.75, marginBottom: "2.5rem" }}>
-            {isPH ? "Walang login · Walang bayad · Libre forever" : "No login · No credit card · Free forever"}
+      <main style={{position:"relative",zIndex:10,padding:"130px 16px 56px",maxWidth:1200,margin:"0 auto"}}>
+        <div className="glass" style={{maxWidth:860,margin:"0 auto 48px",borderRadius:40,padding:"clamp(32px,6vw,64px)",textAlign:"center",position:"relative",overflow:"hidden",boxShadow:"0 20px 60px rgba(124,67,67,.09)",animation:"slideInUp .7s cubic-bezier(.22,1,.36,1) both"}}>
+          <div style={{position:"absolute",top:-80,right:-80,width:200,height:200,background:"rgba(253,162,177,.32)",borderRadius:"50%",filter:"blur(40px)",pointerEvents:"none"}}/>
+          <div style={{position:"absolute",bottom:-80,left:-80,width:200,height:200,background:"rgba(255,225,228,.45)",borderRadius:"50%",filter:"blur(40px)",pointerEvents:"none"}}/>
+
+          <div style={{display:"inline-flex",alignItems:"center",gap:8,padding:"6px 18px",borderRadius:9999,background:"rgba(255,255,255,.76)",border:"1px solid rgba(255,217,221,.75)",boxShadow:"0 2px 8px rgba(124,67,67,.06)",marginBottom:22}}>
+            <span className="ms" style={{fontSize:14,color:"#904856"}}>auto_awesome</span>
+            <span style={{fontFamily:"Montserrat,sans-serif",fontSize:11,fontWeight:700,letterSpacing:".18em",textTransform:"uppercase",color:"#602d2d"}}>✦ MADE FOR MEANINGFUL MOMENTS ✦</span>
+          </div>
+
+          <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(2.1rem,5vw,3.4rem)",lineHeight:1.15,fontWeight:500,color:"#2f1318",margin:"0 0 18px"}}>
+            Send flowers that{" "}<em className="shimmer" style={{fontStyle:"italic",fontWeight:400}}>feel like you</em>
+          </h1>
+
+          <p style={{fontFamily:"Montserrat,sans-serif",fontSize:16,lineHeight:1.78,color:"#524343",maxWidth:560,margin:"0 auto 34px",fontWeight:300}}>
+            {isIndia?"Handcraft beautiful digital bouquets, greeting cards & more with a heartfelt note. Free, in 60 seconds.":"Handcraft bespoke digital floral arrangements paired with poetic notes and heartfelt motion. Free forever, no waste, infinitely cherished."}
           </p>
 
-          {/* Interactive Live Bouquet Preview Showcase */}
-          <div 
-            style={{ 
-              display: "flex", 
-              flexDirection: "column", 
-              alignItems: "center", 
-              margin: "0 auto 3.5rem", 
-              maxWidth: "360px", 
-              width: "100%",
-            }}
-          >
-            <Link 
-              href="/create" 
-              style={{ 
-                textDecoration: "none", 
-                display: "block", 
-                width: "100%",
-                borderRadius: "2rem",
-                padding: "0.55rem",
-                background: "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,244,246,0.85) 100%)",
-                border: "1.5px solid rgba(228, 141, 156, 0.45)",
-                boxShadow: "0 24px 60px rgba(166, 93, 93, 0.18), 0 4px 16px rgba(0,0,0,0.04)",
-                transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease",
-                position: "relative",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-6px) scale(1.01)";
-                e.currentTarget.style.boxShadow = "0 30px 70px rgba(166, 93, 93, 0.25), 0 8px 24px rgba(0,0,0,0.06)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "translateY(0) scale(1)";
-                e.currentTarget.style.boxShadow = "0 24px 60px rgba(166, 93, 93, 0.18), 0 4px 16px rgba(0,0,0,0.04)";
-              }}
-            >
-              <div style={{ position: "relative", overflow: "hidden", borderRadius: "1.6rem" }}>
-                <img
-                  src="/landing-bouquet-preview.png"
-                  alt="Interactive digital flower bouquet with personal voice note and love letter"
-                  style={{
-                    width: "100%",
-                    height: "auto",
-                    display: "block",
-                    borderRadius: "1.6rem",
-                  }}
-                />
-              </div>
-
-              {/* Floating CTA Pill below image */}
-              <div style={{
-                marginTop: "0.65rem",
-                padding: "0.55rem 0.9rem",
-                background: "rgba(255,255,255,0.92)",
-                borderRadius: "9999px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.4rem",
-                border: "1px solid rgba(228, 141, 156, 0.35)",
-                boxShadow: "0 2px 10px rgba(124, 67, 67, 0.06)"
-              }}>
-                <span style={{ fontSize: "0.85rem" }}>✨</span>
-                <span style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 800,
-                  color: "#7c3f4f",
-                  letterSpacing: "0.04em",
-                  textTransform: "uppercase"
-                }}>
-                  {isPH ? "I-tap para gumawa ng bouquet mo →" : "Tap to make your bouquet →"}
-                </span>
-              </div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:14,justifyContent:"center",marginBottom:26}}>
+            <button className="btn-wine" style={{padding:"14px 36px",fontSize:15}} onClick={()=>setModalOpen(true)}>
+              <span className="ms" style={{fontSize:20}}>redeem</span>
+              Gifts &amp; Tools
+              <span className="ms" style={{fontSize:18}}>arrow_forward</span>
+            </button>
+            <Link href="/blog" className="btn-glass-s" style={{padding:"13px 28px",fontSize:14}}>
+              <span className="ms" style={{fontSize:18}}>menu_book</span> Explore Journal
             </Link>
           </div>
-        </main>
 
-        {/* Live Ticker */}
-        <div className="hw-ticker-wrap" style={{ width: "100%", maxWidth: "600px", margin: "0 auto 3rem", padding: "0 1.5rem" }}>
-          <div style={{
-            display: "flex", alignItems: "center", gap: "10px",
-            background: "rgba(255,255,255,0.85)", backdropFilter: "blur(20px)",
-            border: "1px solid rgba(228,141,156,0.35)", borderRadius: "9999px", padding: "0.6rem 1.25rem",
-            boxShadow: "0 4px 20px rgba(124, 67, 67, 0.08)",
-            overflow: "hidden"
-          }}>
-            <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#43a047", boxShadow: "0 0 0 3px rgba(67,160,71,0.25)", flexShrink: 0 }} />
-            <span style={{
-              fontSize: "0.8rem", color: "#3d3028", fontWeight: 600,
-              opacity: tickerVisible ? 1 : 0,
-              transform: tickerVisible ? "translateY(0)" : "translateY(6px)",
-              transition: "opacity 0.3s ease, transform 0.3s ease",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis"
-            }}>
-              {TICKER_ITEMS[tickerIdx]}
-            </span>
-          </div>
-        </div>
+          <p style={{fontFamily:"Montserrat,sans-serif",fontSize:12,color:"#857372"}}>
+            <span className="ms" style={{fontSize:14,color:"#904856",marginRight:4}}>verified</span>
+            No login required · Ready in 60 seconds · 100% Free
+          </p>
 
-        {/* Stats */}
-        <div ref={statsRef} className="hw-stats-grid" style={{
-          display: "flex", gap: "1.25rem", flexWrap: "wrap", justifyContent: "center",
-          margin: "0 auto 4rem", padding: "0 1.5rem", maxWidth: "700px", width: "100%"
-        }}>
-          {[
-            { num: bouquetCount.toLocaleString() + "+", label: "moments sent", icon: "💐" },
-            { num: happyCount + "%", label: "would send again", icon: "❤️" },
-            { num: secondsCount + "s", label: "to make one", icon: "⚡" },
-          ].map(stat => (
-            <div key={stat.label} className="hw-stat-card" style={{
-              textAlign: "center", flex: "1 1 140px",
-              background: "rgba(255,255,255,0.65)", backdropFilter: "blur(16px)",
-              border: "1px solid rgba(255,255,255,0.8)", borderRadius: "1.5rem",
-              padding: "1.5rem 1rem", boxShadow: "0 4px 24px rgba(200,130,140,0.1)",
-            }}>
-              <div style={{ fontSize: "1.6rem", marginBottom: "0.25rem" }}>{stat.icon}</div>
-              <div className="hw-stat-num" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.4rem", fontWeight: 600, color: "#7c3f4f", lineHeight: 1, marginBottom: "0.35rem" }}>{stat.num}</div>
-              <div className="hw-stat-label" style={{ fontSize: "0.72rem", color: "#a65d5d", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>{stat.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Gift Strip */}
-        <section id="hw-gift-strip" style={{ width: "100%", maxWidth: "1100px", padding: "0 1rem", marginBottom: "4rem" }}>
-          <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
-            <p style={{ fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#a65d5d", fontWeight: 700, marginBottom: "0.5rem" }}>Pick your gift</p>
-            <h2 className="hw-section-title" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.6rem", fontWeight: 500, color: "#3d3028", margin: 0 }}>Six ways to make someone's day</h2>
-          </div>
-          <div className="hw-scroll-strip">
-            {GIFTS.map(gift => <GiftCard key={gift.path} gift={gift} onClick={handleGiftClick} />)}
-          </div>
-          <p style={{ textAlign: "center", fontSize: "0.72rem", color: "#a65d5d", opacity: 0.65, marginTop: "0.5rem" }}>← swipe to see all →</p>
-        </section>
-
-        {/* Marquee Trust Strip */}
-        <div style={{
-          width: "100%", overflow: "hidden",
-          borderTop: "1px solid rgba(228,141,156,0.2)", borderBottom: "1px solid rgba(228,141,156,0.2)",
-          background: "rgba(255,255,255,0.55)", backdropFilter: "blur(12px)",
-          padding: "0.85rem 0", marginBottom: "4rem",
-        }}>
-          <div style={{ display: "flex", overflow: "hidden" }}>
-            <div className="hw-marquee-track">
-              {[...FEATURES, ...FEATURES].map((f, i) => (
-                <span key={i} style={{ fontSize: "0.76rem", fontWeight: 600, color: "#7c4343", letterSpacing: "0.06em" }}>
-                  {f}<span style={{ marginLeft: "2.5rem", color: "#e48d9c", opacity: 0.5 }}>·</span>
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* How It Works */}
-        <section style={{ width: "100%", maxWidth: "900px", padding: "0 1rem", marginBottom: "4rem" }}>
-          <div style={{ textAlign: "center", marginBottom: "2.25rem" }}>
-            <p style={{ fontSize: "0.72rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#a65d5d", fontWeight: 700, marginBottom: "0.5rem" }}>Simple as sending a text</p>
-            <h2 className="hw-section-title" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.6rem", fontWeight: 500, color: "#3d3028", margin: 0 }}>How it works</h2>
-          </div>
-          <div className="hw-steps" style={{ display: "flex", gap: "1.25rem" }}>
-            {HOW_IT_WORKS.map((s, i) => (
-              <div key={s.step} className="hw-step-card">
-                <div style={{ fontSize: "2.2rem", marginBottom: "0.75rem" }}>{s.icon}</div>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "0.75rem", fontWeight: 700, color: "#e48d9c", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "0.4rem" }}>Step {s.step}</div>
-                <h3 style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "1rem", fontWeight: 700, color: "#3d3028", margin: "0 0 0.4rem" }}>{s.title}</h3>
-                <p style={{ fontSize: "0.82rem", color: "#705f58", lineHeight: 1.6, margin: 0 }}>{s.desc}</p>
-                {i < HOW_IT_WORKS.length - 1 && (
-                  <>
-                    <div className="hw-step-arrow-h" style={{ fontSize: "1.4rem", color: "#e48d9c", opacity: 0.4, marginTop: "0.75rem" }}>→</div>
-                    <div className="hw-step-arrow-v">↓</div>
-                  </>
-                )}
+          <div style={{marginTop:32,paddingTop:22,borderTop:"1px solid rgba(214,194,193,.45)",display:"flex",flexWrap:"wrap",gap:18,justifyContent:"space-around"}}>
+            {[{icon:"spa",label:"Living Petals",sub:"Wind & blossom physics"},{icon:"history_edu",label:"Artisan Script",sub:"Letterpress calligraphy"},{icon:"workspace_premium",label:"Wax Seal Stamp",sub:"Bespoke monogram emblems"}].map(f=>(
+              <div key={f.icon} style={{display:"flex",alignItems:"center",gap:12,textAlign:"left"}}>
+                <div style={{width:38,height:38,borderRadius:"50%",background:"rgba(253,162,177,.28)",display:"flex",alignItems:"center",justifyContent:"center",color:"#602d2d"}}>
+                  <span className="ms" style={{fontSize:19}}>{f.icon}</span>
+                </div>
+                <div>
+                  <p style={{fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:600,color:"#602d2d",margin:0}}>{f.label}</p>
+                  <p style={{fontFamily:"Montserrat,sans-serif",fontSize:11,color:"#857372",margin:0}}>{f.sub}</p>
+                </div>
               </div>
             ))}
           </div>
-        </section>
+        </div>
 
-        {/* Testimonials + Blog */}
-        <div className="hw-grid-twocol" style={{
-          width: "100%", maxWidth: "1000px",
-          display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          gap: "1.5rem", padding: "0 1.25rem", marginBottom: "4rem",
-        }}>
-          {/* Testimonials */}
-          <div className="hw-glass hw-testimonial-card" style={{ borderRadius: "2rem", padding: "2.25rem" }}>
-            <p style={{ fontSize: "0.7rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#a65d5d", fontWeight: 700, margin: "0 0 1.25rem" }}>
-              {t("home.testimonials", "What people say")}
-            </p>
-            <div style={{ opacity: isSliding ? 0 : 1, transform: isSliding ? "translateX(-10px)" : "translateX(0)", transition: "opacity 0.22s ease, transform 0.22s ease", minHeight: "140px" }}>
-              <Stars count={TESTIMONIALS[activeIdx].stars} />
-              <p className="hw-testimonial-quote" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.3rem", fontStyle: "italic", color: "#3d3028", lineHeight: 1.6, margin: "0.75rem 0 1.25rem" }}>
-                "{TESTIMONIALS[activeIdx].quote}"
-              </p>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <div style={{ width: 40, height: 40, borderRadius: "50%", background: "linear-gradient(135deg, #fbc4ab, #f48fb1)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: "#7c4343", fontSize: "0.95rem" }}>
-                  {TESTIMONIALS[activeIdx].author[0]}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(320px,1fr))",gap:26}}>
+          <div className="glass" style={{borderRadius:30,padding:"clamp(24px,4vw,36px)",display:"flex",flexDirection:"column",justifyContent:"space-between",position:"relative",overflow:"hidden",boxShadow:"0 8px 32px rgba(124,67,67,.06)"}}>
+            <span style={{position:"absolute",top:-16,right:12,fontSize:130,lineHeight:1,color:"rgba(214,194,193,.3)",fontFamily:"'Playfair Display',serif",fontStyle:"italic",pointerEvents:"none",userSelect:"none"}}>"</span>
+            <div>
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18}}>
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <span className="ms ms-fill" style={{fontSize:20,color:"#904856"}}>favorite</span>
+                  <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:600,color:"#602d2d",margin:0}}>Words from the Heart</h2>
                 </div>
-                <div>
-                  <p style={{ fontWeight: 700, fontSize: "0.88rem", color: "#3d3028", margin: 0 }}>{TESTIMONIALS[activeIdx].author}</p>
-                  <p style={{ fontSize: "0.75rem", color: "#a65d5d", margin: 0 }}>{TESTIMONIALS[activeIdx].city}</p>
+                <div style={{display:"flex",gap:2,color:"#904856"}}>
+                  {[...Array(5)].map((_,i)=><span key={i} className="ms ms-fill" style={{fontSize:15}}>star</span>)}
                 </div>
               </div>
+              <div style={{minHeight:120,display:"flex",alignItems:"center",opacity:isSliding?0:1,transform:isSliding?"translateX(-10px)":"translateX(0)",transition:"opacity .2s,transform .2s"}}>
+                <p style={{fontFamily:"'Playfair Display',serif",fontSize:17,fontStyle:"italic",lineHeight:1.7,color:"#2f1318",margin:0}}>"{t_.quote}"</p>
+              </div>
             </div>
-            <div style={{ display: "flex", gap: "8px", marginTop: "1.5rem" }}>
-              {TESTIMONIALS.map((_, i) => (
-                <div key={i} onClick={() => setActiveIdx(i)} style={{ height: 6, borderRadius: "9999px", cursor: "pointer", transition: "all 0.3s ease", width: i === activeIdx ? 28 : 6, background: i === activeIdx ? "#7c4343" : "rgba(228,141,156,0.4)" }} />
-              ))}
+            <div style={{marginTop:22,paddingTop:18,borderTop:"1px solid rgba(214,194,193,.42)",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+              <div style={{display:"flex",alignItems:"center",gap:12}}>
+                <div style={{width:42,height:42,borderRadius:"50%",background:"rgba(253,162,177,.38)",border:"2px solid rgba(253,162,177,.6)",display:"flex",alignItems:"center",justifyContent:"center",color:"#602d2d",fontFamily:"'Playfair Display',serif",fontWeight:600,fontSize:17}}>{(t_.author||"?")[0]}</div>
+                <div>
+                  <h4 style={{fontFamily:"Montserrat,sans-serif",fontSize:13,fontWeight:700,color:"#602d2d",margin:0}}>{t_.author}</h4>
+                  <p style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:600,letterSpacing:".12em",textTransform:"uppercase",color:"#857372",margin:0}}>{t_.city}</p>
+                </div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:7}}>
+                <button className="dot-ctrl" onClick={()=>setActiveIdx((activeIdx-1+TESTIMONIALS.length)%TESTIMONIALS.length)}><span className="ms" style={{fontSize:16}}>arrow_back</span></button>
+                <div style={{display:"flex",gap:5}}>
+                  {TESTIMONIALS.map((_,i)=>(<button key={i} onClick={()=>setActiveIdx(i)} style={{width:i===activeIdx?10:7,height:i===activeIdx?10:7,borderRadius:"50%",background:i===activeIdx?"#602d2d":"rgba(133,115,114,.4)",border:"none",cursor:"pointer",transition:"all .2s"}}/>))}
+                </div>
+                <button className="dot-ctrl" onClick={()=>setActiveIdx((activeIdx+1)%TESTIMONIALS.length)}><span className="ms" style={{fontSize:16}}>arrow_forward</span></button>
+              </div>
             </div>
           </div>
 
-          {/* Blog */}
-          <div className="hw-glass hw-blog-card" style={{ borderRadius: "2rem", padding: "2.25rem" }}>
-            <p style={{ fontSize: "0.7rem", letterSpacing: "0.14em", textTransform: "uppercase", color: "#a65d5d", fontWeight: 700, margin: "0 0 1.25rem" }}>
-              {t("home.fromBlog", "From the blog")}
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-              {featuredPosts.map((post, i) => (
-                <Link key={post.slug} href={`/blog/${post.slug}`} style={{ textDecoration: "none", display: "block" }}>
-                  <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
-                    <div style={{ width: 28, height: 28, flexShrink: 0, marginTop: "2px", borderRadius: "50%", background: "linear-gradient(135deg, #fbc4ab, #e48d9c)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.7rem", fontWeight: 800, color: "#7c4343" }}>{i + 1}</div>
+          <div className="glass" style={{borderRadius:30,padding:"clamp(24px,4vw,36px)",display:"flex",flexDirection:"column",boxShadow:"0 8px 32px rgba(124,67,67,.06)"}}>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:18,paddingBottom:14,borderBottom:"1px solid rgba(214,194,193,.42)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:8}}>
+                <span className="ms" style={{fontSize:22,color:"#904856"}}>auto_stories</span>
+                <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:600,color:"#602d2d",margin:0}}>The Floral Journal</h2>
+              </div>
+              <Link href="/blog" style={{fontFamily:"Montserrat,sans-serif",fontSize:12,fontWeight:600,color:"#904856",textDecoration:"none",display:"flex",alignItems:"center",gap:4}}>
+                View all <span className="ms" style={{fontSize:14}}>arrow_forward</span>
+              </Link>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:11}}>
+              {featuredPosts.map(post=>(
+                <Link key={post.slug} href={`/blog/${post.slug}`} className="blog-link" style={{padding:"13px 15px"}}>
+                  <div style={{display:"flex",alignItems:"flex-start",gap:13}}>
+                    <div style={{width:44,height:44,borderRadius:12,background:"rgba(253,162,177,.25)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:20}}>🌸</div>
                     <div>
-                      <h4 style={{ fontSize: "0.88rem", fontWeight: 700, color: "#3d3028", margin: "0 0 0.3rem", transition: "color 0.2s" }}
-                        onMouseEnter={e => e.currentTarget.style.color = "#7c4343"}
-                        onMouseLeave={e => e.currentTarget.style.color = "#3d3028"}
-                      >{post.title}</h4>
-                      <p style={{ fontSize: "0.75rem", color: "#705f58", margin: 0, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{post.description}</p>
+                      <div style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:700,letterSpacing:".14em",textTransform:"uppercase",color:"#904856",marginBottom:4}}>Floral Lore · 4 min read</div>
+                      <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:15,fontWeight:500,color:"#2f1318",margin:0,lineHeight:1.45}}>{post.title}</h3>
                     </div>
                   </div>
                 </Link>
               ))}
             </div>
-            <div style={{ marginTop: "1.75rem", paddingTop: "1.25rem", borderTop: "1px solid rgba(228,141,156,0.2)" }}>
-              <Link href="/blog" style={{ fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "#a65d5d", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                View all articles
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-              </Link>
+          </div>
+        </div>
+      </main>
+
+      {modalOpen&&(
+        <div className="modal-bd" onClick={()=>setModalOpen(false)}>
+          <div className="modal-box glass2" style={{maxWidth:900,width:"100%",borderRadius:40,padding:"clamp(24px,5vw,48px)",position:"relative"}} onClick={e=>e.stopPropagation()}>
+            <button onClick={()=>setModalOpen(false)} style={{position:"absolute",top:18,right:18,width:40,height:40,borderRadius:"50%",background:"rgba(255,255,255,.88)",border:"1px solid rgba(214,194,193,.55)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#602d2d",zIndex:1}}>
+              <span className="ms" style={{fontSize:20}}>close</span>
+            </button>
+            <div style={{textAlign:"center",marginBottom:32}}>
+              <div style={{display:"inline-flex",alignItems:"center",gap:8,padding:"5px 16px",borderRadius:9999,background:"rgba(253,162,177,.28)",border:"1px solid rgba(253,162,177,.5)",marginBottom:12}}>
+                <span className="ms" style={{fontSize:13,color:"#602d2d"}}>auto_fix_high</span>
+                <span style={{fontFamily:"Montserrat,sans-serif",fontSize:10,fontWeight:700,letterSpacing:".16em",textTransform:"uppercase",color:"#602d2d"}}>Bespoke Digital Suite</span>
+              </div>
+              <h2 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(1.4rem,3vw,2rem)",fontWeight:500,color:"#602d2d",margin:"0 0 8px"}}>Choose Your Gesture of Devotion</h2>
+              <p style={{fontFamily:"Montserrat,sans-serif",fontSize:14,color:"#524343",margin:0,fontWeight:300}}>Select an interactive instrument to build and customize your unique token.</p>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:16}}>
+              {GIFTS.map(gift=>(
+                <div key={gift.path} className="tool-card" style={{padding:22}}>
+                  <div>
+                    <div style={{fontSize:34,marginBottom:14}}>{gift.icon}</div>
+                    <h3 style={{fontFamily:"'Playfair Display',serif",fontSize:17,fontWeight:600,color:"#602d2d",margin:"0 0 8px"}}>{gift.title}</h3>
+                    <p style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:"#524343",lineHeight:1.65,margin:"0 0 14px"}}>{gift.desc}</p>
+                    {gift.tag&&<span style={{display:"inline-block",marginBottom:14,padding:"2px 10px",borderRadius:9999,background:"linear-gradient(135deg,#e91e63,#f48fb1)",color:"#fff",fontSize:10,fontWeight:800,letterSpacing:".1em"}}>{gift.tag}</span>}
+                  </div>
+                  <button className="btn-wine" style={{width:"100%",padding:"12px 0",fontSize:14}} onClick={()=>{setModalOpen(false);router.push(gift.path);}}>
+                    Explore Tool <span className="ms" style={{fontSize:15}}>arrow_forward</span>
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
+      )}
 
-        {/* Final CTA Banner */}
-        <section style={{ width: "100%", maxWidth: "860px", padding: "0 1rem", marginBottom: "3rem" }}>
-          <div className="hw-banner-card" style={{
-            borderRadius: "2.5rem",
-            background: "linear-gradient(135deg, #a65d5d 0%, #7c3f4f 60%, #5c3344 100%)",
-            padding: "3.5rem 2.5rem", textAlign: "center", position: "relative", overflow: "hidden",
-            boxShadow: "0 24px 60px rgba(92,51,68,0.35)",
-          }}>
-            <div style={{ position: "absolute", width: 200, height: 200, borderRadius: "50%", background: "rgba(255,255,255,0.06)", top: -60, right: -40, pointerEvents: "none" }} />
-            <div style={{ position: "absolute", width: 140, height: 140, borderRadius: "50%", background: "rgba(255,255,255,0.04)", bottom: -40, left: -20, pointerEvents: "none" }} />
-            <p style={{ fontSize: "1.75rem", margin: "0 0 0.75rem" }}>🌸</p>
-            <h2 className="hw-banner-heading" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.8rem", fontWeight: 500, color: "#fff", margin: "0 0 1rem", lineHeight: 1.15 }}>
-              Don't wait for a reason.<br /><em>Make someone's day today.</em>
-            </h2>
-            <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.95rem", margin: "0 auto 2rem", maxWidth: "420px", lineHeight: 1.7 }}>
-              Free, takes 60 seconds, works on WhatsApp. No account needed.
-            </p>
-            <Link href="/create" className="hw-banner-btn" style={{
-              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "10px",
-              background: "#fff", color: "#7c3f4f",
-              fontFamily: "'Montserrat', sans-serif",
-              fontSize: "0.9rem", fontWeight: 800,
-              letterSpacing: "0.08em", textTransform: "uppercase",
-              border: "none", borderRadius: "9999px",
-              padding: "0 2.5rem", minHeight: "56px",
-              textDecoration: "none",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
-              transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 16px 40px rgba(0,0,0,0.2)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 10px 30px rgba(0,0,0,0.15)"; }}
-            >
-              💐 Start for free
-            </Link>
+      <footer style={{background:"rgba(255,240,241,.6)",borderTop:"1px solid rgba(214,194,193,.4)",position:"relative",zIndex:10,marginTop:52}}>
+        <div style={{maxWidth:1200,margin:"0 auto",padding:"36px 24px",display:"flex",flexWrap:"wrap",justifyContent:"space-between",alignItems:"center",gap:18}}>
+          <div>
+            <h4 style={{fontFamily:"'Playfair Display',serif",fontSize:19,fontWeight:500,color:"#602d2d",margin:"0 0 4px"}}>Petals &amp; Words</h4>
+            <p style={{fontFamily:"Montserrat,sans-serif",fontSize:12,color:"#857372",margin:0}}>© 2024 Petals &amp; Words. Handcrafted digital floral poetry.</p>
           </div>
-        </section>
-
-      </div>
+          <nav style={{display:"flex",flexWrap:"wrap",gap:18}}>
+            {[["Blog","/blog"],["Bouquet Maker","/create"],["Greeting Card","/create-greeting-card"],["Virtual Hug","/create-hug-card"]].map(([label,to])=>(
+              <Link key={to} href={to} style={{fontFamily:"Montserrat,sans-serif",fontSize:13,color:"#524343",textDecoration:"none"}}>{label}</Link>
+            ))}
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -6,7 +6,9 @@ import Create from "./legacy-pages/Create.jsx";
 import Payment from "./legacy-pages/Payment.jsx";
 import ViewBouquet from "./legacy-pages/ViewBouquet.jsx";
 import KeywordLanding from "./legacy-pages/KeywordLanding.jsx";
-import CakeKeywordLanding from "./legacy-pages/CakeKeywordLanding.jsx";
+import CreateShagun from "./legacy-pages/CreateShagun.jsx";
+import ShagunSuccess from "./legacy-pages/ShagunSuccess.jsx";
+import ClaimShagun from "./legacy-pages/ClaimShagun.jsx";
 import Blog from "./legacy-pages/Blog.jsx";
 import BlogPost from "./legacy-pages/BlogPost.jsx";
 import HugCard from "./legacy-pages/HugCard.jsx";
@@ -15,20 +17,9 @@ import GreetingCard from "./legacy-pages/GreetingCard.jsx";
 import CreateGreetingCard from "./legacy-pages/CreateGreetingCard.jsx";
 import PaymentGreetingCard from "./legacy-pages/PaymentGreetingCard.jsx";
 import MothersDayKeywordLanding from "./legacy-pages/MothersDayKeywordLanding.jsx";
-import CreateCake from "./legacy-pages/CreateCake.jsx";
-import ViewCake from "./legacy-pages/ViewCake.jsx";
-import PaymentCake from "./legacy-pages/PaymentCake.jsx";
 import AdminDashboard from "./legacy-pages/AdminDashboard.jsx";
 import Cart from "./legacy-pages/Cart.jsx";
 import GiftBundle from "./legacy-pages/GiftBundle.jsx";
-import CreatePlushie from "./legacy-pages/CreatePlushie.jsx";
-import PaymentPlushie from "./legacy-pages/PaymentPlushie.jsx";
-import ViewPlushie from "./legacy-pages/ViewPlushie.jsx";
-
-import CreateShagun from "./legacy-pages/CreateShagun.jsx";
-import ShagunSuccess from "./legacy-pages/ShagunSuccess.jsx";
-import ClaimShagun from "./legacy-pages/ClaimShagun.jsx";
-import PhilippinesLanding from "./legacy-pages/PhilippinesLanding.jsx";
 
 import useDirection from "./hooks/useDirection.js";
 
@@ -65,25 +56,11 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/ph" element={<PhilippinesLanding />} />
-        <Route path="/philippines" element={<PhilippinesLanding />} />
+        <Route path="/ph" element={<Navigate to="/" replace />} />
+        <Route path="/philippines" element={<Navigate to="/" replace />} />
         <Route path="/shagun" element={<CreateShagun />} />
         <Route path="/shagun/success/:id" element={<ShagunSuccess />} />
         <Route path="/claim/:id" element={<ClaimShagun />} />
-        <Route path="/create-cake" element={<CreateCake />} />
-        <Route path="/payment-cake" element={<PaymentCake />} />
-        <Route path="/cake/:id" element={<ViewCake />} />
-        <Route path="/cake" element={<ViewCake />} />
-
-        <Route path="/create-plushie" element={<CreatePlushie />} />
-        <Route path="/payment-plushie" element={<PaymentPlushie />} />
-        <Route path="/plushie/:id" element={<ViewPlushie />} />
-        <Route path="/plushie" element={<ViewPlushie />} />
-
-        {/* Localized Cake SEO Routes */}
-        <Route path="/tl/virtual-cake-anniversary" element={<CakeKeywordLanding />} />
-        <Route path="/es/pastel-de-cumpleanos-virtual" element={<CakeKeywordLanding />} />
-        <Route path="/bn/virtual-janmadin-cake" element={<CakeKeywordLanding />} />
 
         {/* Localized Mother's Day SEO Routes */}
         <Route path="/free-digital-mothers-day-card" element={<MothersDayKeywordLanding />} />

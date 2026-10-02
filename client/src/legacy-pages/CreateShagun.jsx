@@ -247,7 +247,7 @@ export default function CreateShagun() {
         throw new Error(orderData?.error || "Failed to create order on payment gateway");
       }
 
-      const keyId = process.env.VITE_RAZORPAY_KEY_ID;
+      const keyId = typeof process !== "undefined" && process.env ? process.env.VITE_RAZORPAY_KEY_ID : undefined;
 
       // 3. Trigger Razorpay Checkout
       const rzp = new window.Razorpay({

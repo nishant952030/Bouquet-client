@@ -8,7 +8,7 @@ import { trackEvent } from "../lib/analytics";
 import { loadRazorpayScript } from "../lib/razorpay";
 import { applySeo } from "../lib/seo";
 
-const API_BASE_URL = String(process.env.VITE_API_BASE_URL || "").replace(/\/+$/, "");
+const API_BASE_URL = String((typeof process !== "undefined" && process.env && process.env.VITE_API_BASE_URL) || "").replace(/\/+$/, "");
 function apiUrl(p) { const n = p.startsWith("/") ? p : `/${p}`; return `${API_BASE_URL}${n}`; }
 async function readApi(r) {
   const ct = r.headers.get("content-type") || "";
@@ -82,7 +82,7 @@ export default function PaymentGreetingCard() {
   const [copied, setCopied] = useState(false);
   const [errMsg, setErrMsg] = useState("");
 
-  const razorpayKey = process.env.VITE_RAZORPAY_KEY_ID;
+  const razorpayKey = typeof process !== "undefined" && process.env ? process.env.VITE_RAZORPAY_KEY_ID : undefined;
   const isIndia = countryCode === "IN";
   const tip = isIndia ? TIP_INR : TIP_USD;
 
@@ -130,16 +130,44 @@ export default function PaymentGreetingCard() {
       if (!ready || !window.Razorpay) throw new Error("Could not load Razorpay.");
       const currency = isIndia ? "INR" : "USD";
       const amountMinor = Math.round(tip.amount * 100);
+      const cardDescription = `Personalized Greeting Card for ${cardData?.to || "Loved One"}`;
+
       const orderRes = await fetch(apiUrl("/api/razorpay/create-order"), {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId: "greeting_card", amountMinor, currency, receipt: `mc_${Date.now()}`, notes: { type: "greeting_card" } }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId: "greeting_card",
+          amountMinor,
+          currency,
+          receipt: `rcpt_card_${Date.now()}`,
+          notes: {
+            gift_type: "Personalized Greeting Card",
+            recipient_name: String(cardData?.to || "Loved One"),
+            sender_name: String(cardData?.from || "Anonymous"),
+            paper_style: String(cardData?.paper || "vintage"),
+            website: "www.petalsandwords.com",
+          },
+        }),
       });
       const orderData = await readApi(orderRes);
       if (!orderRes.ok || !orderData?.orderId) throw new Error(orderData?.error || `HTTP ${orderRes.status}`);
 
       const rz = new window.Razorpay({
-        key: razorpayKey, order_id: orderData.orderId, currency: orderData.currency || currency,
-        name: "Petals and Words", description: "Greeting Card", theme: { color: "#be185d" },
+        key: razorpayKey,
+        order_id: orderData.orderId,
+        currency: orderData.currency || currency,
+        name: "Petals and Words",
+        description: cardDescription,
+        image: "https://www.petalsandwords.com/logo-transparent.png",
+        prefill: {
+          name: cardData?.from ? String(cardData.from).trim() : "",
+        },
+        notes: {
+          gift_type: "Personalized Greeting Card",
+          recipient: String(cardData?.to || "Loved One"),
+          sender: String(cardData?.from || "Anonymous"),
+        },
+        theme: { color: "#be185d" },
         modal: { ondismiss: () => { setPaying(false); setErrMsg("Payment cancelled."); } },
         handler: async (resp) => {
           try {

@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Music, Play, Square } from "lucide-react";
 import { MUSIC_TRACKS, playTrack, stopTrack } from "../lib/audioTracks";
 
-const PH_TRACK_NAMES = {
-  none: { name: "Walang Tugtog", desc: "Tahimik lang" },
-  acoustic: { name: "Gitara / Harana", desc: "Mainit at maaliwalas" },
-  piano: { name: "Sweet Piano", desc: "Malambing at madamdamin" },
-  lofi: { name: "Lofi Vibe", desc: "Chill at nakakarelaks" },
-  chiptune: { name: "Cute Chiptune", desc: "Makulit at masigla" },
-};
-
-export default function MusicSelector({ selectedTrackId, onChange, isPH = false }) {
+export default function MusicSelector({ selectedTrackId, onChange }) {
+  const { t } = useTranslation();
   const [previewingId, setPreviewingId] = useState(null);
+
+  const TRACK_I18N = {
+    none: { name: t("music.noneName", "No music"), desc: t("music.noneDesc", "Silence") },
+    "with-a-smile": { name: t("music.withASmileName", "With a Smile"), desc: t("music.withASmileDesc", "Acoustic & comforting") },
+    "happy-birthday": { name: t("music.happyBirthdayName", "Happy Birthday"), desc: t("music.happyBirthdayDesc", "Acoustic guitar version") },
+  };
 
   const handleSelect = (trackId) => {
     onChange(trackId);
@@ -61,22 +61,20 @@ export default function MusicSelector({ selectedTrackId, onChange, isPH = false 
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
         <Music size={16} style={{ color: "#7b5455" }} />
         <h3 style={{ fontSize: "0.82rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em", color: "#7b5455", margin: 0 }}>
-          {isPH ? "Tugtuging Pang-Background" : "Background Music"}
+          {t("music.title", "Background Music")}
         </h3>
       </div>
       
       <p style={{ fontSize: "0.75rem", color: "#705f58", margin: "0 0 0.85rem", lineHeight: 1.4 }}>
-        {isPH
-          ? "Pumili ng tugtog na maririnig kapag binuksan ang iyong regalo. I-tap para pakinggan."
-          : "Choose a track to play when the receiver opens your gift. Tap to preview."}
+        {t("music.subtitle", "Choose a track to play when the receiver opens your gift. Tap to preview.")}
       </p>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "0.6rem" }}>
         {MUSIC_TRACKS.map((track) => {
           const isSelected = selectedTrackId === track.id;
           const isPreviewing = previewingId === track.id;
-          const displayName = (isPH && PH_TRACK_NAMES[track.id]?.name) || track.name;
-          const displayDesc = (isPH && PH_TRACK_NAMES[track.id]?.desc) || track.desc;
+          const displayName = TRACK_I18N[track.id]?.name || track.name;
+          const displayDesc = TRACK_I18N[track.id]?.desc || track.desc;
           
           return (
             <div
@@ -139,7 +137,7 @@ export default function MusicSelector({ selectedTrackId, onChange, isPH = false 
                       padding: 0,
                       transition: "all 0.15s",
                     }}
-                    title={isPreviewing ? (isPH ? "Itigil ang tugtog" : "Stop Preview") : (isPH ? "Pakinggan ang tugtog" : "Preview Track")}
+                    title={isPreviewing ? t("music.stopPreview", "Stop Preview") : t("music.previewTrack", "Preview Track")}
                   >
                     {isPreviewing ? <Square size={8} fill="currentColor" /> : <Play size={8} fill="currentColor" />}
                   </button>

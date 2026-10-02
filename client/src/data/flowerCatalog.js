@@ -1,10 +1,12 @@
 import hydrangea_1 from "../assets/flowers/hydrangea/hydrangea_1.png";
+import hydrangea_blue_2 from "../assets/flowers/hydrangea/hydrangea_blue_2.png";
 import rose_1 from "../assets/flowers/rose/rose_1.png";
 import rose_2 from "../assets/flowers/rose/rose_2.png";
 import rose_3 from "../assets/flowers/rose/rose_3.png";
 import rose_4 from "../assets/flowers/rose/rose_4.png";
 import rose_5 from "../assets/flowers/rose/rose_5.png";
 import rose_peach_1 from "../assets/flowers/rose/rose_peach_1.png";
+import rose_crimson_6 from "../assets/flowers/rose/rose_crimson_6.png";
 import sunflower_1 from "../assets/flowers/sunflower/sunflower_1.png";
 import sunflower_2 from "../assets/flowers/sunflower/sunflower_2.png";
 import tulip_1 from "../assets/flowers/tulip/tulip_1.png";
@@ -20,6 +22,10 @@ import babys_breath_1 from "../assets/flowers/babys_breath/babys_breath_1.png";
 import sakura_1 from "../assets/flowers/sakura/sakura_1.png";
 import sampaguita_1 from "../assets/flowers/sampaguita/sampaguita_1.png";
 import lavender_1 from "../assets/flowers/lavender/lavender_1.png";
+import lily_1 from "../assets/flowers/lily/lily_1.png";
+import marigold_1 from "../assets/flowers/marigold/marigold_1.png";
+import orchid_1 from "../assets/flowers/orchid/orchid_1.png";
+import dahlia_1 from "../assets/flowers/dahlia/dahlia_1.png";
 
 const flowerModules = {
   "../assets/flowers/peony/peony_1.png": peony_1,
@@ -28,7 +34,12 @@ const flowerModules = {
   "../assets/flowers/babys_breath/babys_breath_1.png": babys_breath_1,
   "../assets/flowers/sampaguita/sampaguita_1.png": sampaguita_1,
   "../assets/flowers/lavender/lavender_1.png": lavender_1,
+  "../assets/flowers/lily/lily_1.png": lily_1,
+  "../assets/flowers/marigold/marigold_1.png": marigold_1,
+  "../assets/flowers/orchid/orchid_1.png": orchid_1,
+  "../assets/flowers/dahlia/dahlia_1.png": dahlia_1,
   "../assets/flowers/rose/rose_peach_1.png": rose_peach_1,
+  "../assets/flowers/rose/rose_crimson_6.png": rose_crimson_6,
   "../assets/flowers/rose/rose_1.png": rose_1,
   "../assets/flowers/rose/rose_2.png": rose_2,
   "../assets/flowers/rose/rose_3.png": rose_3,
@@ -37,6 +48,7 @@ const flowerModules = {
   "../assets/flowers/sunflower/sunflower_2.png": sunflower_2,
   "../assets/flowers/sunflower/sunflower_1.png": sunflower_1,
   "../assets/flowers/hydrangea/hydrangea_1.png": hydrangea_1,
+  "../assets/flowers/hydrangea/hydrangea_blue_2.png": hydrangea_blue_2,
   "../assets/flowers/tulip/tulip_1.png": tulip_1,
   "../assets/flowers/tulip/tulip_deep_purple_4.png": tulip_deep_purple_4,
   "../assets/flowers/tulip/tulip_lavender_1.png": tulip_lavender_1,
@@ -54,7 +66,13 @@ const customLabels = {
   "sampaguita_1": { type: "Sampaguita", label: "Sampaguita" },
   "lavender_1": { type: "Lavender", label: "English Lavender" },
   "rose_peach_1": { type: "Rose", label: "Peach Garden Rose" },
+  "rose_crimson_6": { type: "Rose", label: "Velvet Crimson Rose" },
   "sunflower_2": { type: "Sunflower", label: "Golden Sunflower" },
+  "lily_1": { type: "Lily", label: "Stargazer Oriental Lily" },
+  "marigold_1": { type: "Marigold", label: "Golden Marigold" },
+  "orchid_1": { type: "Orchid", label: "Purple Moth Orchid" },
+  "hydrangea_blue_2": { type: "Hydrangea", label: "Periwinkle Hydrangea" },
+  "dahlia_1": { type: "Dahlia", label: "Burgundy Dahlia" },
 };
 
 function titleCase(value) {

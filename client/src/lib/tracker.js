@@ -4,10 +4,14 @@ import { db, isFirebaseConfigured } from "./firebase";
 /* ── Helpers ─────────────────────────────────────────────── */
 
 function generateId() {
-  return crypto.randomUUID?.() || Math.random().toString(36).slice(2) + Date.now().toString(36);
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
 function getVisitorId() {
+  if (typeof window === "undefined" || !globalThis.localStorage) return "ssr-visitor";
   const key = "pw_vid";
   let vid = localStorage.getItem(key);
   if (!vid) {
@@ -18,6 +22,7 @@ function getVisitorId() {
 }
 
 function getSessionId() {
+  if (typeof window === "undefined" || !globalThis.sessionStorage) return "ssr-session";
   const key = "pw_sid";
   let sid = sessionStorage.getItem(key);
   if (!sid) {
@@ -28,6 +33,7 @@ function getSessionId() {
 }
 
 function isAdmin() {
+  if (typeof window === "undefined" || !globalThis.localStorage) return false;
   try {
     return localStorage.getItem("pw_admin") === "true";
   } catch {
@@ -36,6 +42,7 @@ function isAdmin() {
 }
 
 function getDeviceType() {
+  if (typeof window === "undefined" || !window.screen) return "desktop";
   const w = window.screen.width;
   if (w < 768) return "mobile";
   if (w < 1024) return "tablet";
