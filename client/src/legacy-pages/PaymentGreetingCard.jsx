@@ -82,7 +82,10 @@ export default function PaymentGreetingCard() {
   const [copied, setCopied] = useState(false);
   const [errMsg, setErrMsg] = useState("");
 
-  const razorpayKey = typeof process !== "undefined" && process.env ? process.env.VITE_RAZORPAY_KEY_ID : undefined;
+  const razorpayKey =
+    typeof process !== "undefined" && process.env
+      ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID
+      : undefined;
   const isIndia = countryCode === "IN";
   const tip = isIndia ? TIP_INR : TIP_USD;
 

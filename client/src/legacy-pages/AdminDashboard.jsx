@@ -3,8 +3,9 @@ import { collection, getDocs, query, where, getCountFromServer } from "firebase/
 import { db, isFirebaseConfigured } from "../lib/firebase";
 import { 
   BarChart3, Users, Globe, Smartphone, ArrowRight, Lock, KeyRound, Clock, Activity, CreditCard,
-  Loader2
+  Loader2, RefreshCw, Sparkles, CheckCircle2
 } from "lucide-react";
+import { sendTestPageView } from "../lib/tracker";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function AdminDashboard() {
@@ -46,11 +47,18 @@ export default function AdminDashboard() {
     }
   }, [isAuthenticated, dateRange]);
 
+  const [trackAdmin, setTrackAdmin] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("pw_track_admin") === "true";
+  });
+  const [testingTrack, setTestingTrack] = useState(false);
+  const [testSuccessMsg, setTestSuccessMsg] = useState("");
+
   const handleLogin = (e) => {
     e.preventDefault();
-    const correctPassword = typeof process !== "undefined" && process.env ? process.env.VITE_ADMIN_KEY : undefined;
+    const correctPassword = process.env.NEXT_PUBLIC_ADMIN_KEY || process.env.VITE_ADMIN_KEY || "RCBxMI@240902";
     if (!correctPassword) {
-      setError("Admin key not configured in .env");
+      setError("Admin key not configured in .env (add NEXT_PUBLIC_ADMIN_KEY)");
       return;
     }
     if (password === correctPassword) {
@@ -59,6 +67,27 @@ export default function AdminDashboard() {
       setIsAuthenticated(true);
     } else {
       setError("Incorrect password");
+    }
+  };
+
+  const handleToggleTrackAdmin = () => {
+    const next = !trackAdmin;
+    setTrackAdmin(next);
+    localStorage.setItem("pw_track_admin", next ? "true" : "false");
+  };
+
+  const handleTestTrack = async () => {
+    try {
+      setTestingTrack(true);
+      setTestSuccessMsg("");
+      await sendTestPageView();
+      setTestSuccessMsg("✓ Test visit recorded!");
+      await fetchStats();
+      setTimeout(() => setTestSuccessMsg(""), 4000);
+    } catch (err) {
+      alert("Test tracking failed: " + err.message);
+    } finally {
+      setTestingTrack(false);
     }
   };
 
@@ -244,22 +273,67 @@ export default function AdminDashboard() {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <BarChart3 className="w-8 h-8 text-rose-500" />
-              Analytics Dashboard
-            </h1>
-            <p className="text-neutral-400 mt-1 text-sm">
-              Your visits are currently excluded from tracking.
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                <BarChart3 className="w-8 h-8 text-rose-500" />
+                Analytics Dashboard
+              </h1>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                isFirebaseConfigured 
+                  ? "bg-emerald-950/80 text-emerald-400 border border-emerald-800/60" 
+                  : "bg-rose-950/80 text-rose-400 border border-rose-800/60"
+              }`}>
+                <span className={`w-2 h-2 rounded-full ${isFirebaseConfigured ? "bg-emerald-400 animate-pulse" : "bg-rose-400"}`} />
+                {isFirebaseConfigured ? "Database Connected" : "Firebase Config Missing"}
+              </span>
+            </div>
+            <p className="text-neutral-400 mt-1 text-sm flex items-center gap-2 flex-wrap">
+              <span>{trackAdmin ? "⚡ Testing Mode: Your visits from this browser ARE being tracked." : "Your visits from this browser are excluded from tracking."}</span>
+              <button
+                type="button"
+                onClick={handleToggleTrackAdmin}
+                className="text-xs text-rose-400 hover:text-rose-300 underline font-medium"
+              >
+                {trackAdmin ? "Turn Off (Exclude My Visits)" : "Turn On (Track My Visits)"}
+              </button>
             </p>
+            {testSuccessMsg && (
+              <p className="text-emerald-400 text-xs font-bold mt-1.5 flex items-center gap-1.5 animate-fadeIn">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                {testSuccessMsg}
+              </p>
+            )}
           </div>
 
-          <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={fetchStats}
+              disabled={loading}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700/60 transition shadow-sm disabled:opacity-50"
+              title="Refresh Analytics Stats"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-rose-400" : ""}`} />
+              Refresh
+            </button>
+
+            <button
+              type="button"
+              onClick={handleTestTrack}
+              disabled={testingTrack || !isFirebaseConfigured}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-900/80 hover:bg-rose-800 text-white border border-rose-700/60 transition shadow-sm disabled:opacity-50"
+              title="Record a test visit to verify Firestore tracking live"
+            >
+              {testingTrack ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+              {testingTrack ? "Recording..." : "Record Test Visit"}
+            </button>
+
             <div className="flex bg-neutral-800/50 p-1 rounded-xl border border-neutral-800 w-fit">
               {["today", "7d", "30d", "all"].map((range) => (
                 <button
                   key={range}
                   onClick={() => setDateRange(range)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     dateRange === range 
                       ? "bg-neutral-700 text-white shadow-sm" 
                       : "text-neutral-400 hover:text-white hover:bg-neutral-800"

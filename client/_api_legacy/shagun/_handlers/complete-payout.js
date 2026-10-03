@@ -73,7 +73,7 @@ export default async function handler(req, res) {
   }
 
   // Authorize using environment variables admin key
-  const correctAdminKey = process.env.VITE_ADMIN_KEY;
+  const correctAdminKey = process.env.ADMIN_KEY || process.env.NEXT_PUBLIC_ADMIN_KEY || process.env.VITE_ADMIN_KEY;
   if (!correctAdminKey || adminKey !== correctAdminKey) {
     return res.status(401).json({ error: "Unauthorized access" });
   }

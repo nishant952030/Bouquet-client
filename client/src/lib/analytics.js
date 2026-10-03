@@ -1,13 +1,11 @@
 // analytics.js
 
-const TRACKER_URL = 'https://site-tracker-ruddy.vercel.app';
-const WEBSITE_ID = 'petalsandwords';
-
-const getEnv = (key) => (typeof process !== "undefined" && process.env ? process.env[key] : undefined);
+const TRACKER_URL = process.env.NEXT_PUBLIC_ANALYTICS_API_URL || process.env.VITE_ANALYTICS_API_URL || 'https://site-tracker-ruddy.vercel.app';
+const WEBSITE_ID = process.env.NEXT_PUBLIC_ANALYTICS_WEBSITE_ID || process.env.VITE_ANALYTICS_WEBSITE_ID || 'petalsandwords';
 
 // ✅ INIT GA
 export function initGoogleAnalytics() {
-  const measurementId = getEnv("VITE_GA_MEASUREMENT_ID");
+  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || process.env.VITE_GA_MEASUREMENT_ID;
 
   if (typeof window === "undefined" || !measurementId) return;
   if (window.__gaInitialized) return;
@@ -39,7 +37,7 @@ export function initGoogleAnalytics() {
 export function trackPageView(url) {
   if (typeof window === "undefined") return;
 
-  const measurementId = getEnv("VITE_GA_MEASUREMENT_ID");
+  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || process.env.VITE_GA_MEASUREMENT_ID;
 
   if (typeof window.gtag === "function") {
     window.gtag("event", "page_view", {

@@ -214,7 +214,10 @@ export default function AnonymousDeliveryModal({ giftUrl, giftType = "bouquet", 
   const [errorMsg, setErrorMsg] = useState("");
   const [isMock, setIsMock] = useState(false);
 
-  const razorpayKeyId = typeof process !== "undefined" && process.env ? process.env.VITE_RAZORPAY_KEY_ID : undefined;
+  const razorpayKeyId =
+    typeof process !== "undefined" && process.env
+      ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID
+      : undefined;
 
   const isValidPhone = /^[6-9]\d{9}$/.test(phone.replace(/\s/g, ""));
 

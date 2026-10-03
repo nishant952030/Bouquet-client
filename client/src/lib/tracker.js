@@ -1,5 +1,5 @@
 import { collection, addDoc } from "firebase/firestore";
-import { db, isFirebaseConfigured } from "./firebase";
+import { db, isFirebaseConfigured } from "./firebase.js";
 
 /* ── Helpers ─────────────────────────────────────────────── */
 
@@ -35,6 +35,7 @@ function getSessionId() {
 function isAdmin() {
   if (typeof window === "undefined" || !globalThis.localStorage) return false;
   try {
+    if (localStorage.getItem("pw_track_admin") === "true") return false;
     return localStorage.getItem("pw_admin") === "true";
   } catch {
     return false;
@@ -147,8 +148,28 @@ export function trackPageViewFirestore(pathname) {
   };
 
   addDoc(collection(db, "page_views"), payload).catch((err) => {
-    console.debug("Tracker write failed:", err.message);
+    console.warn("[Analytics] Firestore page_views write error:", err);
   });
+}
+
+export async function sendTestPageView() {
+  if (!isFirebaseConfigured || !db) {
+    throw new Error("Firebase is not configured or db is null");
+  }
+  const now = new Date();
+  const payload = {
+    path: "/test-view",
+    visitorId: getVisitorId(),
+    sessionId: getSessionId(),
+    deviceType: getDeviceType(),
+    country: getCountryFromTimezone(),
+    referrer: "Admin Test",
+    timestamp: now.toISOString(),
+    date: now.toISOString().split("T")[0],
+    hour: now.getHours(),
+  };
+
+  return await addDoc(collection(db, "page_views"), payload);
 }
 
 export { isAdmin, getVisitorId };

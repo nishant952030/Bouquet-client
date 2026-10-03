@@ -1,26 +1,54 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-const getEnv = (key) => (typeof process !== "undefined" && process.env ? process.env[key] : undefined);
+const apiKey =
+  process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+  process.env.VITE_FIREBASE_API_KEY ||
+  "AIzaSyCTsC2-lzdcfFw6GaRA2Dn6nltBZcKYa1k";
+
+const authDomain =
+  process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
+  process.env.VITE_FIREBASE_AUTH_DOMAIN ||
+  "bouquet-9a203.firebaseapp.com";
+
+const projectId =
+  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+  process.env.VITE_FIREBASE_PROJECT_ID ||
+  "bouquet-9a203";
+
+const storageBucket =
+  process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+  process.env.VITE_FIREBASE_STORAGE_BUCKET ||
+  "bouquet-9a203.firebasestorage.app";
+
+const messagingSenderId =
+  process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
+  process.env.VITE_FIREBASE_MESSAGING_SENDER_ID ||
+  "904506751557";
+
+const appId =
+  process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
+  process.env.VITE_FIREBASE_APP_ID ||
+  "1:904506751557:web:0b3ae9d173f63a5e25012c";
 
 const firebaseConfig = {
-  apiKey: getEnv("VITE_FIREBASE_API_KEY"),
-  authDomain: getEnv("VITE_FIREBASE_AUTH_DOMAIN"),
-  projectId: getEnv("VITE_FIREBASE_PROJECT_ID"),
-  storageBucket: getEnv("VITE_FIREBASE_STORAGE_BUCKET"),
-  messagingSenderId: getEnv("VITE_FIREBASE_MESSAGING_SENDER_ID"),
-  appId: getEnv("VITE_FIREBASE_APP_ID"),
+  apiKey,
+  authDomain,
+  projectId,
+  storageBucket,
+  messagingSenderId,
+  appId,
 };
 
-const isFirebaseConfigured = Object.values(firebaseConfig).every(Boolean);
+const isFirebaseConfigured = Boolean(apiKey && authDomain && projectId && appId);
 
 let db = null;
 let auth = null;
 let googleProvider = null;
 
 if (isFirebaseConfigured) {
-  const app = initializeApp(firebaseConfig);
+  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   db = getFirestore(app);
   auth = getAuth(app);
   googleProvider = new GoogleAuthProvider();

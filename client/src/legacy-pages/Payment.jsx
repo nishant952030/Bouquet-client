@@ -658,7 +658,10 @@ export default function Payment() {
   const [tipDone, setTipDone] = useState(false);
   const [tipMsg, setTipMsg] = useState("");
 
-  const razorpayKeyId = typeof process !== "undefined" && process.env ? process.env.VITE_RAZORPAY_KEY_ID : undefined;
+  const razorpayKeyId =
+    typeof process !== "undefined" && process.env
+      ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID
+      : undefined;
   const isIndia = countryCode === "IN";
   const isPhilippines = false;
   const currentTip = isIndia ? TIP_PRESET_INR : TIP_PRESET_USD;

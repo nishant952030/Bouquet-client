@@ -1,9 +1,31 @@
 "use client";
 
-import React, { Suspense, useEffect, useState } from "react";
-import { initGoogleAnalytics } from "../src/lib/analytics";
+import React, { Suspense, useEffect, useState, useRef } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { initGoogleAnalytics, trackPageView } from "../src/lib/analytics";
+import { trackPageViewFirestore } from "../src/lib/tracker";
 import FloatingCart from "../src/components/FloatingCart";
 import FeedbackWidget from "../src/components/FeedbackWidget";
+
+function AppTrafficTracker() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const lastPath = useRef(null);
+
+  useEffect(() => {
+    if (!pathname) return;
+    const queryString = searchParams?.toString();
+    const fullPath = queryString ? `${pathname}?${queryString}` : pathname;
+
+    if (lastPath.current === fullPath) return;
+    lastPath.current = fullPath;
+
+    trackPageView(fullPath);
+    trackPageViewFirestore(fullPath);
+  }, [pathname, searchParams]);
+
+  return null;
+}
 
 export default function ClientProviders({ children }) {
   const [i18nReady, setI18nReady] = useState(false);
@@ -54,6 +76,9 @@ export default function ClientProviders({ children }) {
         </div>
       }
     >
+      <Suspense fallback={null}>
+        <AppTrafficTracker />
+      </Suspense>
       {children}
       <FloatingCart />
       <FeedbackWidget />

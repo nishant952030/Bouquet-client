@@ -461,10 +461,10 @@ function FloatingDecorations() {
 export default function ViewBouquet() {
   const { id: rawId } = useParams();
   const { t } = useTranslation();
-  // Bouquet IDs are Date.now() (13 digits) + base36 random (4-8 chars),
-  // so they only contain [a-z0-9]. Strip anything after the first non-ID
-  // character (spaces, slashes, encoded chars, appended text, etc.).
-  const id = rawId ? rawId.match(/^[a-z0-9]+/i)?.[0] || rawId : rawId;
+  // Extract ID from useParams or window.location.pathname as a fallback
+  const pathId = typeof window !== "undefined" ? window.location.pathname.split("/view/")[1]?.split("/")[0]?.split("?")[0] : null;
+  const effectiveRawId = rawId || pathId;
+  const id = effectiveRawId ? (effectiveRawId.trim().match(/^[a-z0-9]+/i)?.[0] || effectiveRawId.trim()) : effectiveRawId;
   const [shared, setShared] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isNoteOpen, setIsNoteOpen] = useState(false);
@@ -517,13 +517,14 @@ export default function ViewBouquet() {
         if (isFirebaseConfigured && db) {
           let snapshot = null;
           try {
-            snapshot = await getDocFromServer(doc(db, "bouquets", id));
-          } catch (serverError) {
-            // Only retry offline cache if not a permission denied error
-            if (serverError?.code !== "permission-denied") {
-              try {
-                snapshot = await getDoc(doc(db, "bouquets", id));
-              } catch {}
+            // First attempt: standard getDoc (handles cache + server seamlessly)
+            snapshot = await getDoc(doc(db, "bouquets", id));
+          } catch (err1) {
+            console.warn("[ViewBouquet] getDoc attempt failed, trying getDocFromServer:", err1);
+            try {
+              snapshot = await getDocFromServer(doc(db, "bouquets", id));
+            } catch (err2) {
+              console.warn("[ViewBouquet] getDocFromServer also failed:", err2);
             }
           }
 
@@ -538,7 +539,8 @@ export default function ViewBouquet() {
 
         // Fallback to local storage (e.g. preview mode or local test)
         if (!cancelled) setShared(localData);
-      } catch {
+      } catch (err) {
+        console.warn("[ViewBouquet] Load error:", err);
         if (!cancelled) setShared(localData);
       } finally {
         if (!cancelled) setIsLoading(false);

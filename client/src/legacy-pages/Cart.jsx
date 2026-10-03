@@ -192,7 +192,10 @@ export default function Cart() {
   const [copied, setCopied] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
 
-  const razorpayKey = typeof process !== "undefined" && process.env ? process.env.VITE_RAZORPAY_KEY_ID : undefined;
+  const razorpayKey =
+    typeof process !== "undefined" && process.env
+      ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID
+      : undefined;
   const currency = normalizeCurrency(countryCode);
   const totals = useMemo(() => getGiftCartTotals(items, currency), [items, currency]);
   const displayItems = paid ? checkedOutItems : items;

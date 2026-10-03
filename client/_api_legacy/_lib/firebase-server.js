@@ -26,7 +26,9 @@ try {
 }
 
 const projectId =
-  process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+  process.env.VITE_FIREBASE_PROJECT_ID ||
+  process.env.FIREBASE_PROJECT_ID;
 
 let db = null;
 let isConfigured = false;
